@@ -5,47 +5,27 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'delete'
 on:
   delete: # Trigger automatically when we do a deletion of a branch
   workflow_dispatch:
-
-env:
-  DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
-  DEPLOY_PATH:         ${{ vars.WEB_PATH }}/${{ github.event.repository.name }}/${{ github.event.ref }}
-  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ github.event.repository.name }}/${{ github.event.ref }}
     
 jobs:
-  branch_delete:
-    name: Branch Deletion Cleanup
-    if: github.event.ref_type == 'branch'
-    runs-on: ubuntu-22.04
-    # concurrency:
-    #   group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
-    #   cancel-in-progress: false
-    
+  setup:
+    name: Get Branch
+    runs-on: ubuntu-24.04
+    outputs:
+      branch-tag: ${{ steps.get-branch.outputs.branch-name }}
     steps:
+      - name: Get Branch
+        id: get-branch
+        uses: opengamedata/actions-get-branch@v1.0
 
-    # 1. Local checkout & config
-    
-    # 2. Build 
-
-    # 3. Remote config & clean
-    - name: Install OpenConnect
-      run: sudo apt-get -q update && sudo apt-get -q install openconnect
-    - name: Connect to VPN
-      run: echo ${{ secrets.VPN_PASS }} | sudo openconnect --protocol=gp -u ${{ secrets.VPN_USER}} --passwd-on-stdin soe.vpn.wisc.edu &
-
-    - name: Setup Access Key
-      run: |
-        mkdir -p ~/.ssh
-        echo '${{secrets.CLEAN_KEY}}' >> ./key.txt
-        chmod 600 ./key.txt
-
-    - name: Remove branch folder
-      run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.CLEAN_USER }}@${{ env.DEPLOY_HOST }} "rm -r ${{ env.DEPLOY_PATH }}"
-    
-    - name: Announce cleanup
-      run: echo "Removed branch deploy at ${{ env.DEPLOY_URL }}"
-
-    - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        path: ./*.log
+  branch_delete:
+    name: Dead Branch Cleanup
+    if: github.event.ref_type == 'branch'
+    needs: [setup]
+    uses: ./.github/workflows/DEPLOY_LoggerAPI.yml
+    with:
+      image_name: ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:  ${{ needs.setup.outputs.branch-tag }}
+      remove: true
+      as_latest: false
+    secrets: inherit
     

@@ -84,6 +84,9 @@ jobs:
       cancel-in-progress: false
     
     steps:
+
+    - name: Announce cleanup
+      run: echo "Removed branch deploy at ${{ env.DEPLOY_URL }}"
     
     # 1. Remove Image from GitHub
     - name: Remove Image from Repo

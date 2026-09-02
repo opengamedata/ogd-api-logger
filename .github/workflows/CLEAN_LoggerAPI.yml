@@ -1,5 +1,5 @@
 # Workflow to clean out the directory where a deleted branch's files were deployed by CI
-name: OGD Logger - Dead Branch Cleanup Script
+name: Cleanup Dead Branch - LoggerAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'delete' && github.event.ref || 'Manual Run') }}
 
 on:

@@ -2,7 +2,9 @@
 **/.dockerignore
 **/.env
 **/.git
+**/.github
 **/.gitignore
+**/.gitmodules
 **/.project
 **/.settings
 **/.toolstarget
@@ -19,11 +21,14 @@
 !**/composer.json
 !**/composer.lock
 **/Dockerfile*
+**/key.txt
+**/makefile
 **/node_modules
 **/npm-debug.log
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/vendor
+config/config.php.template
 LICENSE
 README.md

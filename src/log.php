@@ -2,9 +2,13 @@
 header("Access-Control-Allow-Headers: Origin, Authorization, X-Requested-With, Content-Type, Accept");
 header("Access-Control-Allow-Origin: *");
 
-include('config.php');
-include('query_generator.php');
-include('monitor.php');
+# 3rd-party imports
+require 'vendor/autoload.php';
+# Local imports
+require 'config.php';
+require 'query_generator.php';
+require 'monitor.php';
+
 # 1. Figure out what the input schema looks like, defaulting to full OGD schema.
 $REQUEST_SCHEMA = $OGD_SCHEMA;
 $APP_ID = "NO APP ID";

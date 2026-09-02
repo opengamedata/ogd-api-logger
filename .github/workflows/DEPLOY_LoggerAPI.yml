@@ -42,6 +42,8 @@ jobs:
 
     steps:
 
+    - name: Announce deploy
+      run: echo "Deploying ${{ github.ref }} to ${{ env.DEPLOY_URL }}"
     # Need checkout in order to have authentication step apply to deploy step.
     - name: Checkout repository
       uses: actions/checkout@v7.0.1

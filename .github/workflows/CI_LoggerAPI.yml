@@ -1,0 +1,42 @@
+# Workflow to build and deploy designer dashboard to server.
+name: OGD Logger - CI Script
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
+on:
+  push:
+    paths:
+    - '.github/workflows/CI_logger.yml'
+    - '.github/actions/**'
+    - 'src/*.php'
+    - 'src/config.php.template'
+  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
+
+jobs:
+  setup:
+    name: Get Branch
+    runs-on: ubuntu-22.04
+    outputs:
+      branch-tag: ${{ steps.get-branch.outputs.branch-name }}
+    steps:
+      - name: Get Branch
+        id: get-branch
+        uses: opengamedata/actions-get-branch@v1.0
+
+  build:
+    name: Build Docker Image
+    needs: [setup]
+    uses: ./.github/workflows/BUILD_LoggerAPI.yml
+    with:
+      image_name:       ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:        ${{ needs.setup.outputs.branch-tag }}
+      with_caching: false
+    secrets: inherit
+
+  deploy:
+    name: CI Deploy to GCP
+    needs: [setup, build]
+    uses: ./.github/workflows/DEPLOY_LoggerAPI.yml
+    with:
+      image_name: ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:  ${{ needs.setup.outputs.branch-tag }}
+      remove: false
+    secrets: inherit

@@ -1,0 +1,31 @@
+# Workflow to clean out the directory where a deleted branch's files were deployed by CI
+name: Cleanup Dead Branch - LoggerAPI
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'delete' && github.event.ref || 'Manual Run') }}
+
+on:
+  delete: # Trigger automatically when we do a deletion of a branch
+  workflow_dispatch:
+    
+jobs:
+  setup:
+    name: Get Branch
+    runs-on: ubuntu-24.04
+    outputs:
+      branch-tag: ${{ steps.get-branch.outputs.branch-name }}
+    steps:
+      - name: Get Branch
+        id: get-branch
+        uses: opengamedata/actions-get-branch@v1.0
+
+  branch_delete:
+    name: Dead Branch Cleanup
+    if: github.event.ref_type == 'branch'
+    needs: [setup]
+    uses: ./.github/workflows/DEPLOY_LoggerAPI.yml
+    with:
+      image_name: ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:  ${{ needs.setup.outputs.branch-tag }}
+      remove: true
+      as_latest: false
+    secrets: inherit
+    

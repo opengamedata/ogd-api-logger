@@ -1,0 +1,70 @@
+# Workflow to build the Logger API project Docker image
+name: Build Docker Image - Logger API
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        type: string
+        description: "The name of the image."
+        required: true
+      image_tag:
+        type: string
+        description: "The image tag to use."
+        required: true
+      with_caching:
+        type: boolean
+        description: "Whether to cache the build for upload in a later job."
+        required: true
+        default: false
+    secrets:
+      image_repository:
+        required: True
+        description: "Secret indicating the repository of Docker images to use to find the image for deploy."
+
+jobs:
+
+  build_image:
+    name: Build Docker Image
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-image
+      cancel-in-progress: true
+
+    steps:
+
+    # 1. Local checkout & config
+    - name: Checkout repository
+      uses: actions/checkout@v7.0.1
+      with:
+        fetch-depth: 0
+    - name: Set up Config File
+      uses: ./.github/actions/LoggerAPI_config
+      with:
+        db_user: ${{ secrets.OGD_LOGGING_USER }}
+        db_pass: ${{ secrets.OGD_LOGGING_PASS }}
+        version_name: ${{ github.ref }}
+        monitor_enabled: true
+        monitor_url: ${{ vars.OGD_MONITOR_HOST }}
+        monitor_timeout: 100
+
+    # 2. Build image
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v4.3.0
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v4.6.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and Push to GHCR
+      uses: docker/build-push-action@v7.3.0
+      with:
+        context: .
+        push: true
+        tags: "${{ secrets.image_repository }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
+        cache-from: type=gha
+        cache-to: type=gha,mode=max

@@ -1,0 +1,102 @@
+# Workflow to build and deploy designer dashboard to server.
+name: Deploy Script - Logger API
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        type: string
+        description: "The name of the image."
+        required: true
+      image_tag:
+        type: string
+        description: "The image tag to use."
+        required: true
+      remove:
+        type: boolean
+        description: "Whether to remove the deploy for the current branch."
+        required: true
+        default: false
+      as_latest:
+        type: boolean
+        description: "Whether to also deploy/remove as the 'latest' version of API"
+        required: false
+        default: false
+
+env:
+  SERVICE_NAME: 'ogd-api-logger'
+  DEPLOY_URL: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
+
+jobs:
+
+  deploy_image:
+    name: Deploy Image to Google Cloud
+    if: inputs.remove == false
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-deploy
+      cancel-in-progress: true
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+
+    - name: Announce deploy
+      run: echo "Deploying ${{ github.ref }} to ${{ env.DEPLOY_URL }}"
+    # Need checkout in order to have authentication step apply to deploy step.
+    - name: Checkout repository
+      uses: actions/checkout@v7.0.1
+      with:
+        fetch-depth: 0
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v3.0.0
+      with:
+        project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
+        workload_identity_provider: 'projects/${{ vars.GCLOUD_PROJECT_NUM }}/locations/global/workloadIdentityPools/${{ secrets.GCLOUD_ID_POOL }}/providers/${{ secrets.GCLOUD_ID_PROVIDER }}'
+        service_account: ${{ secrets.GCLOUD_DEPLOY_USER }}
+    
+    - name: Deploy to Cloud Run Service as latest
+      if: ${{ inputs.as_latest == 'true' }}
+      uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
+      with:
+        service: ${{ env.SERVICE_NAME }}
+        image: "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
+        tag: latest
+    - name: Deploy to Cloud Run Service
+      if: ${{ inputs.as_latest != 'true' }}
+      uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
+      with:
+        service: ${{ env.SERVICE_NAME }}
+        image: "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
+        tag: "t${{ inputs.image_tag }}"
+        no_traffic: true
+
+    # 4. Cleanup & complete
+
+  branch_delete:
+    name: Remove FileAPI Deploy
+    if: inputs.remove == true
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      cancel-in-progress: false
+    
+    steps:
+
+    - name: Announce cleanup
+      run: echo "Removed branch deploy at ${{ env.DEPLOY_URL }}"
+    
+    # 1. Remove Image from GitHub
+    - name: Remove Image from Repo
+      uses: dataaxiom/ghcr-cleanup-action@v1.2.2
+      with:
+        delete-tags: "${{ inputs.image_name }}:${{ inputs.image_tag }}"
+
+    # 2. Remove from GCP
+
+    - name: Upload logs as artifacts
+      uses: actions/upload-artifact@v7.0.1
+      with:
+        path: ./*.log

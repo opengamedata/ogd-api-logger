@@ -26,10 +26,9 @@ jobs:
     needs: [setup]
     uses: ./.github/workflows/BUILD_LoggerAPI.yml
     with:
-      image_name:       ${{ github.repository }} # github.repository includes organization as prefix
-      image_tag:        ${{ needs.setup.outputs.branch-tag }}
-      with_caching: false
-    secrets: inherit
+      image_tag:    ${{ needs.setup.outputs.branch-tag }}
+    secrets:
+      image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
   deploy:
     name: CI Deploy to GCP

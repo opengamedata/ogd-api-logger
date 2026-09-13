@@ -3,7 +3,7 @@ FROM 8.1.32-apache
 # TODO: look into updating to more recent PHP
 
 COPY ./src /var/www/html
-COPY config/config.py /src/config.py
+# COPY config/config.php.template /src/config.php
 
 USER www-data
 

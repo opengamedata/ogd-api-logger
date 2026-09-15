@@ -34,7 +34,7 @@ runs:
   using: "composite"
   steps:
     - name: Set up config
-      run: cp src/config.php.template src/config.php 
+      run: cp config/config.php.template src/config.php 
       shell: bash
     - name: Set DB hostname
       run: sed -i 's@127.0.0.1@${{ inputs.db_host }}@g' src/config.php

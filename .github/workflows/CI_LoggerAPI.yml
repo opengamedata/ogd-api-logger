@@ -1,0 +1,49 @@
+# Workflow to build and deploy designer dashboard to server.
+name: OGD Logger - CI Script
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
+on:
+  push:
+    paths:
+    - '.github/workflows/CI_LoggerAPI.yml'
+    - '.github/workflows/BUILD_LoggerAPI.yml'
+    - '.github/workflows/DEPLOY_LoggerAPI.yml'
+    - '.github/actions/LoggerAPI_config**'
+    - 'src/*.php'
+    - 'src/config.php.template'
+    - '.dockerignore'
+    - 'Dockerfile'
+  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
+
+jobs:
+  setup:
+    name: Get Branch
+    runs-on: ubuntu-24.04
+    outputs:
+      branch_tag: ${{ steps.get_branch.outputs.branch_name }}
+    steps:
+      - name: Get Branch
+        id: get_branch
+        uses: opengamedata/actions-get-branch@v1.1
+        with:
+          n: 20
+          remove: '\.'
+
+  build:
+    name: Build Docker Image
+    needs: [setup]
+    uses: ./.github/workflows/BUILD_LoggerAPI.yml
+    with:
+      image_tag:    ${{ needs.setup.outputs.branch_tag }}
+    secrets:
+      image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
+
+  deploy:
+    name: CI Deploy to GCP
+    needs: [setup, build]
+    uses: ./.github/workflows/DEPLOY_LoggerAPI.yml
+    with:
+      service_name: "ogd-api-logger-test"
+      image_name: ${{ needs.build.outputs.image_name }}
+      revision_tag: "t-${{ needs.setup.outputs.branch_tag }}-t"
+      remove: false
+    secrets: inherit

@@ -1,0 +1,49 @@
+# Workflow to clean out the directory where a deleted branch's files were deployed by CI
+name: Cleanup Dead Branch - LoggerAPI
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'delete' && github.event.ref || 'Manual Run') }}
+
+on:
+  delete: # Trigger automatically when we do a deletion of a branch
+  workflow_dispatch:
+    
+jobs:
+  branch_delete:
+    name: Remove FileAPI Deploy
+    if: github.event.ref_type == 'branch'
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      cancel-in-progress: false
+    
+    steps:
+    - name: Get Branch
+      id: get_branch
+      uses: opengamedata/actions-get-branch@v1.1
+      with:
+        n: 20
+        remove: '\.'
+
+    - name: Get URL
+      id: get-url
+      uses: opengamedata/actions-derive-gcp-url@v1.0
+      with:
+        service_name:      'ogd-api-files-test'
+        revision_tag:      ${{ steps.get_branch.outputs.branch_tag }}
+        revision_url_hash: ${{ vars.GCLOUD_REVISION_HASH }}
+
+    - name: Announce cleanup
+      run: echo "Removing branch deploy at ${{ steps.get-url.outputs.url }}"
+    
+    # 1. Remove Image from GitHub
+
+    - name: Remove Image from Repo
+      uses: dataaxiom/ghcr-cleanup-action@v1.2.2
+      with:
+        delete-tags: ${{ steps.get_branch.outputs.branch_tag }}
+
+    # 2. Remove from GCP
+
+    - name: Upload logs as artifacts
+      uses: actions/upload-artifact@v7.0.1
+      with:
+        path: ./*.log

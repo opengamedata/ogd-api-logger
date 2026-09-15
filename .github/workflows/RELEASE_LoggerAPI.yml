@@ -1,0 +1,33 @@
+# Workflow to build and deploy designer dashboard to server.
+name: Release Script - LoggerAPI
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'release' && github.ref || 'Manual Run') }}
+on:
+  #create:
+  #  tags:
+  #    - '*'
+  workflow_dispatch:
+  release:
+    types: [released, prereleased]
+
+jobs:
+
+  build:
+    name: Build Docker Image
+    uses: ./.github/workflows/BUILD_LoggerAPI.yml
+    with:
+      image_name:   ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:    ${{ github.ref_name }}
+      with_caching: false
+    secrets: inherit
+
+  deploy:
+    name: Release Deploy to GCP
+    if: github.event.action == 'released'
+    needs: [build]
+    uses: ./.github/workflows/DEPLOY_LoggerAPI.yml
+    with:
+      image_name: ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:  ${{ github.ref_name }}
+      as_latest: true
+      remove: false
+    secrets: inherit

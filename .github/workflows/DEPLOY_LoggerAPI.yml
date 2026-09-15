@@ -4,13 +4,17 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' &
 on:
   workflow_call:
     inputs:
+      service_name:
+        type: string
+        description: "The service to which the image should be deployed"
+        required: true
       image_name:
         type: string
-        description: "The name of the image."
+        description: "The full name of the image, including the tag."
         required: true
-      image_tag:
+      revision_tag:
         type: string
-        description: "The image tag to use."
+        description: "The name of the revision to use for the deploy. Typically the same as the image tag."
         required: true
       remove:
         type: boolean
@@ -24,13 +28,14 @@ on:
         default: false
 
 env:
-  SERVICE_NAME: 'ogd-api-logger'
-  DEPLOY_URL: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
+  SERVICE_URL: "logger.api.opengamedata.io"
 
 jobs:
 
   deploy_image:
     name: Deploy Image to Google Cloud
+    outputs:
+      url: ${{ steps.get-url.outputs.url }}
     if: inputs.remove == false
     runs-on: ubuntu-24.04
     concurrency:
@@ -42,8 +47,17 @@ jobs:
 
     steps:
 
+    - name: Get URL
+      id: get-url
+      uses: opengamedata/actions-derive-gcp-url@v1.0
+      with:
+        service_name:      ${{ inputs.service_name }}
+        revision_tag:      ${{ inputs.revision_tag }}
+        revision_url_hash: ${{ vars.GCLOUD_REVISION_HASH }}
+
     - name: Announce deploy
-      run: echo "Deploying ${{ github.ref }} to ${{ env.DEPLOY_URL }}"
+      run: echo "Deploying ${{ github.ref }} to ${{ case(inputs.as_latest == 'true', env.SERVICE_URL, steps.get-url.outputs.url) }}"
+
     # Need checkout in order to have authentication step apply to deploy step.
     - name: Checkout repository
       uses: actions/checkout@v7.0.1
@@ -57,46 +71,19 @@ jobs:
         workload_identity_provider: 'projects/${{ vars.GCLOUD_PROJECT_NUM }}/locations/global/workloadIdentityPools/${{ secrets.GCLOUD_ID_POOL }}/providers/${{ secrets.GCLOUD_ID_PROVIDER }}'
         service_account: ${{ secrets.GCLOUD_DEPLOY_USER }}
     
-    - name: Deploy to Cloud Run Service as latest
+    - name: Deploy as Latest
       if: ${{ inputs.as_latest == 'true' }}
       uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
       with:
-        service: ${{ env.SERVICE_NAME }}
-        image: "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
-        tag: latest
-    - name: Deploy to Cloud Run Service
+        service: ${{ inputs.service_name }}
+        image:  "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}"
+        tag:     ${{ inputs.revision_tag }}
+
+    - name: Deploy as Test
       if: ${{ inputs.as_latest != 'true' }}
       uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
       with:
-        service: ${{ env.SERVICE_NAME }}
-        image: "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
-        tag: "t${{ inputs.image_tag }}"
+        service: ${{ inputs.service_name }}
+        image:  "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}"
+        tag:     ${{ inputs.revision_tag }}
         no_traffic: true
-
-    # 4. Cleanup & complete
-
-  branch_delete:
-    name: Remove FileAPI Deploy
-    if: inputs.remove == true
-    runs-on: ubuntu-24.04
-    concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
-      cancel-in-progress: false
-    
-    steps:
-
-    - name: Announce cleanup
-      run: echo "Removed branch deploy at ${{ env.DEPLOY_URL }}"
-    
-    # 1. Remove Image from GitHub
-    - name: Remove Image from Repo
-      uses: dataaxiom/ghcr-cleanup-action@v1.2.2
-      with:
-        delete-tags: "${{ inputs.image_name }}:${{ inputs.image_tag }}"
-
-    # 2. Remove from GCP
-
-    - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v7.0.1
-      with:
-        path: ./*.log

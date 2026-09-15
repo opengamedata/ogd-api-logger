@@ -55,11 +55,15 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Get Image Name
+      id: get_image_name
+      run: echo "image_name=${{ github.repository }}:${{ inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+
     - name: Build and Push to GHCR
       uses: docker/build-push-action@v7.3.0
       with:
         context: .
         push: true
-        tags: "${{ secrets.image_repository }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
+        tags: "${{ secrets.image_repository }}/${{ steps.get_image_name.outputs.image_name }}"
         cache-from: type=gha
         cache-to: type=gha,mode=max

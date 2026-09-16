@@ -3,8 +3,6 @@ header("Access-Control-Allow-Origin: *");
 $loggerversion = "version placeholder";
 
 $servername = "127.0.0.1";
-$username = "user placeholder";
-$password = "pass placeholder";
 $db = "db placeholder";
 
 $monitorEnabled = true;

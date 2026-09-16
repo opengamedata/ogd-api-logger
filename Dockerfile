@@ -1,9 +1,10 @@
 # syntax=docker/dockerfile:1
 FROM php:8.1.32-apache
 # TODO: look into updating to more recent PHP
+WORKDIR /var/www/html/
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-COPY ./src /var/www/html
+COPY ./src .
 # COPY config/config.php.template /src/config.php
 
 USER www-data

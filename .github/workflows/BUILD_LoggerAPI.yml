@@ -35,10 +35,15 @@ jobs:
       uses: actions/checkout@v7.0.1
       with:
         fetch-depth: 0
+
+    - name: Get current version tag
+      id: version_tag
+      run: echo "VERSION_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+
     - name: Set up Config File
       uses: ./.github/actions/LoggerAPI_config
       with:
-        version_name: ${{ github.ref }}
+        version_name: ${{ steps.version_tag.outputs.VERSION_TAG }}-${{ github.sha }}
         monitor_enabled: true
         monitor_url: ${{ vars.OGD_MONITOR_HOST }}
         monitor_timeout: 100

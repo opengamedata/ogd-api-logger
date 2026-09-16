@@ -1,0 +1,89 @@
+# Workflow to build and deploy designer dashboard to server.
+name: Deploy Script - Logger API
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        type: string
+        description: "The service to which the image should be deployed"
+        required: true
+      image_name:
+        type: string
+        description: "The full name of the image, including the tag."
+        required: true
+      revision_tag:
+        type: string
+        description: "The name of the revision to use for the deploy. Typically the same as the image tag."
+        required: true
+      remove:
+        type: boolean
+        description: "Whether to remove the deploy for the current branch."
+        required: true
+        default: false
+      as_latest:
+        type: boolean
+        description: "Whether to also deploy/remove as the 'latest' version of API"
+        required: false
+        default: false
+
+env:
+  SERVICE_URL: "logger.api.opengamedata.io"
+
+jobs:
+
+  deploy_image:
+    name: Deploy Image to Google Cloud
+    outputs:
+      url: ${{ steps.get-url.outputs.url }}
+    if: inputs.remove == false
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-deploy
+      cancel-in-progress: true
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+
+    - name: Get URL
+      id: get-url
+      uses: opengamedata/actions-derive-gcp-url@v1.0
+      with:
+        service_name:      ${{ inputs.service_name }}
+        revision_tag:      ${{ inputs.revision_tag }}
+        revision_url_hash: ${{ vars.GCLOUD_REVISION_HASH }}
+
+    - name: Announce deploy
+      run: echo "Deploying ${{ github.ref }} to ${{ case(inputs.as_latest == 'true', env.SERVICE_URL, steps.get-url.outputs.url) }}"
+
+    # Need checkout in order to have authentication step apply to deploy step.
+    - name: Checkout repository
+      uses: actions/checkout@v7.0.1
+      with:
+        fetch-depth: 0
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v3.0.0
+      with:
+        project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
+        workload_identity_provider: 'projects/${{ vars.GCLOUD_PROJECT_NUM }}/locations/global/workloadIdentityPools/${{ secrets.GCLOUD_ID_POOL }}/providers/${{ secrets.GCLOUD_ID_PROVIDER }}'
+        service_account: ${{ secrets.GCLOUD_DEPLOY_USER }}
+    
+    - name: Deploy as Latest
+      if: ${{ inputs.as_latest == 'true' }}
+      uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
+      with:
+        service: ${{ inputs.service_name }}
+        image:  "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}"
+        tag:     ${{ inputs.revision_tag }}
+
+    - name: Deploy as Test
+      if: ${{ inputs.as_latest != 'true' }}
+      uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
+      with:
+        service: ${{ inputs.service_name }}
+        image:  "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}"
+        tag:     ${{ inputs.revision_tag }}
+        no_traffic: true

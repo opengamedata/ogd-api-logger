@@ -209,7 +209,7 @@
                           $event_sequence_index, $http_user_agent);
       }
 
-      static function FromLoggerFormat($datum, $conn) : Event
+      static function FromLoggerFormat($datum) : Event
       /** Create an Event object from the legacy "Old Logger" format.
        * 
        * Items from $_REQUEST: session_id, persistent_session_id, app_version, player_id
@@ -221,7 +221,7 @@
          $session_id  = null;
          $persistent_session_id = null;
          $player_id   = null;
-         $http_user_agent = mysqli_real_escape_string($conn,$_SERVER["HTTP_USER_AGENT"]);
+         $http_user_agent = $_SERVER["HTTP_USER_AGENT"];
 
          //per dump
          if(isset($_REQUEST["app_version"]))           $app_version_raw       = filter_var($_REQUEST["app_version"],           FILTER_SANITIZE_NUMBER_INT); else die("No app_version");

@@ -58,12 +58,13 @@ if (!is_array($data)) {
 
 # 4. Generate and send query.
 if (count($data) > 0) {
+   $query = new EventQuery($REQUEST_SCHEMA, $APP_ID, $data);
+   $q_string = $query->AsQueryString($db_type, $conn);
    switch ($db_type) {
       case "bigquery":
          break;
       case "mysql":
-         $query = generateQueryString($REQUEST_SCHEMA, $APP_ID, $data, $conn);
-         $result = mysqli_query($conn, $query);
+         $result = mysqli_query($conn, $q_string);
          if (!$result) {
             $sql_err = "Query for ".$APP_ID." failed with error: ".mysqli_error($conn);
             error_log($sql_err);

@@ -27,13 +27,16 @@
          "synced".
       ") VALUES";
 
-      private array $events;      
+      private array $events;
+      private string $app_id;
 
-      function __construct($schema, $data) {
+      function __construct($schema, $app_id, $data)
+      {
          global $LOGGER_SCHEMA;
          global $OGD_SCHEMA;
          $n_rows = count($data);
 
+         $this->app_id = $app_id;
          switch ($schema) {
             case $LOGGER_SCHEMA:
                $lambda = function($datum) {
@@ -54,10 +57,23 @@
          $this->events = array_map($lambda, $data);
       }
 
-      function generateQueryString($schema, $app_id, $conn) {
-         $lambda = function(Event $next_event) {
-            return $next_event->AsMySQLQuery($conn);
-         };
+      function AsQueryString($db_type, $app_id, $conn) : string
+      {
+         switch ($db_type) {
+            case "bigquery":
+               $lambda = function(Event $next_event) {
+                  return $next_event->AsBigQuery($conn);
+               };
+               break;
+            case "bigquery":
+               $lambda = function(Event $next_event) {
+                  return $next_event->AsMySQLQuery($conn);
+               };
+               break;
+            default:
+               die("FAIL: API software was misconfigured, invalid db_type setting!");
+               break;
+         }
 
          $cols = "INSERT INTO ".$app_id." ".EventQuery::OGD_COLUMNS;
          $vals = join(",", array_map($lambda, $this->events));
@@ -279,7 +295,7 @@
                           $event_sequence_index,    $http_user_agent);
       }
 
-      static function AsMySQLQuery($conn)
+      static function AsMySQLQuery($conn) : string
       {
          $offset         = !is_null($this->client_offset) ? "\"".mysqli_real_escape_string($conn, $this->client_offset)."\"" : "NULL";
          $event_data_str = !is_null($this->event_data)    ?      mysqli_real_escape_string($conn, $this->event_data)         : "NULL";
@@ -304,6 +320,11 @@
             "\"".mysqli_real_escape_string($conn, $this->http_user_agent)."\",".
             "\"".Event::$synced."\"".
          ")";
+      }
+
+      static function AsBigQuery($conn) : string
+      {
+         return "(imaginary query)";
       }
    }
 

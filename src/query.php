@@ -27,47 +27,41 @@
          "synced".
       ") VALUES";
 
-      function generateQueryString($schema, $app_id, $data, $conn) {
+      private array $events;      
+
+      function __construct($schema, $data) {
          global $LOGGER_SCHEMA;
          global $OGD_SCHEMA;
-         $vals = "";
          $n_rows = count($data);
-         $cols = "INSERT INTO ".$app_id." ".EventQuery::OGD_COLUMNS;
+
          switch ($schema) {
             case $LOGGER_SCHEMA:
-               for($i = 0; $i < $n_rows; $i++)
-               {
-                  $next_event = Event::FromLoggerFormat($data[$i], $conn);
-                  $vals .= $next_event->AsMySQLQuery();
-                  if($i < $n_rows-1) {
-                     $vals .= ",";
-                  }
-               }
-               return $cols.$vals;
+               $lambda = function($datum) {
+                  return Event::FromLoggerFormat($datum);
+               };
                break;
             case $OGD_SCHEMA:
-               for($i = 0; $i < $n_rows; $i++)
-               {
-                  $next_event = Event::FromOGDFormat($data[$i], $conn);
-                  $vals .= $next_event->AsMySQLQuery();
-                  if($i < $n_rows-1) {
-                     $vals .= ",";
-                  }
-               }
-               return $cols.$vals;
+               $lambda = function($datum) {
+                  return Event::FromOGDFormat($datum);
+               };
                break;
             default:
                error_log("Got schema name ".$schema." that did not match ".$LOGGER_SCHEMA." or ".$OGD_SCHEMA.", defaulting to ".$OGD_SCHEMA);
-               for($i = 0; $i < $n_rows; $i++)
-               {
-                  $next_event = Event::FromOGDFormat($data[$i], $conn);
-                  $vals .= $next_event->AsMySQLQuery();
-                  if($i < $n_rows-1) {
-                     $vals .= ",";
-                  }
-               }
-               return $cols.$vals;
+               $lambda = function($datum) {
+                  return Event::FromOGDFormat($datum);
+               };
          }
+         $this->events = array_map($lambda, $data);
+      }
+
+      function generateQueryString($schema, $app_id, $conn) {
+         $lambda = function(Event $next_event) {
+            return $next_event->AsMySQLQuery($conn);
+         };
+
+         $cols = "INSERT INTO ".$app_id." ".EventQuery::OGD_COLUMNS;
+         $vals = join(",", array_map($lambda, $this->events));
+         return $cols.$vals;
       }
 
    }

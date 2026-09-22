@@ -66,76 +66,6 @@
       ") VALUES";
    }
 
-   function LoggerToOGDValues($datum, $conn) : string {
-      # 1. Get all the variables out of a Logger package.
-      $app_version_raw = null;
-      $session_id  = null;
-      $persistent_session_id = null;
-      $player_id   = null;
-      $http_user_agent = mysqli_real_escape_string($conn,$_SERVER["HTTP_USER_AGENT"]);
-
-      //per dump
-      if(isset($_REQUEST["app_version"]))           $app_version_raw       = filter_var($_REQUEST["app_version"],           FILTER_SANITIZE_NUMBER_INT); else die("No app_version");
-      if(isset($_REQUEST["session_id"]))            $session_id            = filter_var($_REQUEST["session_id"],            FILTER_SANITIZE_NUMBER_INT); else die("No session_id");
-      if(isset($_REQUEST["persistent_session_id"])) $persistent_session_id = filter_var($_REQUEST["persistent_session_id"], FILTER_SANITIZE_NUMBER_INT);
-      if(isset($_REQUEST["player_id"]))             $player_id             = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["player_id"]);
-
-      $level = 0;
-      $event = "UNDEFINED";
-      $event_custom = 0;
-      $event_data_complex = NULL;
-      $client_time = date("Y-m-d H:i:s");
-      $client_time_ms = 0;
-      $session_n      = -1;
-
-      if(isset($datum->level)) {
-         $level = filter_var($datum->level, FILTER_SANITIZE_NUMBER_INT);
-      }
-      if(isset($datum->event)) {
-         $event = mysqli_real_escape_string($conn,$datum->event);
-      }
-      //optional
-      if(isset($datum->event_custom)) {
-         $event_custom = filter_var($datum->event_custom, FILTER_SANITIZE_NUMBER_INT);
-      }
-      if(isset($datum->event_data_complex)) {
-         $event_data_complex = mysqli_real_escape_string($conn,$datum->event_data_complex);
-      } else {
-         $event_data_complex = "{}";
-      }
-      if(isset($datum->session_n)) {
-         $session_n = filter_var($datum->session_n, FILTER_SANITIZE_NUMBER_INT);
-      }
-      if(isset($datum->client_time))
-      {
-         $client_time = mysqli_real_escape_string($conn,$datum->client_time);
-         // $client_time is a string like "2019-02-20 17:21:05.493Z"
-         $ct_len = strlen($client_time);
-         $ct_dot = strrpos($client_time,".");
-         if ($ct_dot) {
-            // drop ".493Z" for the DATETIME, and extract 493 for separate column
-            $client_time_ms = substr($client_time, $ct_dot + 1, $ct_len - ($ct_dot + 1) - 1);
-            $client_time    = substr($client_time, 0, $ct_dot);
-         } else {
-            $client_time_ms = 0;
-         }
-      }
-      # 2. Convert Logger stuff over to naming for an OGD package
-      $user_id = $player_id;
-      $user_data = mysqli_real_escape_string($conn, json_encode( ["persistent_session_id" => $persistent_session_id] ));
-      $client_offset = null;
-      $event_name = $event.".".$event_custom;
-      $event_data = $event_data_complex;
-      $game_state = mysqli_real_escape_string($conn, json_encode( ["level" => $level] ));
-      $app_version = "1.0";
-      $app_branch  = "main";
-      $log_version = $app_version_raw;
-      $event_sequence_index = $session_n;
-      return generateValueString($session_id, $user_id,    $user_data,  $client_time, $client_time_ms, $client_offset,
-                                 $event_name, $event_data, $game_state, $app_version, $app_branch,     $log_version,
-                                 $event_sequence_index,    $http_user_agent);
-   }
-
    function OGDValues($datum, $conn) : string {
    // Items from $_REQUEST: session_id, user_id, user_data, app_version, app_branch, log_version, 
    // Items from $datum: client_time, client_offset, event_name, event_data, game_state, event_sequence_index
@@ -220,6 +150,76 @@
       return generateValueString($session_id, $user_id,    $user_data,  $client_time, $client_time_ms, $client_offset,
                                  $event_name, $event_data, $game_state, $app_version, $app_branch,     $log_version,
                                  $event_sequence_index, $http_user_agent);
+   }
+
+   function LoggerToOGDValues($datum, $conn) : string {
+      # 1. Get all the variables out of a Logger package.
+      $app_version_raw = null;
+      $session_id  = null;
+      $persistent_session_id = null;
+      $player_id   = null;
+      $http_user_agent = mysqli_real_escape_string($conn,$_SERVER["HTTP_USER_AGENT"]);
+
+      //per dump
+      if(isset($_REQUEST["app_version"]))           $app_version_raw       = filter_var($_REQUEST["app_version"],           FILTER_SANITIZE_NUMBER_INT); else die("No app_version");
+      if(isset($_REQUEST["session_id"]))            $session_id            = filter_var($_REQUEST["session_id"],            FILTER_SANITIZE_NUMBER_INT); else die("No session_id");
+      if(isset($_REQUEST["persistent_session_id"])) $persistent_session_id = filter_var($_REQUEST["persistent_session_id"], FILTER_SANITIZE_NUMBER_INT);
+      if(isset($_REQUEST["player_id"]))             $player_id             = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["player_id"]);
+
+      $level = 0;
+      $event = "UNDEFINED";
+      $event_custom = 0;
+      $event_data_complex = NULL;
+      $client_time = date("Y-m-d H:i:s");
+      $client_time_ms = 0;
+      $session_n      = -1;
+
+      if(isset($datum->level)) {
+         $level = filter_var($datum->level, FILTER_SANITIZE_NUMBER_INT);
+      }
+      if(isset($datum->event)) {
+         $event = mysqli_real_escape_string($conn,$datum->event);
+      }
+      //optional
+      if(isset($datum->event_custom)) {
+         $event_custom = filter_var($datum->event_custom, FILTER_SANITIZE_NUMBER_INT);
+      }
+      if(isset($datum->event_data_complex)) {
+         $event_data_complex = mysqli_real_escape_string($conn,$datum->event_data_complex);
+      } else {
+         $event_data_complex = "{}";
+      }
+      if(isset($datum->session_n)) {
+         $session_n = filter_var($datum->session_n, FILTER_SANITIZE_NUMBER_INT);
+      }
+      if(isset($datum->client_time))
+      {
+         $client_time = mysqli_real_escape_string($conn,$datum->client_time);
+         // $client_time is a string like "2019-02-20 17:21:05.493Z"
+         $ct_len = strlen($client_time);
+         $ct_dot = strrpos($client_time,".");
+         if ($ct_dot) {
+            // drop ".493Z" for the DATETIME, and extract 493 for separate column
+            $client_time_ms = substr($client_time, $ct_dot + 1, $ct_len - ($ct_dot + 1) - 1);
+            $client_time    = substr($client_time, 0, $ct_dot);
+         } else {
+            $client_time_ms = 0;
+         }
+      }
+      # 2. Convert Logger stuff over to naming for an OGD package
+      $user_id = $player_id;
+      $user_data = mysqli_real_escape_string($conn, json_encode( ["persistent_session_id" => $persistent_session_id] ));
+      $client_offset = null;
+      $event_name = $event.".".$event_custom;
+      $event_data = $event_data_complex;
+      $game_state = mysqli_real_escape_string($conn, json_encode( ["level" => $level] ));
+      $app_version = "1.0";
+      $app_branch  = "main";
+      $log_version = $app_version_raw;
+      $event_sequence_index = $session_n;
+      return generateValueString($session_id, $user_id,    $user_data,  $client_time, $client_time_ms, $client_offset,
+                                 $event_name, $event_data, $game_state, $app_version, $app_branch,     $log_version,
+                                 $event_sequence_index,    $http_user_agent);
    }
 
    function generateValueString(string $session_id,  ?string $user_id,        ?string $user_data,

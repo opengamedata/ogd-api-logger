@@ -3,7 +3,7 @@
    $LOGGER_SCHEMA = "LOGGER";
    $OGD_SCHEMA    = "OPENGAMEDATA";
 
-   class Event {
+   class EventQuery {
       const string OGD_COLUMNS =
       "(".
          "session_id,".
@@ -26,6 +26,53 @@
          "http_user_agent,".
          "synced".
       ") VALUES";
+
+      function generateQueryString($schema, $app_id, $data, $conn) {
+         global $LOGGER_SCHEMA;
+         global $OGD_SCHEMA;
+         $vals = "";
+         $n_rows = count($data);
+         $cols = "INSERT INTO ".$app_id." ".EventQuery::OGD_COLUMNS;
+         switch ($schema) {
+            case $LOGGER_SCHEMA:
+               for($i = 0; $i < $n_rows; $i++)
+               {
+                  $next_event = Event::FromLoggerFormat($data[$i], $conn);
+                  $vals .= $next_event->AsMySQLQuery();
+                  if($i < $n_rows-1) {
+                     $vals .= ",";
+                  }
+               }
+               return $cols.$vals;
+               break;
+            case $OGD_SCHEMA:
+               for($i = 0; $i < $n_rows; $i++)
+               {
+                  $next_event = Event::FromOGDFormat($data[$i], $conn);
+                  $vals .= $next_event->AsMySQLQuery();
+                  if($i < $n_rows-1) {
+                     $vals .= ",";
+                  }
+               }
+               return $cols.$vals;
+               break;
+            default:
+               error_log("Got schema name ".$schema." that did not match ".$LOGGER_SCHEMA." or ".$OGD_SCHEMA.", defaulting to ".$OGD_SCHEMA);
+               for($i = 0; $i < $n_rows; $i++)
+               {
+                  $next_event = Event::FromOGDFormat($data[$i], $conn);
+                  $vals .= $next_event->AsMySQLQuery();
+                  if($i < $n_rows-1) {
+                     $vals .= ",";
+                  }
+               }
+               return $cols.$vals;
+         }
+      }
+
+   }
+
+   class Event {
 
       private static string $event_source = "GAME";
       private static int $synced = 0;
@@ -74,7 +121,7 @@
          $this->remote_addr = $_SERVER["REMOTE_ADDR"];
       }
 
-      static function FromOGDFormat($datum, $conn) : Event
+      static function FromOGDFormat($datum) : Event
       /** Create an Event object from the standard OGD format (Schema v0.1)
        * 
        * Items from $_REQUEST: session_id, user_id, user_data, app_version, app_branch, log_version, 
@@ -263,49 +310,6 @@
             "\"".$this->http_user_agent."\",".
             "\"".Event::$synced."\"".
          ")";
-      }
-   }
-
-   function generateQueryString($schema, $app_id, $data, $conn) {
-      global $LOGGER_SCHEMA;
-      global $OGD_SCHEMA;
-      $vals = "";
-      $n_rows = count($data);
-      $cols = "INSERT INTO ".$app_id." ".Event::OGD_COLUMNS;
-      switch ($schema) {
-         case $LOGGER_SCHEMA:
-            for($i = 0; $i < $n_rows; $i++)
-            {
-               $next_event = Event::FromLoggerFormat($data[$i], $conn);
-               $vals .= $next_event->AsMySQLQuery();
-               if($i < $n_rows-1) {
-                  $vals .= ",";
-               }
-            }
-            return $cols.$vals;
-            break;
-         case $OGD_SCHEMA:
-            for($i = 0; $i < $n_rows; $i++)
-            {
-               $next_event = Event::FromOGDFormat($data[$i], $conn);
-               $vals .= $next_event->AsMySQLQuery();
-               if($i < $n_rows-1) {
-                  $vals .= ",";
-               }
-            }
-            return $cols.$vals;
-            break;
-         default:
-            error_log("Got schema name ".$schema." that did not match ".$LOGGER_SCHEMA." or ".$OGD_SCHEMA.", defaulting to ".$OGD_SCHEMA);
-            for($i = 0; $i < $n_rows; $i++)
-            {
-               $next_event = Event::FromOGDFormat($data[$i], $conn);
-               $vals .= $next_event->AsMySQLQuery();
-               if($i < $n_rows-1) {
-                  $vals .= ",";
-               }
-            }
-            return $cols.$vals;
       }
    }
 

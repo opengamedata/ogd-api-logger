@@ -7,7 +7,7 @@
       global $OGD_SCHEMA;
       $vals = "";
       $n_rows = count($data);
-      $cols = OGDInsert($app_id).OGDColumns();
+      $cols = "INSERT INTO ".$app_id." ".OGDColumns();
       switch ($schema) {
          case $LOGGER_SCHEMA:
             for($i = 0; $i < $n_rows; $i++)
@@ -40,10 +40,6 @@
             }
             return $cols.$vals;
       }
-   }
-
-   function OGDInsert($app_id) : string {
-      return "INSERT INTO ".$app_id." ";
    }
 
    function OGDColumns() : string {

@@ -8,6 +8,7 @@ use Google\Cloud\BigQuery\BigQueryClient;
 # Local imports
 require 'config.php';
 require 'bigquery.php';
+require 'mysql.php';
 require 'query.php';
 require 'monitor.php';
 
@@ -67,12 +68,7 @@ if (count($data) > 0) {
          BigQueryUtils::InsertBigQuery($APP_ID);
          break;
       case "mysql":
-         $result = mysqli_query($conn, $q_string);
-         if (!$result) {
-            $sql_err = "Query for ".$APP_ID." failed with error: ".mysqli_error($conn);
-            error_log($sql_err);
-            die("FAIL: ".$sql_err);
-         }
+         MySQLUtils::InsertMySQL($conn, $APP_ID, $q_string);
          break;
       default:
          die("FAIL: API software was misconfigured, invalid db_type setting!");

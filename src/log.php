@@ -65,10 +65,10 @@ if (count($data) > 0) {
 
    switch ($db_type) {
       case "bigquery":
-         BigQueryUtils::InsertBigQuery($conn, $APP_ID, $q_string);
+         BigQueryUtils::Insert($conn, $APP_ID, $q_string);
          break;
       case "mysql":
-         MySQLUtils::InsertMySQL($conn, $APP_ID, $q_string);
+         MySQLUtils::Insert($conn, $APP_ID, $q_string);
          break;
       default:
          die("FAIL: API software was misconfigured, invalid db_type setting!");

@@ -7,8 +7,9 @@ require 'vendor/autoload.php';
 use Google\Cloud\BigQuery\BigQueryClient;
 # Local imports
 require 'config.php';
-require 'query_generator.php';
-// require 'monitor.php';
+require 'bigquery.php';
+require 'query.php';
+require 'monitor.php';
 
 # 1. Figure out what the input schema looks like, defaulting to full OGD schema.
 $REQUEST_SCHEMA = $OGD_SCHEMA;
@@ -60,8 +61,10 @@ if (!is_array($data)) {
 if (count($data) > 0) {
    $query = new EventQuery($REQUEST_SCHEMA, $APP_ID, $data);
    $q_string = $query->AsQueryString($db_type, $conn);
+
    switch ($db_type) {
       case "bigquery":
+         BigQueryUtils::InsertBigQuery($APP_ID);
          break;
       case "mysql":
          $result = mysqli_query($conn, $q_string);

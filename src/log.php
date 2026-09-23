@@ -33,7 +33,7 @@ if (isset($_REQUEST["app_id"])) {
 # 2. Make the db connection before we go to the trouble of generating query.
 switch ($db_type) {
    case "bigquery":
-      $conn = new BigQueryClient();
+      $conn = new BigQueryClient([ 'projectId' => $db ]);
       break;
    case "mysql":
       $conn = mysqli_connect($servername, $username, $password, $db);
@@ -65,7 +65,7 @@ if (count($data) > 0) {
 
    switch ($db_type) {
       case "bigquery":
-         BigQueryUtils::InsertBigQuery($APP_ID);
+         BigQueryUtils::InsertBigQuery($conn, $APP_ID, $q_string);
          break;
       case "mysql":
          MySQLUtils::InsertMySQL($conn, $APP_ID, $q_string);

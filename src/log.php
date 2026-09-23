@@ -18,13 +18,15 @@ $LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "C
 # 1. Make the db connection before we go to the trouble of looking at the data.
 switch ($db_type) {
    case "bigquery":
-      $conn = new BigQueryClient([ 'projectId' => $db ]);
+      // $conn = new BigQueryClient([ 'projectId' => $db ]);
+      print("Dummy connect to BQ");
       break;
    case "mysql":
-      $conn = mysqli_connect($servername, $username, $password, $db);
-      if (!$conn) {
-         die("FAIL: Could not connect to the database.\nError message: " . mysqli_connect_error());
-      }
+      // $conn = mysqli_connect($servername, $username, $password, $db);
+      // if (!$conn) {
+      //    die("FAIL: Could not connect to the database.\nError message: " . mysqli_connect_error());
+      // }
+      print("Dummy connect to MySQL");
       break;
    default:
       die("FAIL: API software was misconfigured, invalid db_type setting!");
@@ -61,11 +63,13 @@ if (count($data) > 0) {
    switch ($db_type) {
       case "bigquery":
          $arr = $query->AsBigQuery();
-         $resulst = BigQueryUtils::Insert($conn, $app_id, $q_string);
+         // $result = BigQueryUtils::Insert($conn, $app_id, $arr);
+         $result = "Dummy insert of ".count($arr)." events into BQ.";
          break;
       case "mysql":
          $query_string = $query->AsMySQL($db_type, $app_id, $conn);
-         $result = MySQLUtils::Insert($conn, $app_id, $query_string);
+         // $result = MySQLUtils::Insert($conn, $app_id, $query_string);
+         $result = "Dummy run of \n".$query_string."\n in MySQL.";
          break;
       default:
          die("FAIL: API software was misconfigured, invalid db_type setting!");

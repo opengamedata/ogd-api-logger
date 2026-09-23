@@ -14,18 +14,8 @@ require 'monitor.php';
 
 $LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
                      "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND");
-# 1. Figure out what the input schema looks like, defaulting to full OGD schema.
-$REQUEST_SCHEMA = $OGD_SCHEMA;
-$app_id = "NO APP ID";
 
-if (isset($_REQUEST["app_id"])) {
-  $app_id = strtoupper($_REQUEST["app_id"]);
-  if (in_array($APP_ID, $LOGGER_GAMES)) {
-    $REQUEST_SCHEMA = $LOGGER_SCHEMA;
-  }
-}
-
-# 2. Make the db connection before we go to the trouble of generating query.
+# 1. Make the db connection before we go to the trouble of looking at the data.
 switch ($db_type) {
    case "bigquery":
       $conn = new BigQueryClient([ 'projectId' => $db ]);
@@ -39,6 +29,17 @@ switch ($db_type) {
    default:
       die("FAIL: API software was misconfigured, invalid db_type setting!");
       break;
+}
+
+# 2. Figure out what the input schema looks like, defaulting to full OGD schema.
+$request_schema = $OGD_SCHEMA;
+$app_id = "NO APP ID";
+
+if (isset($_REQUEST["app_id"])) {
+  $app_id = strtoupper($_REQUEST["app_id"]);
+  if (in_array($APP_ID, $LOGGER_GAMES)) {
+    $request_schema = $LOGGER_SCHEMA;
+  }
 }
 
 # 3. Generate the query data from raw input data.
@@ -55,16 +56,16 @@ if (!is_array($data)) {
 
 # 4. Generate and send query.
 if (count($data) > 0) {
-   $query = new EventQuery($REQUEST_SCHEMA, $app_id, $data);
+   $query = new EventQuery($request_schema, $app_id, $data);
 
    switch ($db_type) {
       case "bigquery":
          $arr = $query->AsBigQuery();
-         BigQueryUtils::Insert($conn, $app_id, $q_string);
+         $resulst = BigQueryUtils::Insert($conn, $app_id, $q_string);
          break;
       case "mysql":
          $query_string = $query->AsMySQL($db_type, $app_id, $conn);
-         MySQLUtils::Insert($conn, $app_id, $query_string);
+         $result = MySQLUtils::Insert($conn, $app_id, $query_string);
          break;
       default:
          die("FAIL: API software was misconfigured, invalid db_type setting!");
@@ -75,8 +76,8 @@ if (count($data) > 0) {
 }
 
 # 5. If successful, forward data to monitor and return.
-sendToMonitor($_REQUEST, $data[0]);
-die("SUCCESS: " . $query);
+// sendToMonitor($_REQUEST, $data[0]);
+die("SUCCESS: " . $result);
 
 die("Logger endpoint reached, version=".$loggerversion);
 ?>

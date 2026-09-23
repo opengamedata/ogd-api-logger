@@ -24,7 +24,7 @@ class BigQueryUtils {
       ]
    ];
 
-   static function Insert($conn, string $app_id, array $query) {
+   static function Insert($conn, string $app_id, array $query) : string {
       $dataset = $conn->dataset(strtolower($app_id));
       $table_name = "{$dataset->id()}_daily_".date("Ymd");
       $table = $dataset->table($table_name);
@@ -35,6 +35,7 @@ class BigQueryUtils {
          error_log($msg);
          die("FAIL: ".$msg);
       }
+      return "Inserted ".count($query)." rows.";
    }
 }
 

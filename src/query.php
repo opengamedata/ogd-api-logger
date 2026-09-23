@@ -39,36 +39,27 @@
          $this->app_id = $app_id;
          switch ($schema) {
             case $LOGGER_SCHEMA:
-               $lambda = function($datum) {
-                  return Event::FromLoggerFormat($datum);
-               };
+               $lambda = fn($datum) => Event::FromLoggerFormat($datum);
                break;
             case $OGD_SCHEMA:
-               $lambda = function($datum) {
-                  return Event::FromOGDFormat($datum);
-               };
+               $lambda = fn($datum) => Event::FromOGDFormat($datum);
                break;
             default:
                error_log("Got schema name ".$schema." that did not match ".$LOGGER_SCHEMA." or ".$OGD_SCHEMA.", defaulting to ".$OGD_SCHEMA);
-               $lambda = function($datum) {
-                  return Event::FromOGDFormat($datum);
-               };
+               $lambda = fn($datum) => Event::FromOGDFormat($datum);
+               break;
          }
          $this->events = array_map($lambda, $data);
       }
 
       function AsBigQuery() {
-         $lambda = function(Event $next_event) {
-            return [ 'data' => $next_event->AsBigQuery($conn) ];
-         };
+         $lambda = fn(Event $next_event) => [ 'data' => $next_event->AsBigQuery($conn) ];
          return array_map($lambda, $this->events);
       }
 
       function AsMySQL($db_type, $conn) : string
       {
-         $lambda = function(Event $next_event) {
-            return $next_event->AsMySQLQuery($conn);
-         };
+         $lambda = fn(Event $next_event) => $next_event->AsMySQLQuery($conn);
          $cols = "INSERT INTO ".$this->app_id." ".EventQuery::OGD_COLUMNS;
          $vals = join(",", array_map($lambda, $this->events));
          return $cols.$vals;

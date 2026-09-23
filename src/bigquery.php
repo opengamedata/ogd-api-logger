@@ -24,14 +24,14 @@ class BigQueryUtils {
       ]
    ];
 
-   static function InsertBigQuery(string $app_id) {
-      $dataset = $conn->dataset(strtolower($APP_ID));
+   static function InsertBigQuery($conn, string $app_id, $query) {
+      $dataset = $conn->dataset(strtolower($app_id));
       $table_name = "{$dataset->id()}_daily_".date("Ymd");
       $table = $dataset->table($table_name);
-      $result = $table->insertRows($q_string, autoCreate:true, tableMetadata:BigQueryUtils::STANDARD_METADATA_0_1);
+      $result = $table->insertRows($query, autoCreate:true, tableMetadata:BigQueryUtils::STANDARD_METADATA_0_1);
       if (!$result->isSuccessful()) {
          $lambda = function($err) { return $err['reason'].": ".$err['message']; };
-         $msg = "Query for ".$APP_ID." failed with errors: ".join("\n", array_map($lambda, $result->failedRows()));
+         $msg = "Query for ".$app_id." failed with errors: ".join("\n", array_map($lambda, $result->failedRows()));
          error_log($msg);
          die("FAIL: ".$msg);
       }

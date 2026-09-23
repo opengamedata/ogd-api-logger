@@ -61,14 +61,15 @@ if (!is_array($data)) {
 # 4. Generate and send query.
 if (count($data) > 0) {
    $query = new EventQuery($REQUEST_SCHEMA, $APP_ID, $data);
-   $q_string = $query->AsQueryString($db_type, $conn);
 
    switch ($db_type) {
       case "bigquery":
+         $arr = $query->AsBigQuery();
          BigQueryUtils::Insert($conn, $APP_ID, $q_string);
          break;
       case "mysql":
-         MySQLUtils::Insert($conn, $APP_ID, $q_string);
+         $query_string = $query->AsMySQL($db_type, $APP_ID, $conn);
+         MySQLUtils::Insert($conn, $APP_ID, $query_string);
          break;
       default:
          die("FAIL: API software was misconfigured, invalid db_type setting!");

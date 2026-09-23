@@ -53,11 +53,11 @@
       }
 
       function AsBigQuery() {
-         $lambda = fn(Event $next_event) => [ 'data' => $next_event->AsBigQuery($conn) ];
+         $lambda = fn(Event $next_event) => [ 'data' => $next_event->AsBigQuery() ];
          return array_map($lambda, $this->events);
       }
 
-      function AsMySQL($db_type, $conn) : string
+      function AsMySQL($conn) : string
       {
          $lambda = fn(Event $next_event) => $next_event->AsMySQLQuery($conn);
          $cols = "INSERT INTO ".$this->app_id." ".EventQuery::OGD_COLUMNS;
@@ -307,26 +307,26 @@
          ")";
       }
 
-      static function AsBigQuery($conn) : string
+      static function AsBigQuery() : string
       {
          return [
-            "session_id" => $this->session_id,
-            "user_id" => $this->user_id,
-            "user_data" => $this->user_data,
-            "client_time" => $this->client_time,
+            "session_id"           => $this->session_id,
+            "user_id"              => $this->user_id,
+            "user_data"            => $this->user_data,
+            "client_time"          => $this->client_time,
             // "client_time_ms" => $this->client_time_ms,
-            "client_offset" => $this->client_offset,
-            "event_name" => $this->event_name,
-            "event_data" => $this->event_data,
-            "event_source" => $this->event_source,
+            "client_offset"        => $this->client_offset,
+            "event_name"           => $this->event_name,
+            "event_data"           => $this->event_data,
+            "event_source"         => $this->event_source,
             // "synced" => $this->synced,
-            "game_state" => $this->game_state,
-            "app_version" => $this->app_version,
-            "app_branch" => $this->app_branch,
-            "log_version" => $this->log_version,
+            "game_state"           => $this->game_state,
+            "app_version"          => $this->app_version,
+            "app_branch"           => $this->app_branch,
+            "log_version"          => $this->log_version,
             "event_sequence_index" => $this->event_sequence_index,
-            "host" => $this->host,
-            "remote_addr" => $this->remote_addr
+            "host"                 => $this->host,
+            "remote_addr"          => $this->remote_addr
          ];
       }
    }

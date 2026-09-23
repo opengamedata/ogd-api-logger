@@ -12,21 +12,16 @@ require 'mysql.php';
 require 'query.php';
 require 'monitor.php';
 
+$LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
+                     "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND");
 # 1. Figure out what the input schema looks like, defaulting to full OGD schema.
 $REQUEST_SCHEMA = $OGD_SCHEMA;
-$APP_ID = "NO APP ID";
+$app_id = "NO APP ID";
+
 if (isset($_REQUEST["app_id"])) {
-  $APP_ID = strtoupper($_REQUEST["app_id"]);
-  // error_log("The app id in upper-case is: ".$upper);
-  $logger_games = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
-                        "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND");
-  $ogd_games    = array("AQUALAB",    "BLOOM",    "ICECUBE",    "JOURNALISM",   "MASHOPOLIS",     "PENGUINS",
-                        "THERMOVR",   "TRANSFORMATION_QUEST");
-  if (in_array($APP_ID, $logger_games)) {
+  $app_id = strtoupper($_REQUEST["app_id"]);
+  if (in_array($APP_ID, $LOGGER_GAMES)) {
     $REQUEST_SCHEMA = $LOGGER_SCHEMA;
-  }
-  elseif (in_array($APP_ID, $ogd_games)) {
-    $REQUEST_SCHEMA = $OGD_SCHEMA;
   }
 }
 
@@ -60,16 +55,16 @@ if (!is_array($data)) {
 
 # 4. Generate and send query.
 if (count($data) > 0) {
-   $query = new EventQuery($REQUEST_SCHEMA, $APP_ID, $data);
+   $query = new EventQuery($REQUEST_SCHEMA, $app_id, $data);
 
    switch ($db_type) {
       case "bigquery":
          $arr = $query->AsBigQuery();
-         BigQueryUtils::Insert($conn, $APP_ID, $q_string);
+         BigQueryUtils::Insert($conn, $app_id, $q_string);
          break;
       case "mysql":
-         $query_string = $query->AsMySQL($db_type, $APP_ID, $conn);
-         MySQLUtils::Insert($conn, $APP_ID, $query_string);
+         $query_string = $query->AsMySQL($db_type, $app_id, $conn);
+         MySQLUtils::Insert($conn, $app_id, $query_string);
          break;
       default:
          die("FAIL: API software was misconfigured, invalid db_type setting!");

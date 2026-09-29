@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Stage 1: Get dependencies
-FROM composer:2.10 as dependencies
+FROM composer:2.10 AS dependencies
 WORKDIR /deps
 RUN --mount=type=bind,source=composer.json,target=composer.json \
     --mount=type=bind,source=composer.lock,target=composer.lock \

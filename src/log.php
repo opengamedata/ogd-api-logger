@@ -19,14 +19,14 @@ $LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "C
 switch ($db_type) {
    case "bigquery":
       // $conn = new BigQueryClient([ 'projectId' => $db ]);
-      print("Dummy connect to BQ");
+      error_log("Dummy connect to BQ\n");
       break;
    case "mysql":
       // $conn = mysqli_connect($servername, $username, $password, $db);
       // if (!$conn) {
       //    die("FAIL: Could not connect to the database.\nError message: " . mysqli_connect_error());
       // }
-      print("Dummy connect to MySQL");
+      error_log("Dummy connect to MySQL\n");
       break;
    default:
       die("FAIL: API software was misconfigured, invalid db_type setting!");

@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM php:8.1.32-apache
+FROM php:8.5.11-apache
 # TODO: look into updating to more recent PHP
 WORKDIR /var/www/html/
 

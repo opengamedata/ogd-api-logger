@@ -1,7 +1,6 @@
 {
     "require": {
-        "google/cloud-bigquery": "^1.39",
-        "google/cloud-logging": "^2.2"
+        "google/cloud-bigquery": "^1.39"
     },
     "require-dev": {
         "phpunit/phpunit": "^13"

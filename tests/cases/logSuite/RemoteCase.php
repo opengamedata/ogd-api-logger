@@ -37,6 +37,7 @@
          $opts = [
             CURLOPT_URL => $test_url,
             CURLOPT_USERAGENT => "fake agent/1.0",
+            CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_RETURNTRANSFER => true

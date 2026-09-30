@@ -280,7 +280,7 @@
                           $event_sequence_index,    $http_user_agent);
       }
 
-      static function AsMySQLQuery($conn) : string
+      function AsMySQLQuery($conn) : string
       {
          $offset         = !is_null($this->client_offset) ? "\"".mysqli_real_escape_string($conn, $this->client_offset)."\"" : "NULL";
          $event_data_str = !is_null($this->event_data)    ?      mysqli_real_escape_string($conn, $this->event_data)         : "NULL";
@@ -307,7 +307,7 @@
          ")";
       }
 
-      static function AsBigQuery() : string
+      function AsBigQuery() : array
       {
          return [
             "session_id"           => $this->session_id,
@@ -318,8 +318,8 @@
             "client_offset"        => $this->client_offset,
             "event_name"           => $this->event_name,
             "event_data"           => $this->event_data,
-            "event_source"         => $this->event_source,
-            // "synced" => $this->synced,
+            "event_source"         => $this::$event_source,
+            // "synced" => $this::synced,
             "game_state"           => $this->game_state,
             "app_version"          => $this->app_version,
             "app_branch"           => $this->app_branch,

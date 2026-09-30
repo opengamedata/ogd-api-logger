@@ -47,3 +47,10 @@ jobs:
       revision_tag: "t-${{ needs.setup.outputs.branch_tag }}-t"
       remove: false
     secrets: inherit
+
+  testbed_loggerapi_remote:
+    name: LoggerAPI Remote Testbeds
+    needs: [deploy]
+    uses: ./.github/workflows/TEST_LoggerAPI_remote.yml
+    with:
+      base_url: ${{ needs.deploy.outputs.url }}

@@ -51,3 +51,10 @@ jobs:
     secrets: inherit
 
   # *** 3. Remote Testbeds ***
+
+  testbed_loggerapi_remote:
+    name: LoggerAPI Remote Testbeds
+    needs: [deploy]
+    uses: ./.github/workflows/TEST_LoggerAPI_remote.yml
+    with:
+      base_url: ${{ needs.deploy.outputs.url }}

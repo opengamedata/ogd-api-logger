@@ -1,0 +1,85 @@
+# Workflow to test Logger API's Hello endpoint on the CI server
+name: Remote Testbed - HelloAPI
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        type: string
+        description: "The base URL of the deploy to test."
+        required: true
+  workflow_call:
+    inputs:
+      base_url:
+        type: string
+        description: "The base URL of the deploy to test."
+        required: true
+
+jobs:
+  check_deploy:
+    name: Check for Existing Deploy
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-file
+      cancel-in-progress: false
+
+    steps:
+
+    - name: cURL Check Hello Endpoint
+      run: curl -Is --fail-with-body https://${{ inputs.base_url }}/hello.php
+
+  # deploy_if_needed:
+  #   name: LoggerAPI Deploy (If Needed)
+  #   needs: check_deploy
+  #   if: failure()
+  #   uses: ./.github/workflows/DEPLOY_LoggerAPI.yml
+  #   secrets: inherit
+  #   with:
+  #     deploy_host: ${{ vars.OGD_STAGING_HOST }}
+  #     branch: ${{ github.ref_name }}
+  #     remove: false
+
+  run_testbed_files:
+    name: Run HelloAPI Testbed
+    needs: [check_deploy]
+    # if: always() && (needs.check_deploy.result == 'success' || needs.deploy_if_needed.result == 'success')
+    runs-on: ubuntu-24.04
+    container: ${{ vars.EXEC_CONTAINER }}
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-logger
+      cancel-in-progress: false
+    defaults:
+      run:
+        shell: sh
+
+    steps:
+
+    - name: Announce testing
+      run: echo "Testing HelloAPI deploy at ${{ inputs.base_url }}"
+
+  # 1. Local checkout 
+    - name: Checkout repository
+      uses: actions/checkout@v7.0.1
+      with:
+        fetch-depth: 0
+    - name: Get Dependencies
+      run: composer install
+
+    - name: Set up Config File
+      uses: ./.github/actions/test_config
+      with:
+          endpoint: ${{ inputs.base_url }}
+          shell: sh
+
+  # 2. Build & configure remote environments
+
+  # 3. Perform export
+    - name: Execute testbed
+      run: vendor/bin/phpunit --testsuite hello
+
+  # 4. Cleanup & complete
+    - name: Upload logs as artifacts
+      uses: actions/upload-artifact@v7.0.1
+      with:
+        name: "test-log"
+        path: ./*.log

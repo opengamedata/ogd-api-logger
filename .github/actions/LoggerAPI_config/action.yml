@@ -5,6 +5,9 @@ branding:
   icon: 'clipboard'
   color: 'blue'
 inputs:
+  db_type:
+    description: "Whether we should target BigQuery or MySQL for storing logs. Should either be `bigquery` or `mysql`, all lower-case."
+    required: true
   db_host:
     description: "Host of the database"
     required: false
@@ -35,6 +38,9 @@ runs:
   steps:
     - name: Set up config
       run: cp config/config.php.template src/config.php 
+      shell: bash
+    - name: Set DB type
+      run: sed -i 's@db type placeholder@${{ inputs.db_type }}@g' src/config.php
       shell: bash
     - name: Set DB hostname
       run: sed -i 's@127.0.0.1@${{ inputs.db_host }}@g' src/config.php

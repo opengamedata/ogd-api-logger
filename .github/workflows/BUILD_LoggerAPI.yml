@@ -43,6 +43,7 @@ jobs:
     - name: Set up Config File
       uses: ./.github/actions/LoggerAPI_config
       with:
+        db_type: "bigquery"
         version_name: ${{ steps.version_tag.outputs.VERSION_TAG }}-${{ github.sha }}
         monitor_enabled: true
         monitor_url: ${{ vars.OGD_MONITOR_HOST }}

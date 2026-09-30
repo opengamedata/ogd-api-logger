@@ -26,6 +26,10 @@ on:
         description: "Whether to also deploy/remove as the 'latest' version of API"
         required: false
         default: false
+    outputs:
+      url:
+        description: "The URL of the deploy."
+        value: ${{ jobs.deploy_image.outputs.url }}
 
 env:
   SERVICE_URL: "logger.api.opengamedata.io"

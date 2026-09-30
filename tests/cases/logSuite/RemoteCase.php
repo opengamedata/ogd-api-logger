@@ -11,7 +11,7 @@
             "user_data" => "{}",
             "app_version" => "1.0.0-testbed",
             "app_branch" => "testing-branch",
-            "log_version" => "1",
+            "log_version" => "1"
          ];
          $body_params = [
             [

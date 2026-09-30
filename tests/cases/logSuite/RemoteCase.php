@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
    use PHPUnit\Framework\TestCase;
 
-   final class RemoteCase extends TestCase
+   final class LogRemoteCase extends TestCase
    {
       public function testBasicCall(): void
       {

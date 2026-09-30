@@ -1,5 +1,5 @@
-# Workflow to test Logger API on the CI server
-name: Remote Testbed - LoggerAPI
+# Workflow to test Logger API's Hello endpoint on the CI server
+name: Remote Testbed - HelloAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
@@ -40,7 +40,7 @@ jobs:
   #     remove: false
 
   run_testbed_files:
-    name: Run LoggerAPI Testbed
+    name: Run HelloAPI Testbed
     needs: [check_deploy]
     # if: always() && (needs.check_deploy.result == 'success' || needs.deploy_if_needed.result == 'success')
     runs-on: ubuntu-24.04
@@ -55,7 +55,7 @@ jobs:
     steps:
 
     - name: Announce testing
-      run: echo "Testing LoggerAPI deploy at ${{ inputs.base_url }}"
+      run: echo "Testing HelloAPI deploy at ${{ inputs.base_url }}"
 
   # 1. Local checkout 
     - name: Checkout repository
@@ -75,7 +75,7 @@ jobs:
 
   # 3. Perform export
     - name: Execute testbed
-      run: vendor/bin/phpunit --testsuite log
+      run: vendor/bin/phpunit --testsuite hello
 
   # 4. Cleanup & complete
     - name: Upload logs as artifacts

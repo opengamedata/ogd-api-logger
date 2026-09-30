@@ -48,6 +48,13 @@ jobs:
       remove: false
     secrets: inherit
 
+  testbed_helloapi_remote:
+    name: HelloAPI Remote Testbeds
+    needs: [deploy]
+    uses: ./.github/workflows/TEST_HelloAPI_remote.yml
+    with:
+      base_url: ${{ needs.deploy.outputs.url }}
+
   testbed_loggerapi_remote:
     name: LoggerAPI Remote Testbeds
     needs: [deploy]

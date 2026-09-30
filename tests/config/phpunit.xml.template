@@ -13,6 +13,6 @@
 
   </testsuites>
   <php>
-    <env name="base_url", value="PLACEHOLDER_URL" /env>
+    <env name="base_url" value="PLACEHOLDER_URL"/>
   </php>
 </phpunit>

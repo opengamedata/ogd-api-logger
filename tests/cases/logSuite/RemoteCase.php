@@ -44,7 +44,10 @@
 
          $response = curl_exec($request);
 
-         $this->assertSame($response, "SUCCESS: Dummy insert of 2 events into BQ.");
+         $this->assertSame(
+            $response, "SUCCESS: Dummy insert of 2 events into BQ.",
+            "Test Fail: Unexpected result '".$response."' from call to ".$test_url
+         );
       }
    }
 

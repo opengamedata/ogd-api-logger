@@ -4,7 +4,7 @@
          bootstrap="vendor/autoload.php">
   <testsuites>
     <testsuite name="log">
-      <directory suffix="Case.php">ctests/ases/logSuite</directory>
+      <directory suffix="Case.php">tests/cases/logSuite</directory>
     </testsuite>
 
     <!-- <testsuite name="query">

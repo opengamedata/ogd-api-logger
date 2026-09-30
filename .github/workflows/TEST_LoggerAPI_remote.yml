@@ -1,5 +1,5 @@
-# Workflow to test Files API on the CI server
-name: Remote Testbed - FileAPI
+# Workflow to test Logger API on the CI server
+name: Remote Testbed - LoggerAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
@@ -29,10 +29,10 @@ jobs:
       run: curl -Is --fail-with-body https://${{ inputs.base_url }}/hello.php
 
   # deploy_if_needed:
-  #   name: FileAPI Deploy (If Needed)
+  #   name: LoggerAPI Deploy (If Needed)
   #   needs: check_deploy
   #   if: failure()
-  #   uses: ./.github/workflows/DEPLOY_FileAPI.yml
+  #   uses: ./.github/workflows/DEPLOY_LoggerAPI.yml
   #   secrets: inherit
   #   with:
   #     deploy_host: ${{ vars.OGD_STAGING_HOST }}

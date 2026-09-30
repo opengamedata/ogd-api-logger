@@ -1,5 +1,5 @@
 # Workflow to build and deploy designer dashboard to server.
-name: OGD Logger - CI Script
+name: CI Script - LoggerAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   push:

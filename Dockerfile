@@ -10,7 +10,6 @@ RUN --mount=type=bind,source=composer.json,target=composer.json \
 
 # Stage 2: Build final image
 FROM php:8.5.11-apache
-# TODO: look into updating to more recent PHP
 WORKDIR /var/www/html/
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"

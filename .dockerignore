@@ -29,6 +29,8 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/vendor
+**/*.cache
 config/config.php.template
+tests/
 LICENSE
 README.md

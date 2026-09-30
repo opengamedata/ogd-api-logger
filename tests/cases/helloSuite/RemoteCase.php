@@ -16,7 +16,12 @@
          curl_setopt_array($request, $opts);
 
          $response = curl_exec($request);
+         $code = curl_getinfo($request, CURLINFO_HTTP_CODE);
 
+         $this->assertSame(
+            $code, 200,
+            "Test Fail: Unexpected response code '".$code."' from call to ".$test_url
+         );
          $this->assertSame(
             $response, "Hello, world!",
             "Test Fail: Unexpected result '".$response."' from call to ".$test_url

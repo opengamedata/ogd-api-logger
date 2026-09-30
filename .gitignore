@@ -1,4 +1,5 @@
 config.php
-t_config.php
+phpunit.xml
 .vscode
 vendor/
+*.cache

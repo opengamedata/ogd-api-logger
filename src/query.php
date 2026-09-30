@@ -1,7 +1,8 @@
 <?php
 
    $LOGGER_SCHEMA = "LOGGER";
-   $OGD_SCHEMA    = "OPENGAMEDATA";
+   $OGD_SCHEMA_01 = "OPENGAMEDATA_V0";
+   $OGD_SCHEMA_10 = "OPENGAMEDATA_V1";
 
    class EventQuery {
       const string OGD_COLUMNS =
@@ -69,47 +70,88 @@
 
    class Event {
 
-      private static string $event_source = "GAME";
+      # Category 0 Data: Non-logged data
       private static int $synced = 0;
-      private string $session_id;
-      private ?string $user_id;
-      private ?string $user_data;
-      private string $client_time;
-      private string $client_time_ms;
-      private ?string $client_offset;
-      private string $event_name;
-      private ?string $event_data;
-      private ?string $game_state;
-      private string $app_version;
-      private string $app_branch;
-      private string $log_version;
-      private string $event_sequence_index;
       private string $http_user_agent;
-      private string $server_time;
       private string $host;
       private string $remote_addr;
 
-      function __construct(string $session_id,  ?string $user_id,        ?string $user_data,
-                           string $client_time,  string $client_time_ms, ?string $client_offset,
-                           string $event_name,  ?string $event_data,     ?string $game_state,
-                           string $app_version, $app_branch,      string $log_version,
-                           string $event_sequence_index, string $http_user_agent)
+      # Category 1 Data: Identification
+      private  string $game_id;
+      private ?string $instance_id;
+      private ?string $player_id;
+      private  string $session_id;
+      # Category 2 Data: Sequencing
+      // TODO : sort out timestamp stuff, temporarily assuming client_time is our timestamp
+      private string $client_time;
+      private string $client_time_ms;
+      private string $game_time;
+      private ?string $client_offset; // DEPRECATED
+      private static string $server_time = "CURRENT_TIMESTAMP()"; // DEPRECATED
+      private string $event_sequence_index;
+      # Category 3 Data: Segmenting
+      private ?string $game_segment;
+      # Category 4 Data: Provenance
+      private static string $event_source = "GAME";
+      # Category 5 Data: Versioning
+      private string $source_version;
+      private string $game_version;
+      private string $schema_version;
+      private string $log_version;
+      # Category 6 Data: Configuration
+      private string $condition;
+      private string $game_configuration;
+      private string $platform;
+      # Category 7 Data: Context
+      private ?string $player_history;
+      private ?string $game_state;
+      # Category 8 Data: Event
+      private string $event_id;
+      private string $event_name;
+      private ?string $event_data;
+      # Category 9 Data: Private
+      // Nothing here for now, in discussion for final standard
+
+      function __construct(string $game_id,         ?string $instance_id,   ?string $player_id,     string $session_id,
+                           string $client_time,     string $client_time_ms, string $game_time,
+                           ?string $client_offset,  string $sequence_index, ?string $game_segment,
+                           string $source_version,  string $game_version,   string $schema_version, string $log_version,
+                           string $condition,       string $game_config,    string $platform,
+                           ?string $player_history, ?string $game_state,
+                           int $event_id,         string $event_name,     ?string $event_data,     
+                                 
+                           string $http_user_agent)
       {
+         $this->game_id = $game_id;
+         $this->instance_id = $instance_id;
+         $this->player_id = $player_id;
          $this->session_id = $session_id;
-         $this->user_id = $user_id;
-         $this->user_data = $user_data;
+
          $this->client_time = $client_time;
          $this->client_time_ms = $client_time_ms;
+         $this->game_time = $game_time;
          $this->client_offset = $client_offset;
+         $this->event_sequence_index = $sequence_index;
+
+         $this->game_segment = $game_segment;
+
+         $this->source_version = $source_version;
+         $this->game_version = $game_version;
+         $this->schema_version = $schema_version;
+         $this->log_version = $log_version;
+
+         $this->condition = $condition;
+         $this->game_configuration = $game_config;
+         $this->platform = $platform;
+
+         $this->player_history = $player_history;
+         $this->game_state = $game_state;
+
+         $this->event_id = $event_id;
          $this->event_name = $event_name;
          $this->event_data = $event_data;
-         $this->game_state = $game_state;
-         $this->app_version = $app_version;
-         $this->app_branch = $app_branch;
-         $this->log_version = $log_version;
-         $this->event_sequence_index = $event_sequence_index;
+
          $this->http_user_agent = $http_user_agent;
-         $this->server_time = "CURRENT_TIMESTAMP()";
          $this->host = $_SERVER['HTTP_HOST'];
          $this->remote_addr = $_SERVER["REMOTE_ADDR"];
       }
@@ -122,27 +164,27 @@
        */
       {
          // per dump
-         $user_id = NULL;   
-         $user_data = NULL;
+         $player_id = NULL;   
+         $player_history = NULL;
          $client_time = date("Y-m-d H:i:s");
          $client_time_ms = 0;
          $client_offset = "00:00:00";
          $event_data = NULL;
          $game_state = NULL;
-         $app_branch = NULL;
+         $condition = NULL;
 
          if(isset($_REQUEST["session_id"])) {
             $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
          } else { die("No session_id"); }
 
          if(isset($_REQUEST["user_id"])) {
-            $user_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
+            $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
          }
 
          if(isset($_REQUEST["user_data"])) {
-            $user_data = $_REQUEST["user_data"];
+            $player_history = $_REQUEST["user_data"];
          } else {
-            $user_data = "{}";
+            $player_history = "{}";
          }
 
          if(isset($datum->client_time))
@@ -181,11 +223,11 @@
          }
 
          if(isset($_REQUEST["app_version"])) {
-            $app_version = filter_var($_REQUEST["app_version"], FILTER_SANITIZE_NUMBER_INT);
+            $game_version = filter_var($_REQUEST["app_version"], FILTER_SANITIZE_NUMBER_INT);
          } else { die("No app_version"); }
 
          if(isset($_REQUEST["app_branch"])) {
-            $app_branch = preg_replace("/[^a-zA-Z0-9-_]+/", "", $_REQUEST["app_branch"]);
+            $condition = preg_replace("/[^a-zA-Z0-9-_]+/", "", $_REQUEST["app_branch"]);
          }
 
          if(isset($_REQUEST["log_version"])) {
@@ -199,8 +241,8 @@
 
          $http_user_agent = $_SERVER["HTTP_USER_AGENT"];
 
-         return new Event($session_id, $user_id,    $user_data,  $client_time, $client_time_ms, $client_offset,
-                          $event_name, $event_data, $game_state, $app_version, $app_branch,     $log_version,
+         return new Event($session_id, $player_id,    $player_history,  $client_time, $client_time_ms, $client_offset,
+                          $event_name, $event_data, $game_state, $game_version, $condition,     $log_version,
                           $event_sequence_index, $http_user_agent);
       }
 
@@ -212,14 +254,14 @@
        */
       {
          # 1. Get all the variables out of a Logger package.
-         $app_version_raw = null;
+         $game_version_raw = null;
          $session_id  = null;
          $persistent_session_id = null;
          $player_id   = null;
          $http_user_agent = $_SERVER["HTTP_USER_AGENT"];
 
          //per dump
-         if(isset($_REQUEST["app_version"]))           $app_version_raw       = filter_var($_REQUEST["app_version"],           FILTER_SANITIZE_NUMBER_INT); else die("No app_version");
+         if(isset($_REQUEST["app_version"]))           $game_version_raw       = filter_var($_REQUEST["app_version"],           FILTER_SANITIZE_NUMBER_INT); else die("No app_version");
          if(isset($_REQUEST["session_id"]))            $session_id            = filter_var($_REQUEST["session_id"],            FILTER_SANITIZE_NUMBER_INT); else die("No session_id");
          if(isset($_REQUEST["persistent_session_id"])) $persistent_session_id = filter_var($_REQUEST["persistent_session_id"], FILTER_SANITIZE_NUMBER_INT);
          if(isset($_REQUEST["player_id"]))             $player_id             = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["player_id"]);
@@ -265,18 +307,18 @@
             }
          }
          # 2. Convert Logger stuff over to naming for an OGD package
-         $user_id = $player_id;
-         $user_data = json_encode( ["persistent_session_id" => $persistent_session_id] );
+         $player_id = $player_id;
+         $player_history = json_encode( ["persistent_session_id" => $persistent_session_id] );
          $client_offset = null;
          $event_name = $event.".".$event_custom;
          $event_data = $event_data_complex;
          $game_state = json_encode( ["level" => $level] );
-         $app_version = "1.0";
-         $app_branch  = "main";
-         $log_version = $app_version_raw;
+         $game_version = "1.0";
+         $condition  = "main";
+         $log_version = $game_version_raw;
          $event_sequence_index = $session_n;
-         return new Event($session_id, $user_id,    $user_data,  $client_time, $client_time_ms, $client_offset,
-                          $event_name, $event_data, $game_state, $app_version, $app_branch,     $log_version,
+         return new Event($session_id, $player_id,    $player_history,  $client_time, $client_time_ms, $client_offset,
+                          $event_name, $event_data, $game_state, $game_version, $condition,     $log_version,
                           $event_sequence_index,    $http_user_agent);
       }
 
@@ -286,18 +328,18 @@
          $event_data_str = !is_null($this->event_data)    ?      mysqli_real_escape_string($conn, $this->event_data)         : "NULL";
          return "(".
             "\"".mysqli_real_escape_string($conn, $this->session_id)."\",".
-            "\"".mysqli_real_escape_string($conn, $this->user_id)."\",".
-            "\"".mysqli_real_escape_string($conn, $this->user_data)."\",".
+            "\"".mysqli_real_escape_string($conn, $this->player_id)."\",".
+            "\"".mysqli_real_escape_string($conn, $this->player_history)."\",".
             "\"".mysqli_real_escape_string($conn, $this->client_time)."\",".
             "\"".mysqli_real_escape_string($conn, $this->client_time_ms)."\",".
             "".$offset.",".
-            "".$this->server_time.",".
+            "".Event::$server_time.",".
             "\"".mysqli_real_escape_string($conn, $this->event_name)."\",".
             "\"".$event_data_str."\",".
             "\"".Event::$event_source."\",".
             "\"".mysqli_real_escape_string($conn, $this->game_state)."\",".
-            "\"".mysqli_real_escape_string($conn, $this->app_version)."\",".
-            "\"".mysqli_real_escape_string($conn, $this->app_branch)."\",".
+            "\"".mysqli_real_escape_string($conn, $this->game_version)."\",".
+            "\"".mysqli_real_escape_string($conn, $this->condition)."\",".
             "\"".mysqli_real_escape_string($conn, $this->log_version)."\",".
             "\"".mysqli_real_escape_string($conn, $this->event_sequence_index)."\",".
             "\"".mysqli_real_escape_string($conn, $this->host)."\",".
@@ -311,8 +353,8 @@
       {
          return [
             "session_id"           => $this->session_id,
-            "user_id"              => $this->user_id,
-            "user_data"            => $this->user_data,
+            "user_id"              => $this->player_id,
+            "user_data"            => $this->player_history,
             "client_time"          => $this->client_time,
             // "client_time_ms" => $this->client_time_ms,
             "client_offset"        => $this->client_offset,
@@ -321,8 +363,8 @@
             "event_source"         => $this::$event_source,
             // "synced" => $this::synced,
             "game_state"           => $this->game_state,
-            "app_version"          => $this->app_version,
-            "app_branch"           => $this->app_branch,
+            "app_version"          => $this->game_version,
+            "app_branch"           => $this->condition,
             "log_version"          => $this->log_version,
             "event_sequence_index" => $this->event_sequence_index,
             "host"                 => $this->host,

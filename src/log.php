@@ -32,18 +32,24 @@ switch ($db_type) {
       break;
 }
 
-# 2. Figure out what the input schema looks like, defaulting to full OGD schema.
-$request_schema = $OGD_SCHEMA;
-$app_id = "NO APP ID";
-
-if (isset($_REQUEST["app_id"])) {
-  $app_id = strtoupper($_REQUEST["app_id"]);
-  if (in_array($APP_ID, $LOGGER_GAMES)) {
-    $request_schema = $LOGGER_SCHEMA;
-  }
+# 2. Figure out what the input schema looks like, defaulting to v0.1 OGD schema.
+$schema_version = $_REQUEST["schema_version"] ?? "N/A";
+switch ($schema_version) {
+   case "1.0-alpha":
+      $request_schema = $OGD_SCHEMA_10;
+      $app_id = strtoupper($_REQUEST["game_id"]) ?? "NO GAME ID";
+   default:
+      $request_schema = $OGD_SCHEMA_01;
+      $app_id = strtoupper($_REQUEST["app_id"]) ?? "NO GAME ID";
+      if (in_array($app_id, $LOGGER_GAMES)) {
+         $request_schema = $LOGGER_SCHEMA;
+      }
+      break;
 }
 
-# 3. Generate the query data from raw input data.
+
+
+# 3. Parse the query data from raw input data.
 /**
  * An array of event data bodies, containing event_name, event_data, and similar columns.
 * @var data

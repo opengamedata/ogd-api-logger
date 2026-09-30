@@ -15,7 +15,9 @@ WORKDIR /var/www/html/
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY --from=dependencies /deps/vendor ./vendor
 COPY ./src .
+COPY ./config/logging.ini.template $PHP_INI_DIR/conf.d/logging.ini
 
+RUN chown -R www-data:www-data .
 USER www-data
 
 EXPOSE 8080

@@ -8,6 +8,7 @@ RUN --mount=type=bind,source=composer.json,target=composer.json \
     --mount=type=cache,target=/tmp/cache \
     composer install --no-dev --no-interaction
 
+# Stage 2: Build final image
 FROM php:8.5.11-apache
 # TODO: look into updating to more recent PHP
 WORKDIR /var/www/html/

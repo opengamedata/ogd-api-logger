@@ -39,6 +39,7 @@
             CURLOPT_USERAGENT => "fake agent/1.0",
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
+            CURLOPT_POSTREDIR => CURL_REDIR_POST_302,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_RETURNTRANSFER => true
          ];

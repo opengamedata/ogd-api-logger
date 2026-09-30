@@ -1,13 +1,12 @@
 <?php declare(strict_types=1);
    use PHPUnit\Framework\TestCase;
 
-   require "config/t_config.php";
-
    final class RemoteCase extends TestCase
    {
       public function testBasicCall(): void
       {
-         $request = curl_init($base_url."/log.php");
+         $test_url = $_ENV['base_url']."/log.php";
+         $request = curl_init($test_url);
          curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
          $response = curl_exec($request);
 

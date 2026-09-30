@@ -32,13 +32,19 @@
             ]
          ];
 
-         $test_url = curl_escape($_ENV['base_url']."/log.php?".http_build_query($url_params));
-         $request = curl_init($test_url);
-         curl_setopt($request, CURLOPT_POSTFIELDS, json_encode($body_params));
-         curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
+         $request = curl_init();
+         $test_url = $_ENV['base_url']."/log.php?".http_build_query($url_params);
+         $opts = [
+            CURLOPT_URL => $test_url,
+            CURLOPT_USERAGENT => "fake agent/1.0",
+            CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
+            CURLOPT_RETURNTRANSFER => true
+         ];
+         curl_setopt_array($request, $opts);
+
          $response = curl_exec($request);
 
-         $this->assertSame($response, "No session_id");
+         $this->assertSame($response, "SUCCESS: Dummy insert of 2 events into BQ.");
       }
    }
 

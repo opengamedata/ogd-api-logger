@@ -15,6 +15,7 @@ require 'monitor.php';
 $LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
                      "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND");
 
+error_log("With db type ".$db_type."\n");
 # 1. Make the db connection before we go to the trouble of looking at the data.
 switch ($db_type) {
    case "bigquery":
@@ -65,11 +66,13 @@ if (count($data) > 0) {
          $arr = $query->AsBigQuery();
          // $result = BigQueryUtils::Insert($conn, $app_id, $arr);
          $result = "Dummy insert of ".count($arr)." events into BQ.";
+         error_log("Sending bigquery response: ".$result);
          break;
       case "mysql":
          $query_string = $query->AsMySQL($db_type, $app_id, $conn);
          // $result = MySQLUtils::Insert($conn, $app_id, $query_string);
          $result = "Dummy run of \n".$query_string."\n in MySQL.";
+         error_log("Sending mysql response: ".$result);
          break;
       default:
          die("FAIL: API software was misconfigured, invalid db_type setting!");

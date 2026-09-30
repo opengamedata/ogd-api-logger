@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d0277bffdb2434489703fcd31fd71e1",
+    "content-hash": "b5476bb3e3b8942f1d542fa4277ab440",
     "packages": [
         {
             "name": "brick/math",
@@ -334,6 +334,74 @@
             "description": "Google Cloud PHP shared dependency, providing functionality useful to all components.",
             "support": {
                 "source": "https://github.com/googleapis/google-cloud-php-core/tree/v1.73.5"
+            },
+            "time": "2026-09-28T17:51:46+00:00"
+        },
+        {
+            "name": "google/cloud-logging",
+            "version": "v2.2.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/googleapis/google-cloud-php-logging.git",
+                "reference": "3a08105fafd160ed5a008b87aa2c613d7528e1e5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/googleapis/google-cloud-php-logging/zipball/3a08105fafd160ed5a008b87aa2c613d7528e1e5",
+                "reference": "3a08105fafd160ed5a008b87aa2c613d7528e1e5",
+                "shasum": ""
+            },
+            "require": {
+                "google/cloud-core": "^1.66",
+                "google/gax": "^1.38.0",
+                "php": "^8.2"
+            },
+            "provide": {
+                "psr/log-implementation": "2.0||3.0"
+            },
+            "require-dev": {
+                "dg/bypass-finals": "^1.9",
+                "erusev/parsedown": "^1.6",
+                "fig/log-test": "^1.1",
+                "google/cloud-bigquery": "^1.0",
+                "google/cloud-pubsub": "^2.0",
+                "google/cloud-storage": "^2.0",
+                "monolog/monolog": "^3.8",
+                "nikic/php-parser": "^5.0",
+                "opis/closure": "^3",
+                "phpdocumentor/reflection": "^5.3.3||^6.0",
+                "phpdocumentor/reflection-docblock": "^5.3.3||^6.0",
+                "phpspec/prophecy-phpunit": "^2.0",
+                "phpunit/phpunit": "^9.6",
+                "squizlabs/php_codesniffer": "3.*"
+            },
+            "suggest": {
+                "ext-grpc": "The gRPC extension enables use of the performant gRPC transport",
+                "ext-protobuf": "Provides a significant increase in throughput over the pure PHP protobuf implementation. See https://cloud.google.com/php/grpc for installation instructions.",
+                "psr/log": "For using the PSR logger. Currently supports versions 1 and 2."
+            },
+            "type": "library",
+            "extra": {
+                "component": {
+                    "id": "cloud-logging",
+                    "path": "Logging",
+                    "entry": "src/LoggingClient.php",
+                    "target": "googleapis/google-cloud-php-logging.git"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Google\\Cloud\\Logging\\": "src",
+                    "GPBMetadata\\Google\\Logging\\": "metadata"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "description": "Stackdriver Logging Client for PHP",
+            "support": {
+                "source": "https://github.com/googleapis/google-cloud-php-logging/tree/v2.2.3"
             },
             "time": "2026-09-28T17:51:46+00:00"
         },

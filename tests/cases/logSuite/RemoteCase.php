@@ -38,12 +38,18 @@
             CURLOPT_URL => $test_url,
             CURLOPT_USERAGENT => "fake agent/1.0",
             CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
+            CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_RETURNTRANSFER => true
          ];
          curl_setopt_array($request, $opts);
 
          $response = curl_exec($request);
+         $code = curl_getinfo($request, CURLINFO_HTTP_CODE);
 
+         $this->assertSame(
+            $code, 200,
+            "Test Fail: Unexpected response code '".$code."' from call to ".$test_url
+         );
          $this->assertSame(
             $response, "SUCCESS: Dummy insert of 2 events into BQ.",
             "Test Fail: Unexpected result '".$response."' from call to ".$test_url

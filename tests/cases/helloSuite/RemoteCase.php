@@ -10,6 +10,7 @@
          $test_url = $_ENV['base_url']."/hello.php";
          $opts = [
             CURLOPT_URL => $test_url,
+            CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_RETURNTRANSFER => true
          ];
          curl_setopt_array($request, $opts);

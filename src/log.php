@@ -2,11 +2,6 @@
 header("Access-Control-Allow-Headers: Origin, Authorization, X-Requested-With, Content-Type, Accept");
 header("Access-Control-Allow-Origin: *");
 
-print("print test");
-error_log("error_log test");
-echo "echo test";
-die("Skip to the chase in log.php");
-
 # 3rd-party imports
 require 'vendor/autoload.php';
 use Google\Cloud\BigQuery\BigQueryClient;

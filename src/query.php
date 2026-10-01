@@ -1,8 +1,8 @@
 <?php
 
-   $LOGGER_SCHEMA = "LOGGER";
-   $OGD_SCHEMA_01 = "OPENGAMEDATA_V0";
-   $OGD_SCHEMA_10 = "OPENGAMEDATA_V1";
+   const LOGGER_SCHEMA = "LOGGER";
+   const OGD_SCHEMA_01 = "OPENGAMEDATA_V0";
+   const OGD_SCHEMA_10 = "OPENGAMEDATA_V1";
 
    class EventQuery {
       const string OGD_COLUMNS =
@@ -33,21 +33,22 @@
 
       function __construct($schema, $app_id, $data)
       {
-         global $LOGGER_SCHEMA;
-         global $OGD_SCHEMA;
          $n_rows = count($data);
 
          $this->app_id = $app_id;
          switch ($schema) {
-            case $LOGGER_SCHEMA:
-               $lambda = fn($datum) => Event::FromLoggerFormat($app_id, $datum);
+            case LOGGER_SCHEMA:
+               $lambda = fn($datum) => Event::FromLoggerLegacyFormat($app_id, $datum);
                break;
-            case $OGD_SCHEMA:
-               $lambda = fn($datum) => Event::FromOGDFormat($app_id, $datum);
+            case OGD_SCHEMA_01:
+               $lambda = fn($datum) => Event::FromOGDLegacyFormat($app_id, $datum);
+               break;
+            case OGD_SCHEMA_10:
+               $lambda = fn($datum) => Event::FromOGDStandardFormat($app_id, $datum);
                break;
             default:
-               error_log("Got schema name ".$schema." that did not match ".$LOGGER_SCHEMA." or ".$OGD_SCHEMA.", defaulting to ".$OGD_SCHEMA);
-               $lambda = fn($datum) => Event::FromOGDFormat($app_id, $datum);
+               error_log("Got schema name ".$schema." that did not match ".LOGGER_SCHEMA." or ".OGD_SCHEMA_01." or ".OGD_SCHEMA_10.", defaulting to ".OGD_SCHEMA_10);
+               $lambda = fn($datum) => Event::FromOGDStandardFormat($app_id, $datum);
                break;
          }
          $this->events = array_map($lambda, $data);
@@ -151,8 +152,8 @@
          $this->event_data = $event_data;
       }
 
-      static function FromOGDFormat($game_id, $datum) : Event
-      /** Create an Event object from the standard OGD format (Schema v0.1)
+      static function FromOGDStandardFormat($game_id, $datum) : Event
+      /** Create an Event object from the standard OGD format (Schema v1.0)
        * 
        * Items from $_REQUEST: session_id, user_id, user_data, app_version, app_branch, log_version, 
        * Items from $datum: client_time, client_offset, event_name, event_data, game_state, event_sequence_index
@@ -272,7 +273,128 @@
          );
       }
 
-      static function FromLoggerFormat($game_id, $datum) : Event
+      static function FromOGDLegacyFormat($game_id, $datum) : Event
+      /** Create an Event object from the original/legacy OGD format (Schema v0.1)
+       * 
+       * Items from $_REQUEST: session_id, user_id, user_data, app_version, app_branch, log_version, 
+       * Items from $datum: client_time, client_offset, event_name, event_data, game_state, event_sequence_index
+       */
+      {
+         // per dump
+         $player_id = NULL;   
+         $player_history = NULL;
+         $client_time = date("Y-m-d H:i:s");
+         $client_time_ms = 0;
+         $client_offset = "00:00:00";
+         $event_data = NULL;
+         $game_state = NULL;
+         $condition = NULL;
+
+         # Category 1 Data: Identification
+
+         if(isset($_REQUEST["session_id"])) {
+            $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
+         } else { die("No session_id"); }
+
+         if(isset($_REQUEST["user_id"])) {
+            $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
+         }
+
+         # Category 2 Data: Sequencing
+
+         if(isset($datum->client_time))
+         {
+            $client_time = $datum->client_time;
+            // $client_time is a string like "2019-02-20 17:21:05.493Z"
+            $ct_len = strlen($client_time);
+            $ct_dot = strrpos($client_time,".");
+            if ($ct_dot) {
+               // drop ".493Z" for the DATETIME, and extract 493 for separate column
+               $client_time_ms = substr($client_time, $ct_dot + 1, $ct_len - ($ct_dot + 1) - 1);
+               $client_time = substr($client_time, 0, $ct_dot);
+            } else {
+               $client_time_ms = 0;
+            }
+         }
+
+         $game_time = "00:00:00.0000"; // Don't have a great default here
+
+         if(isset($datum->client_offset)) {
+            $client_offset = $datum->client_offset;
+         }
+
+         if(isset($datum->session_sequence_index)) {
+            $session_sequence_index  = filter_var($datum->session_sequence_index, FILTER_SANITIZE_NUMBER_INT);
+            // error_log("From datum ".json_encode($datum).", event sequence index is ".$datum->session_sequence_index);
+         } else { die("No event_sequence_index"); }
+
+         # Category 3 Data: Segmenting
+
+         // Not in 0.1
+
+         # Category 4 Data: Provenance
+
+         // Static, nothing to set here
+
+         # Category 5 Data: Versioning
+
+         if(isset($_REQUEST["app_version"])) {
+            $game_version = filter_var($_REQUEST["app_version"], FILTER_SANITIZE_NUMBER_INT);
+         } else { die("No app_version"); }
+
+         $schema_version = "0.1";
+
+         if(isset($_REQUEST["log_version"])) {
+            $log_version = filter_var($_REQUEST["log_version"], FILTER_SANITIZE_NUMBER_INT);
+         } else { die("No log_version"); }
+
+         # Category 6 Data: Configuration
+
+         if(isset($_REQUEST["app_branch"])) {
+            $condition = preg_replace("/[^a-zA-Z0-9-_]+/", "", $_REQUEST["app_branch"]);
+         }
+
+         # Category 7 Data: Context
+
+         if(isset($_REQUEST["user_data"])) {
+            $player_history = $_REQUEST["user_data"];
+         } else {
+            $player_history = "{}";
+         }
+
+         if(isset($datum->game_state)) {
+            $game_state = $datum->game_state;
+         } else {
+            $game_state = "{}";
+         }
+
+         # Category 8 Data: Event
+         $event_id = 9999;
+
+         if(isset($datum->event_name)) {
+            $event_name = $datum->event_name;
+         } else { die("No event_name"); }
+
+         if(isset($datum->event_data)) {
+            $event_data = $datum->event_data;
+         } else {
+            $event_data = "{}";
+         }
+
+         # Category 9 Data: Private
+
+         return new Event(
+            game_id:$game_id,               instance_id:null,                     player_id:$player_id,     session_id:$session_id,
+            client_time:$client_time,       client_time_ms:$client_time_ms,       game_time:$game_time,
+            client_offset:$client_offset,   sequence_index:$session_sequence_index, game_segment:null,
+            game_version:$game_version,     schema_version:$schema_version,       log_version:$log_version,
+            condition:$condition,           game_config:null,                     platform:null,
+            game_state:$game_state, player_history:$player_history,
+            event_id:$event_id,             event_name:$event_name,               event_data:$event_data,     
+         );
+      }
+
+      static function FromLoggerLegacyFormat($game_id, $datum) : Event
       /** Create an Event object from the legacy "Old Logger" format.
        * 
        * Items from $_REQUEST: session_id, persistent_session_id, app_version, player_id

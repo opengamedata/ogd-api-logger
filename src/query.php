@@ -5,7 +5,7 @@
    const OGD_SCHEMA_10 = "OPENGAMEDATA_V1";
 
    class EventQuery {
-      const string OGD_COLUMNS =
+      const string OGD_01_COLUMNS =
       "(".
          "session_id,".
          "user_id,".
@@ -62,7 +62,7 @@
       function AsMySQL($conn) : string
       {
          $lambda = fn(Event $next_event) => $next_event->AsMySQLQuery($conn);
-         $cols = "INSERT INTO ".$this->app_id." ".EventQuery::OGD_COLUMNS;
+         $cols = "INSERT INTO ".$this->app_id." ".EventQuery::OGD_01_COLUMNS;
          $vals = join(",", array_map($lambda, $this->events));
          return $cols.$vals;
       }
@@ -155,19 +155,25 @@
       static function FromOGDStandardFormat($game_id, $datum) : Event
       /** Create an Event object from the standard OGD format (Schema v1.0)
        * 
-       * Items from $_REQUEST: session_id, user_id, user_data, app_version, app_branch, log_version, 
-       * Items from $datum: client_time, client_offset, event_name, event_data, game_state, event_sequence_index
+       * Items from $_REQUEST:
+       * - instance_id
+       * - player_id
+       * - session_id
+       * - user_data
+       * - app_version
+       * - app_branch
+       * - log_version
+       * 
+       * Items from $datum:
+       * - client_time
+       * - client_offset
+       * - event_name
+       * - event_data
+       * - game_state
+       * - event_sequence_index
        */
       {
          // per dump
-         $player_id = NULL;   
-         $player_history = NULL;
-         $client_time = date("Y-m-d H:i:s");
-         $client_time_ms = 0;
-         $client_offset = "00:00:00";
-         $event_data = NULL;
-         $game_state = NULL;
-         $condition = NULL;
 
          # Category 1 Data: Identification
 
@@ -175,12 +181,15 @@
             $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
          } else { die("No session_id"); }
 
+         $player_id = NULL;   
          if(isset($_REQUEST["user_id"])) {
             $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
          }
 
          # Category 2 Data: Sequencing
 
+         $client_time = date("Y-m-d H:i:s");
+         $client_time_ms = 0;
          if(isset($datum->client_time))
          {
             $client_time = $datum->client_time;
@@ -198,6 +207,7 @@
 
          $game_time = "00:00:00.0000"; // Don't have a great default here
 
+         $client_offset = "00:00:00";
          if(isset($datum->client_offset)) {
             $client_offset = $datum->client_offset;
          }
@@ -229,18 +239,21 @@
 
          # Category 6 Data: Configuration
 
+         $condition = NULL;
          if(isset($_REQUEST["app_branch"])) {
             $condition = preg_replace("/[^a-zA-Z0-9-_]+/", "", $_REQUEST["app_branch"]);
          }
 
          # Category 7 Data: Context
 
+         $player_history = NULL;
          if(isset($_REQUEST["user_data"])) {
             $player_history = $_REQUEST["user_data"];
          } else {
             $player_history = "{}";
          }
 
+         $game_state = NULL;
          if(isset($datum->game_state)) {
             $game_state = $datum->game_state;
          } else {
@@ -254,11 +267,7 @@
             $event_name = $datum->event_name;
          } else { die("No event_name"); }
 
-         if(isset($datum->event_data)) {
-            $event_data = $datum->event_data;
-         } else {
-            $event_data = "{}";
-         }
+         $event_data = $datum->event_data ?? "{}";
 
          # Category 9 Data: Private
 

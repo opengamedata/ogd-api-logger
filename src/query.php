@@ -506,9 +506,9 @@
             "\"".mysqli_real_escape_string($conn, $this->session_id)."\",".
             "\"".mysqli_real_escape_string($conn, $this->player_id)."\",".
             "\"".mysqli_real_escape_string($conn, $this->player_history)."\",".
-            "\"".mysqli_real_escape_string($conn, $this->client_time)."\",".
-            "\"".mysqli_real_escape_string($conn, $this->client_time_ms)."\",".
-            "".$offset.",".
+            "\"".mysqli_real_escape_string($conn, "placeholder client_time")."\",".
+            "\"".mysqli_real_escape_string($conn, "placeholder client_time_ms")."\",".
+            ""."placeholder offset".",".
             "".Event::$server_time.",".
             "\"".mysqli_real_escape_string($conn, $this->event_name)."\",".
             "\"".$event_data_str."\",".
@@ -531,9 +531,9 @@
             "session_id"           => $this->session_id,
             "user_id"              => $this->player_id,
             "user_data"            => $this->player_history,
-            "client_time"          => $this->client_time,
+            "client_time"          => $this->timestamp,
             // "client_time_ms" => $this->client_time_ms,
-            "client_offset"        => $this->client_offset,
+            "client_offset"        => "placeholder offset",
             "event_name"           => $this->event_name,
             "event_data"           => $this->event_data,
             "event_source"         => $this::$event_source,

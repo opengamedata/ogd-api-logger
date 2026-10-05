@@ -536,13 +536,13 @@
             "client_offset"        => "placeholder offset",
             "event_name"           => $this->event_name,
             "event_data"           => $this->event_data,
-            "event_source"         => $this::$event_source,
+            "event_source"         => Event::$event_source,
             // "synced" => $this::synced,
             "game_state"           => $this->game_state,
             "app_version"          => $this->game_version,
             "app_branch"           => $this->condition,
             "log_version"          => $this->log_version,
-            "event_sequence_index" => Event::$session_sequence_index,
+            "event_sequence_index" => $this->session_sequence_index,
             "host"                 => Event::$host,
             "remote_addr"          => Event::$remote_addr
          ];

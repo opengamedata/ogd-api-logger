@@ -195,7 +195,7 @@
          }
 
          $auth_timestamp = date("Y-m-d H:i:s\\T");
-         if(isset($datum->authoritative_timestamp) && (DateTimeImmutable::createFromFormat('Y-m-d\Th:i:s.uT', $datum->auth_timestamp) !== false))
+         if(isset($datum->authoritative_timestamp) && (DateTimeImmutable::createFromFormat('Y-m-d\Th:i:s.uT', $datum->authoritative_timestamp) !== false))
          {
             $auth_timestamp = $datum->authoritative_timestamp;
          }
@@ -266,8 +266,8 @@
          }
 
          # Category 8 Data: Event
-         if(isset($_REQUEST["event_id"])) {
-            $event_id = filter_var($_REQUEST["event_id"], FILTER_SANITIZE_NUMBER_INT);
+         if(isset($datum->event_id)) {
+            $event_id = (int) filter_var($datum->event_id, FILTER_SANITIZE_NUMBER_INT);
          } else { die("No event_id"); }
 
          $event_name = $datum->event_name ?? "unnamed";

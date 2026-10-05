@@ -168,7 +168,7 @@
        * - timestamp
        * - authoritative_timestamp
        * - game_time
-       * - event_sequence_index
+       * - session_sequence_index
        * - game_segment
        * - game_state
        * - event_id

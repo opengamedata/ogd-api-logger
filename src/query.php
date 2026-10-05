@@ -156,13 +156,23 @@
          $this->remote_addr = $_SERVER["REMOTE_ADDR"];
       }
 
-      static function FromOGDFormat($datum) : Event
+      static function FromOGDFormat($game_id, $datum) : Event
       /** Create an Event object from the standard OGD format (Schema v0.1)
        * 
        * Items from $_REQUEST: session_id, user_id, user_data, app_version, app_branch, log_version, 
        * Items from $datum: client_time, client_offset, event_name, event_data, game_state, event_sequence_index
        */
       {
+         # Category 1 Data: Identification
+         $instance_id = null;
+
+         if(isset($_REQUEST["user_id"])) {
+            $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
+         }
+         if(isset($_REQUEST["session_id"])) {
+            $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
+         } else { die("No session_id"); }
+
          // per dump
          $player_id = NULL;   
          $player_history = NULL;
@@ -173,13 +183,6 @@
          $game_state = NULL;
          $condition = NULL;
 
-         if(isset($_REQUEST["session_id"])) {
-            $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
-         } else { die("No session_id"); }
-
-         if(isset($_REQUEST["user_id"])) {
-            $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
-         }
 
          if(isset($_REQUEST["user_data"])) {
             $player_history = $_REQUEST["user_data"];
@@ -241,7 +244,7 @@
 
          $http_user_agent = $_SERVER["HTTP_USER_AGENT"];
 
-         return new Event($session_id, $player_id,    $player_history,  $client_time, $client_time_ms, $client_offset,
+         return new Event($game_id, $instance_id, $player_id, $session_id,    $player_history,  $client_time, $client_time_ms, $client_offset,
                           $event_name, $event_data, $game_state, $game_version, $condition,     $log_version,
                           $event_sequence_index, $http_user_agent);
       }

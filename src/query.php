@@ -84,10 +84,8 @@
       private  string $session_id;
       # Category 2 Data: Sequencing
       // TODO : sort out timestamp stuff, temporarily assuming client_time is our timestamp
-      private  string $client_time;
-      private  string $client_time_ms;
+      private  string $timestamp;
       private  string $game_time;
-      private ?string $client_offset; // DEPRECATED
       private static string $server_time = "CURRENT_TIMESTAMP()"; // DEPRECATED
       private  int $session_sequence_index; // TODO : this is listed as non-required in standard, that's probably wrong.
       # Category 3 Data: Segmenting
@@ -114,8 +112,8 @@
       // Nothing here for now, in discussion for final standard
 
       function __construct(string $game_id,        ?string $instance_id,    ?string $player_id,     string $session_id,
-                           string $client_time,    string $client_time_ms,  string $game_time,
-                           ?string $client_offset, string $sequence_index,  ?string $game_segment,
+                           string $timestamp,      string $game_time,
+                           string $sequence_index, ?string $game_segment,
                            string $game_version,   string $schema_version,  string $log_version,
                            ?string $condition,     ?string $game_config,    ?string $platform,
                            ?string $game_state,    ?string $player_history,
@@ -127,10 +125,8 @@
          $this->player_id = $player_id;
          $this->session_id = $session_id;
 
-         $this->client_time = $client_time;
-         $this->client_time_ms = $client_time_ms;
+         $this->timestamp = $timestamp;
          $this->game_time = $game_time;
-         $this->client_offset = $client_offset;
          $this->session_sequence_index = $sequence_index;
 
          $this->game_segment = $game_segment;
@@ -289,13 +285,13 @@
          # Category 9 Data: Private
 
          return new Event(
-            game_id:$game_id,               instance_id:$instance_id,             player_id:$player_id,     session_id:$session_id,
-            client_time:$client_time,       client_time_ms:$client_time_ms,       game_time:$game_time,
-            client_offset:$client_offset,   sequence_index:$session_sequence_index, game_segment:null,
-            game_version:$game_version,     schema_version:$schema_version,       log_version:$log_version,
-            condition:$condition,           game_config:null,                     platform:null,
-            game_state:$game_state, player_history:$player_history,
-            event_id:$event_id,             event_name:$event_name,               event_data:$event_data,     
+            game_id:$game_id,                       instance_id:$instance_id,             player_id:$player_id,     session_id:$session_id,
+            timestamp:$timestamp,                   game_time:$game_time,
+            sequence_index:$session_sequence_index, game_segment:null,
+            game_version:$game_version,             schema_version:$schema_version,       log_version:$log_version,
+            condition:$condition,                   game_config:null,                     platform:null,
+            game_state:$game_state,                 player_history:$player_history,
+            event_id:$event_id,                     event_name:$event_name,               event_data:$event_data,     
          );
       }
 
@@ -331,20 +327,11 @@
          if(isset($datum->client_time))
          {
             $client_time = $datum->client_time;
-            // $client_time is a string like "2019-02-20 17:21:05.493Z"
-            $ct_len = strlen($client_time);
-            $ct_dot = strrpos($client_time,".");
-            if ($ct_dot) {
-               // drop ".493Z" for the DATETIME, and extract 493 for separate column
-               $client_time_ms = substr($client_time, $ct_dot + 1, $ct_len - ($ct_dot + 1) - 1);
-               $client_time = substr($client_time, 0, $ct_dot);
-            } else {
-               $client_time_ms = 0;
-            }
          }
 
          $game_time = "00:00:00.0000"; // Don't have a great default here
 
+         $client_offset = "00:00";
          if(isset($datum->client_offset)) {
             $client_offset = $datum->client_offset;
          }
@@ -409,14 +396,15 @@
 
          # Category 9 Data: Private
 
+         $timestamp = $client_time."+".$client_offset;
          return new Event(
-            game_id:$game_id,               instance_id:null,                     player_id:$player_id,     session_id:$session_id,
-            client_time:$client_time,       client_time_ms:$client_time_ms,       game_time:$game_time,
-            client_offset:$client_offset,   sequence_index:$session_sequence_index, game_segment:null,
-            game_version:$game_version,     schema_version:$schema_version,       log_version:$log_version,
-            condition:$condition,           game_config:null,                     platform:null,
-            game_state:$game_state, player_history:$player_history,
-            event_id:$event_id,             event_name:$event_name,               event_data:$event_data,     
+            game_id:$game_id,           instance_id:null,               player_id:$player_id,     session_id:$session_id,
+            timestamp:$timestamp,       game_time:$game_time,           sequence_index:$session_sequence_index,
+            game_segment:null,
+            game_version:$game_version, schema_version:$schema_version, log_version:$log_version,
+            condition:$condition,       game_config:null,               platform:null,
+            game_state:$game_state,     player_history:$player_history,
+            event_id:$event_id,         event_name:$event_name,         event_data:$event_data,     
          );
       }
 
@@ -438,25 +426,12 @@
          # Category 2 Data: Sequencing
 
          $client_time = date("Y-m-d H:i:s");
-         $client_time_ms = 0;
          if(isset($datum->client_time))
          {
-            $client_time = $datum->client_time;
-            // $client_time is a string like "2019-02-20 17:21:05.493Z"
-            $ct_len = strlen($client_time);
-            $ct_dot = strrpos($client_time,".");
-            if ($ct_dot) {
-               // drop ".493Z" for the DATETIME, and extract 493 for separate column
-               $client_time_ms = substr($client_time, $ct_dot + 1, $ct_len - ($ct_dot + 1) - 1);
-               $client_time    = substr($client_time, 0, $ct_dot);
-            } else {
-               $client_time_ms = 0;
-            }
+            $client_time = $datum->client_time."+00:00";
          }
 
          $game_time = "00:00:00.0000"; // Don't have a great default here
-
-         $client_offset = null;
 
          $session_n      = -1;
          if(isset($datum->session_n)) {
@@ -514,19 +489,18 @@
          $event_data = $datum->event_data_complex ?? "{}";
 
          return new Event(
-            game_id:$game_id,               instance_id:null,                     player_id:$player_id,     session_id:$session_id,
-            client_time:$client_time,       client_time_ms:$client_time_ms,       game_time:$game_time,
-            client_offset:$client_offset,   sequence_index:$session_sequence_index, game_segment:null,
-            game_version:$game_version,     schema_version:$schema_version,       log_version:$log_version,
-            condition:$condition,           game_config:null,                     platform:null,
-            game_state:$game_state, player_history:$player_history,
-            event_id:$event_id,             event_name:$event_name,               event_data:$event_data,     
+            game_id:$game_id,           instance_id:null,               player_id:$player_id,     session_id:$session_id,
+            timestamp:$client_time,     game_time:$game_time,           sequence_index:$session_sequence_index,
+            game_segment:$segment,
+            game_version:$game_version, schema_version:$schema_version, log_version:$log_version,
+            condition:$condition,       game_config:null,               platform:null,
+            game_state:$game_state,     player_history:$player_history,
+            event_id:$event_id,         event_name:$event_name,         event_data:$event_data,     
          );
       }
 
       function AsMySQLQuery($conn) : string
       {
-         $offset         = !is_null($this->client_offset) ? "\"".mysqli_real_escape_string($conn, $this->client_offset)."\"" : "NULL";
          $event_data_str = !is_null($this->event_data)    ?      mysqli_real_escape_string($conn, $this->event_data)         : "NULL";
          return "(".
             "\"".mysqli_real_escape_string($conn, $this->session_id)."\",".

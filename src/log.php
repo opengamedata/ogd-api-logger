@@ -39,6 +39,7 @@ switch ($schema_version) {
    case "1.0-alpha":
       $request_schema = OGD_SCHEMA_10;
       $app_id = strtoupper($_REQUEST["game_id"]) ?? "NO GAME ID";
+      break;
    default:
       $request_schema = OGD_SCHEMA_01;
       $app_id = strtoupper($_REQUEST["app_id"]) ?? "NO GAME ID";

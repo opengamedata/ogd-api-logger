@@ -336,8 +336,8 @@
             $client_offset = $datum->client_offset;
          }
 
-         if(isset($datum->session_sequence_index)) {
-            $session_sequence_index  = filter_var($datum->session_sequence_index, FILTER_SANITIZE_NUMBER_INT);
+         if(isset($datum->event_sequence_index)) {
+            $session_sequence_index  = filter_var($datum->event_sequence_index, FILTER_SANITIZE_NUMBER_INT);
             // error_log("From datum ".json_encode($datum).", event sequence index is ".$datum->session_sequence_index);
          } else { die("No event_sequence_index"); }
 

@@ -156,35 +156,48 @@
       /** Create an Event object from the standard OGD format (Schema v1.0)
        * 
        * Items from $_REQUEST:
+       * - app_id (technically getting this as input)
        * - instance_id
        * - player_id
        * - session_id
-       * - user_data
-       * - app_version
-       * - app_branch
+       * - source_version
+       * - game_version
+       * - schema_version
        * - log_version
+       * - condition
+       * - game_configuration
+       * - platform
+       * - user_history
        * 
        * Items from $datum:
-       * - client_time
-       * - client_offset
+       * - timestamp
+       * - authoritative_timestamp
+       * - game_time
+       * - event_sequence_index
+       * - game_segment
+       * - game_state
+       * - event_id
        * - event_name
        * - event_data
-       * - game_state
-       * - event_sequence_index
        */
       {
          // per dump
 
          # Category 1 Data: Identification
 
+         $instance_id = NULL;   
+         if(isset($_REQUEST["instance_id"])) {
+            $instance_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["instance_id"]);
+         }
+
+         $player_id = NULL;   
+         if(isset($_REQUEST["player_id"])) {
+            $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["player_id"]);
+         }
+
          if(isset($_REQUEST["session_id"])) {
             $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
          } else { die("No session_id"); }
-
-         $player_id = NULL;   
-         if(isset($_REQUEST["user_id"])) {
-            $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
-         }
 
          # Category 2 Data: Sequencing
 
@@ -301,13 +314,13 @@
 
          # Category 1 Data: Identification
 
-         if(isset($_REQUEST["session_id"])) {
-            $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
-         } else { die("No session_id"); }
-
          if(isset($_REQUEST["user_id"])) {
             $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
          }
+
+         if(isset($_REQUEST["session_id"])) {
+            $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
+         } else { die("No session_id"); }
 
          # Category 2 Data: Sequencing
 

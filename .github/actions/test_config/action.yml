@@ -1,53 +1,28 @@
-name: "Configure t_config.py file"
+name: "Configure phpunit.xml file for testing a deploy"
 author: Luke Swanson
-description: "Given a set of appropriate inputs, this action prepares the t_config.py file for running the ogd-logger testbeds."
+description: "Given a set of appropriate inputs, this action prepares the phpunit.xml file for running the API testbed."
 branding:
   icon: 'clipboard'
   color: 'blue'
 inputs:
-  verbose_output:
-    description: "Whether to output extra debugging lines from tests."
-    required: false
-    default: "False"
-  with_log:
-    description: "Whether to run the log.php tests."
-    required: false
-    default: "False"
-  with_register:
-    description: "Whether to run the register.php tests."
-    required: false
-    default: "False"
-  remote_url:
-    description: "The URL for calls to a remote instance of the Hello API"
-    required: False
-    default: "127.0.0.1:5000"
+  endpoint:
+    description: "The external endpoint where the app is deployed"
+    required: true
+    default: 'https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/app.wsgi'
   config_path:
     description: "Local path to test config folder"
     required: false
     default: 'tests/config'
-  app_branch:
-    description: "The name to use for app_branch in the test events"
+  shell:
+    description: "The shell to use to execute the steps"
     required: false
-    default: 'main'
-
+    default: bash
 runs:
   using: "composite"
   steps:
     - name: Set up config
-      run: cp ${{ inputs.config_path }}/t_config.py.template ${{ inputs.config_path }}/t_config.py 
-      shell: bash
-    - name: Set Output Verbosity
-      run: sed -i 's@"VERBOSE"\s*:\s*False@"VERBOSE":${{ inputs.verbose_output }}@g' ${{ inputs.config_path }}/t_config.py
-      shell: bash
-    - name: Set log.php test to run or not
-      run: sed -i 's@"LOG"\s*:\s*True@"LOG":${{ inputs.with_log }}@g'                ${{ inputs.config_path }}/t_config.py
-      shell: bash
-    - name: Set register.php test to run or not
-      run: sed -i 's@"REGISTER"\s*:\s*True@"REGISTER":${{ inputs.with_register }}@g' ${{ inputs.config_path }}/t_config.py
-      shell: bash
-    - name: Set Remote URL
-      run: sed -i 's@"address_placeholder"@"${{ inputs.remote_url }}"@g'             ${{ inputs.config_path }}/t_config.py
-      shell: bash
-    - name: Set App Branch
-      run: sed -i 's@"branch_placeholder"@"${{ inputs.app_branch }}"@g'              ${{ inputs.config_path }}/t_config.py
-      shell: bash
+      run: cp ${{ inputs.config_path }}/phpunit.xml.template ./phpunit.xml
+      shell: ${{ inputs.shell }}
+    - name: Set Endpoint Location
+      run: sed -i 's@PLACEHOLDER_URL@${{inputs.endpoint}}@g' ./phpunit.xml
+      shell: ${{ inputs.shell }}

@@ -1,4 +1,7 @@
 config.php
+phpunit.xml
 .vscode
+vendor/
+*.cache
 
 **/__pycache__

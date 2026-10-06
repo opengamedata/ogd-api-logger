@@ -307,15 +307,16 @@
          ")";
       }
 
-      function AsBigQuery() : array
+      function AsBigQuery($conn) : array
       {
          return [
             "session_id"           => $this->session_id,
             "user_id"              => $this->user_id,
             "user_data"            => $this->user_data,
-            "client_time"          => $this->client_time,
+            "client_time"          => $conn->timestamp($this->client_time),
             // "client_time_ms" => $this->client_time_ms,
             "client_offset"        => $this->client_offset,
+            "server_time"          => $conn->timestamp(new DateTimeImmutable()),
             "event_name"           => $this->event_name,
             "event_data"           => $this->event_data,
             "event_source"         => $this::$event_source,
@@ -326,7 +327,8 @@
             "log_version"          => $this->log_version,
             "event_sequence_index" => $this->event_sequence_index,
             "host"                 => $this->host,
-            "remote_addr"          => $this->remote_addr
+            "remote_addr"          => $this->remote_addr,
+            "http_user_agent"      => $this->http_user_agent
          ];
       }
    }

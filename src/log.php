@@ -24,7 +24,7 @@ switch ($db_type) {
          error_log("Made connection to BQ project, containing dataset ".$test_datasets->current()->id()."\n");
       }
       else {
-         throw new Exception("Didn't find any datasets when trying to connect to BigQuery.");
+         throw new Exception("Didn't find any datasets when trying to connect to BigQuery. The project ID is ".$conn->projectId());
       }
       break;
    case "mysql":

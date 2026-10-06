@@ -19,7 +19,13 @@ switch ($db_type) {
    case "bigquery":
       // $conn = new BigQueryClient([ 'projectId' => $db ]);
       $conn = new BigQueryClient();
-      error_log("Dummy connect to BQ\n");
+      $test_datasets = $conn->datasets(["resultLimit" => 1]);
+      if ($test_datasets->current()) {
+         error_log("Made connection to BQ project, containing dataset ".$test_datasets->current()->id()."\n");
+      }
+      else {
+         throw new Exception("Didn't find any datasets when trying to connect to BigQuery.");
+      }
       break;
    case "mysql":
       // $conn = mysqli_connect($servername, $username, $password, $db);

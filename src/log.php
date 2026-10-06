@@ -39,7 +39,7 @@ $app_id = "NO APP ID";
 
 if (isset($_REQUEST["app_id"])) {
   $app_id = strtoupper($_REQUEST["app_id"]);
-  if (in_array($APP_ID, $LOGGER_GAMES)) {
+  if (in_array($app_id, $LOGGER_GAMES)) {
     $request_schema = $LOGGER_SCHEMA;
   }
 }

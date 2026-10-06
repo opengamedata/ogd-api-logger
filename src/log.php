@@ -69,8 +69,8 @@ if (count($data) > 0) {
    switch ($db_type) {
       case "bigquery":
          $arr = $query->AsBigQuery();
-         // $result = BigQueryUtils::Insert($conn, $app_id, $arr);
-         $result = "Dummy insert of ".count($arr)." events into BQ.";
+         $result = BigQueryUtils::Insert($conn, $app_id, $arr);
+         // $result = "Dummy insert of ".count($arr)." events into BQ.";
          error_log("Sending bigquery response: ".$result);
          break;
       case "mysql":

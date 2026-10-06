@@ -36,7 +36,7 @@ class BigQueryUtils {
          error_log($msg);
          die("FAIL: ".$msg);
       }
-      return "Inserted ".count($query)." rows.";
+      return "Inserted ".count($query)." rows to BigQuery.";
    }
 }
 

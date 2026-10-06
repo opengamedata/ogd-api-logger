@@ -25,10 +25,10 @@ jobs:
         id: get_branch
         uses: opengamedata/actions-get-branch@v1.2
         with:
-          n: 19
+          n: 17
           remove: '\.'
           with_hash: 'true'
-          hash_n: 4
+          hash_n: 2
 
   build:
     name: Build Docker Image

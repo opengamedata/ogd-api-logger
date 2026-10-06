@@ -17,7 +17,7 @@ $LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "C
 # 1. Make the db connection before we go to the trouble of looking at the data.
 switch ($db_type) {
    case "bigquery":
-      // $conn = new BigQueryClient([ 'projectId' => $db ]);
+      $conn = new BigQueryClient([ 'projectId' => $db ]);
       error_log("Dummy connect to BQ\n");
       break;
    case "mysql":

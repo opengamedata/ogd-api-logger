@@ -25,7 +25,8 @@ class BigQueryUtils {
    ];
 
    static function Insert($conn, string $app_id, array $query) : string {
-      $dataset = $conn->dataset(strtolower($app_id));
+      // $dataset = $conn->dataset(strtolower($app_id));
+      $dataset = $conn->dataset("migration_test");
       $table_name = "{$dataset->id()}_daily_".date("Ymd");
       $table = $dataset->table($table_name);
       $result = $table->insertRows($query, autoCreate:true, tableMetadata:BigQueryUtils::STANDARD_METADATA_0_1);

@@ -3,6 +3,27 @@
 
    final class LogRemoteCase extends TestCase
    {
+      static array $headers = [
+         "Accept" => "*/*",
+         "Accept-Language" => "en-US,en;q=0.5",
+         "Accept-Encoding" => "gzip, deflate, br, zstd",
+         "Content-Type" => "application/x-www-form-urlencoded",
+         "DNT" => "1",
+         "Connection" => "keep-alive",
+         "Sec-Fetch-Dest" => "empty",
+         "Sec-Fetch-Mode" => "cors",
+         "Sec-Fetch-Site" => "cross-site"
+      ];
+
+      /* TODO : check into whether we should be inserting escape characters,
+                as in what we had in old Python-based tests:
+                ```python
+                "game_state" : json.dumps({
+                   "level" : 1
+                }).replace('"', '\\\\"'),
+                ```
+      */
+
       public function testOGDLegacyCall(): void
       {
          $url_params = [
@@ -38,6 +59,7 @@
          $opts = [
             CURLOPT_URL => $test_url,
             CURLOPT_USERAGENT => "fake agent/1.0",
+            CURLOPT_HTTPHEADER => LogRemoteCase::$headers,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
             CURLOPT_POSTREDIR => CURL_REDIR_POST_302,
@@ -58,6 +80,7 @@
             "Test Fail: Unexpected result '".$response."' from call to ".$test_url
          );
       }
+
       public function testOGDStandardCall(): void
       {
          $url_params = [
@@ -103,6 +126,7 @@
          $opts = [
             CURLOPT_URL => $test_url,
             CURLOPT_USERAGENT => "fake agent/1.0",
+            CURLOPT_HTTPHEADER => LogRemoteCase::$headers,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
             CURLOPT_POSTREDIR => CURL_REDIR_POST_302,

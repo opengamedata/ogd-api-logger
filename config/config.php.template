@@ -1,10 +1,10 @@
 <?php
-$loggerversion = "version placeholder";
 
 $db_type = "db type placeholder";
-
 $servername = "127.0.0.1";
 $db = "db placeholder";
+
+$loggerversion = "version placeholder";
 
 $monitorEnabled = true;
 $monitorURL = "monitor placeholder";

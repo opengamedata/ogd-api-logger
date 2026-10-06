@@ -24,7 +24,7 @@ switch ($db_type) {
          error_log("Made connection to BQ project, containing dataset ".$test_datasets->current()->id()."\n");
       }
       else {
-         throw new Exception("Didn't find any datasets when trying to connect to BigQuery. The project ID is ".$conn->projectId());
+         throw new Exception("Didn't find any datasets when trying to connect to BigQuery.");
       }
       break;
    case "mysql":
@@ -68,7 +68,7 @@ if (count($data) > 0) {
 
    switch ($db_type) {
       case "bigquery":
-         $arr = $query->AsBigQuery();
+         $arr = $query->AsBigQuery($conn);
          $result = BigQueryUtils::Insert($conn, $app_id, $arr);
          // $result = "Dummy insert of ".count($arr)." events into BQ.";
          error_log("Sending bigquery response: ".$result);

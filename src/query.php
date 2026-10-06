@@ -52,8 +52,8 @@
          $this->events = array_map($lambda, $data);
       }
 
-      function AsBigQuery() {
-         $lambda = fn(Event $next_event) => [ 'data' => $next_event->AsBigQuery() ];
+      function AsBigQuery($conn) {
+         $lambda = fn(Event $next_event) => [ 'data' => $next_event->AsBigQuery($conn) ];
          return array_map($lambda, $this->events);
       }
 

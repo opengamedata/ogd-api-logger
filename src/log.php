@@ -15,6 +15,7 @@ require 'monitor.php';
 $LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
                      "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND");
 # 1. Make the db connection before we go to the trouble of looking at the data.
+$conn = null;
 switch ($db_type) {
    case "bigquery":
       // $conn = new BigQueryClient([ 'projectId' => $db ]);
@@ -36,13 +37,14 @@ switch ($db_type) {
 $schema_version = $_REQUEST["schema_version"] ?? "N/A";
 switch ($schema_version) {
    case "1.0-alpha":
-      $request_schema = $OGD_SCHEMA_10;
+      $request_schema = OGD_SCHEMA_10;
       $app_id = strtoupper($_REQUEST["game_id"]) ?? "NO GAME ID";
+      break;
    default:
-      $request_schema = $OGD_SCHEMA_01;
+      $request_schema = OGD_SCHEMA_01;
       $app_id = strtoupper($_REQUEST["app_id"]) ?? "NO GAME ID";
       if (in_array($app_id, $LOGGER_GAMES)) {
-         $request_schema = $LOGGER_SCHEMA;
+         $request_schema = LOGGER_SCHEMA;
       }
       break;
 }
@@ -73,7 +75,7 @@ if (count($data) > 0) {
          error_log("Sending bigquery response: ".$result);
          break;
       case "mysql":
-         $query_string = $query->AsMySQL($db_type, $app_id, $conn);
+         $query_string = $query->AsMySQL($conn);
          // $result = MySQLUtils::Insert($conn, $app_id, $query_string);
          $result = "Dummy run of \n".$query_string."\n in MySQL.";
          error_log("Sending mysql response: ".$result);

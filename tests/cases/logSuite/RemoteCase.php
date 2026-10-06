@@ -15,6 +15,15 @@
          "Sec-Fetch-Site" => "cross-site"
       ];
 
+      /* TODO : check into whether we should be inserting escape characters,
+                as in what we had in old Python-based tests:
+                ```python
+                "game_state" : json.dumps({
+                   "level" : 1
+                }).replace('"', '\\\\"'),
+                ```
+      */
+
       public function testOGDLegacyCall(): void
       {
          $url_params = [

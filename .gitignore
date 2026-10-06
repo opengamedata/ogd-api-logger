@@ -1,4 +1,4 @@
 config.php
-tests/config/t_config.py
+.vscode
 
 **/__pycache__

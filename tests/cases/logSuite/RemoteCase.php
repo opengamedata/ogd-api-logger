@@ -3,6 +3,17 @@
 
    final class LogRemoteCase extends TestCase
    {
+      static array $headers = [
+         "Accept" => "*/*",
+         "Accept-Language" => "en-US,en;q=0.5",
+         "Accept-Encoding" => "gzip, deflate, br, zstd",
+         "Content-Type" => "application/x-www-form-urlencoded",
+         "DNT" => "1",
+         "Connection" => "keep-alive",
+         "Sec-Fetch-Dest" => "empty",
+         "Sec-Fetch-Mode" => "cors",
+         "Sec-Fetch-Site" => "cross-site"
+      ];
       public function testBasicCall(): void
       {
          $url_params = [
@@ -37,6 +48,7 @@
          $opts = [
             CURLOPT_URL => $test_url,
             CURLOPT_USERAGENT => "fake agent/1.0",
+            CURLOPT_HTTPHEADER => LogRemoteCase::$headers,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
             CURLOPT_POSTREDIR => CURL_REDIR_POST_302,

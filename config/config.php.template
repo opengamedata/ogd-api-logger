@@ -1,5 +1,4 @@
 <?php
-header("Access-Control-Allow-Origin: *");
 $loggerversion = "version placeholder";
 
 $db_type = "db type placeholder";

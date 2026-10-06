@@ -1,9 +1,0 @@
-settings = {
-    "VERBOSE" : False,
-    "ENABLED" : {
-        "LOG":True,
-        "REGISTER":True,
-    },
-    "REMOTE_ADDRESS" : "address_placeholder",
-    "APP_BRANCH" : "branch_placeholder"
-}

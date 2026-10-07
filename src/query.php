@@ -74,7 +74,7 @@
       private string $session_id;
       private ?string $user_id;
       private ?string $user_data;
-      private string $client_time;
+      private string $client_time; // TODO : store times as timestamps, since BQ will want them that way.
       private string $client_time_ms;
       private ?string $client_offset;
       private string $event_name;
@@ -313,7 +313,7 @@
             "session_id"           => $this->session_id,
             "user_id"              => $this->user_id,
             "user_data"            => $this->user_data,
-            "client_time"          => $conn->timestamp($this->client_time),
+            "client_time"          => $conn->timestamp(new DateTimeImmutable($this->client_time)),
             // "client_time_ms" => $this->client_time_ms,
             "client_offset"        => $this->client_offset,
             "server_time"          => $conn->timestamp(new DateTimeImmutable()),

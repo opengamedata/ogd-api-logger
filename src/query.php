@@ -85,6 +85,7 @@
       # Category 2 Data: Sequencing
       // TODO : sort out timestamp stuff, temporarily assuming client_time is our timestamp
       private  string $timestamp;
+      private  ?string $authoritative_timestamp;
       private  string $game_time;
       private static string $server_time = "CURRENT_TIMESTAMP()"; // DEPRECATED
       private  int $session_sequence_index; // TODO : this is listed as non-required in standard, that's probably wrong.
@@ -112,7 +113,7 @@
       // Nothing here for now, in discussion for final standard
 
       function __construct(string $game_id,        ?string $instance_id,    ?string $player_id,     string $session_id,
-                           string $timestamp,      string $game_time,
+                           string $timestamp,      ?string $auth_timestamp,  string $game_time,
                            string $sequence_index, ?string $game_segment,
                            string $game_version,   string $schema_version,  string $log_version,
                            ?string $condition,     ?string $game_config,    ?string $platform,
@@ -126,6 +127,7 @@
          $this->session_id = $session_id;
 
          $this->timestamp = $timestamp;
+         $this->authoritative_timestamp = $auth_timestamp;
          $this->game_time = $game_time;
          $this->session_sequence_index = $sequence_index;
 
@@ -286,7 +288,7 @@
 
          return new Event(
             game_id:$game_id,                       instance_id:$instance_id,             player_id:$player_id,     session_id:$session_id,
-            timestamp:$timestamp,                   game_time:$game_time,
+            timestamp:$timestamp,                   auth_timestamp:$auth_timestamp,       game_time:$game_time,
             sequence_index:$session_sequence_index, game_segment:$segment,
             game_version:$game_version,             schema_version:$schema_version,       log_version:$log_version,
             condition:$condition,                   game_config:$game_config,             platform:$platform,
@@ -408,13 +410,13 @@
 
          $timestamp = $client_time."+".$client_offset;
          return new Event(
-            game_id:$game_id,           instance_id:null,               player_id:$player_id,     session_id:$session_id,
-            timestamp:$timestamp,       game_time:$game_time,           sequence_index:$session_sequence_index,
-            game_segment:null,
-            game_version:$game_version, schema_version:$schema_version, log_version:$log_version,
-            condition:$condition,       game_config:null,               platform:null,
-            game_state:$game_state,     player_history:$player_history,
-            event_id:$event_id,         event_name:$event_name,         event_data:$event_data,     
+            game_id:$game_id,                       instance_id:null,               player_id:$player_id,     session_id:$session_id,
+            timestamp:$timestamp,                   auth_timestamp:null,           game_time:$game_time,
+            sequence_index:$session_sequence_index, game_segment:null,
+            game_version:$game_version,             schema_version:$schema_version, log_version:$log_version,
+            condition:$condition,                   game_config:null,               platform:null,
+            game_state:$game_state,                 player_history:$player_history,
+            event_id:$event_id,                     event_name:$event_name,         event_data:$event_data,     
          );
       }
 
@@ -499,13 +501,13 @@
          $event_data = $datum->event_data_complex ?? "{}";
 
          return new Event(
-            game_id:$game_id,           instance_id:null,               player_id:$player_id,     session_id:$session_id,
-            timestamp:$client_time,     game_time:$game_time,           sequence_index:$session_sequence_index,
-            game_segment:$segment,
-            game_version:$game_version, schema_version:$schema_version, log_version:$log_version,
-            condition:$condition,       game_config:null,               platform:null,
-            game_state:$game_state,     player_history:$player_history,
-            event_id:$event_id,         event_name:$event_name,         event_data:$event_data,     
+            game_id:$game_id,                       instance_id:null,               player_id:$player_id,     session_id:$session_id,
+            timestamp:$client_time,                 game_time:$game_time,           auth_timestamp:null,
+            sequence_index:$session_sequence_index, game_segment:$segment,
+            game_version:$game_version,             schema_version:$schema_version, log_version:$log_version,
+            condition:$condition,                   game_config:null,               platform:null,
+            game_state:$game_state,                 player_history:$player_history,
+            event_id:$event_id,                     event_name:$event_name,         event_data:$event_data,     
          );
       }
 

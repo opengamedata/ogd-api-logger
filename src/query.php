@@ -326,7 +326,7 @@
             "app_branch"           => $this->app_branch,
             "log_version"          => $this->log_version,
             "event_sequence_index" => $this->event_sequence_index,
-            "host"                 => $this->host,
+            // "host"                 => $this->host,
             "remote_addr"          => $this->remote_addr,
             "http_user_agent"      => $this->http_user_agent
          ];

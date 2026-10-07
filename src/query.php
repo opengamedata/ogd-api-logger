@@ -287,9 +287,9 @@
          return new Event(
             game_id:$game_id,                       instance_id:$instance_id,             player_id:$player_id,     session_id:$session_id,
             timestamp:$timestamp,                   game_time:$game_time,
-            sequence_index:$session_sequence_index, game_segment:null,
+            sequence_index:$session_sequence_index, game_segment:$segment,
             game_version:$game_version,             schema_version:$schema_version,       log_version:$log_version,
-            condition:$condition,                   game_config:null,                     platform:null,
+            condition:$condition,                   game_config:$game_config,             platform:$platform,
             game_state:$game_state,                 player_history:$player_history,
             event_id:$event_id,                     event_name:$event_name,               event_data:$event_data,     
          );

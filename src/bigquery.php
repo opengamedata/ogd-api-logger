@@ -41,7 +41,7 @@ class BigQueryUtils {
          error_log($msg);
          die("FAIL: ".$msg);
       }
-      return "Inserted ".count($query)." rows to BigQuery.";
+      return "Inserted ".count($query)." rows to BigQuery in ".$dataset->id().".".$table_name.".";
    }
 }
 

@@ -9,7 +9,7 @@
             "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
             "user_id" => "TestUser",
             "user_data" => "{}",
-            "app_version" => "1.0.0-testbed",
+            "app_version" => "1",
             "app_branch" => "testing-branch",
             "log_version" => "1"
          ];

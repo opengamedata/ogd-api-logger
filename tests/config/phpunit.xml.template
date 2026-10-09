@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/13.3/phpunit.xsd"
+         bootstrap="vendor/autoload.php">
+  <testsuites>
+    <testsuite name="hello">
+      <directory suffix="Case.php">tests/cases/helloSuite</directory>
+    </testsuite>
+    <testsuite name="log">
+      <directory suffix="Case.php">tests/cases/logSuite</directory>
+    </testsuite>
+
+    <!-- <testsuite name="query">
+      <directory suffix="Case.php">tests/cases/querySuite</directory>
+    </testsuite> -->
+
+  </testsuites>
+  <php>
+    <env name="base_url" value="PLACEHOLDER_URL"/>
+  </php>
+</phpunit>

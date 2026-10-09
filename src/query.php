@@ -341,7 +341,7 @@
             $client_time = $datum->client_time;
          }
 
-         $game_time = "00:00:00.0000"; // Don't have a great default here
+         $game_time = 0.0; // Don't have a great default here
 
          $client_offset = "00:00";
          if(isset($datum->client_offset)) {
@@ -443,7 +443,7 @@
             $client_time = $datum->client_time."+00:00";
          }
 
-         $game_time = "00:00:00.0000"; // Don't have a great default here
+         $game_time = 0.0; // Don't have a great default here
 
          $session_n      = -1;
          if(isset($datum->session_n)) {

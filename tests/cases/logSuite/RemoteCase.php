@@ -53,7 +53,7 @@
             "Test Fail: Unexpected response code '".$code."' from call to ".$test_url
          );
          $this->assertSame(
-            $response, "SUCCESS: Insertd 2 rows to BigQuery in migration_test.migration_test_daily_".(new DateTime())->format("Ymd").".",
+            $response, "SUCCESS: Inserted 2 rows to BigQuery in migration_test.migration_test_daily_".(new DateTime())->format("Ymd").".",
             "Test Fail: Unexpected result '".$response."' from call to ".$test_url
          );
       }

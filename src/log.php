@@ -7,6 +7,7 @@ require 'vendor/autoload.php';
 use Google\Cloud\BigQuery\BigQueryClient;
 # Local imports
 require 'config.php';
+require 'parsers.php';
 require 'bigquery.php';
 require 'mysql.php';
 require 'query.php';
@@ -14,6 +15,8 @@ require 'monitor.php';
 
 $LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
                      "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND");
+$RESPONSE_BASE = "ogd-logger ".($loggerVersion ?? "")." ";
+
 # 1. Make the db connection before we go to the trouble of looking at the data.
 switch ($db_type) {
    case "bigquery":
@@ -21,7 +24,7 @@ switch ($db_type) {
       $conn = new BigQueryClient();
       $test_datasets = $conn->datasets(["resultLimit" => 1]);
       if ($test_datasets->current()) {
-         error_log("Made connection to BQ project, containing dataset ".$test_datasets->current()->id()."\n");
+         error_log($RESPONSE_BASE."Made connection to BQ project, containing dataset ".$test_datasets->current()->id()."\n");
       }
       else {
          throw new Exception("Didn't find any datasets when trying to connect to BigQuery.");
@@ -32,10 +35,10 @@ switch ($db_type) {
       // if (!$conn) {
       //    die("FAIL: Could not connect to the database.\nError message: " . mysqli_connect_error());
       // }
-      die("FAIL: Logging with MySQL is currently not supported!");
+      die($RESPONSE_BASE."FAIL: Logging with MySQL is currently not supported!");
       break;
    default:
-      die("FAIL: API software was misconfigured, invalid db_type setting!");
+      die($RESPONSE_BASE."FAIL: API software was misconfigured, invalid db_type setting!");
       break;
 }
 
@@ -59,11 +62,7 @@ else {
 * @var data
 */
 $data = json_decode(base64_decode($_POST["data"]));
-if (!is_array($data)) {
-   $d = $data;
-   $data = array();
-   array_push($data, $d);
-}
+$data = dataToArray($data);
 
 # 4. Generate and send query.
 if (count($data) > 0) {
@@ -78,19 +77,17 @@ if (count($data) > 0) {
          $query_string = $query->AsMySQL($db_type, $app_id, $conn);
          // $result = MySQLUtils::Insert($conn, $app_id, $query_string);
          $result = "Dummy run of \n".$query_string."\n in MySQL.";
-         error_log("Sending mysql response: ".$result);
+         error_log($RESPONSE_BASE."Sending mysql response: ".$result);
          break;
       default:
-         die("FAIL: API software was misconfigured, invalid db_type setting!");
+         die($RESPONSE_BASE."FAIL: API software was misconfigured, invalid db_type setting!");
          break;
    }
 } else {
-   die("FAIL: Could not log event(s), no valid data received!");
+   die($RESPONSE_BASE."FAIL: Could not log event(s), no valid data received!");
 }
 
 # 5. If successful, forward data to monitor and return.
 // sendToMonitor($_REQUEST, $data[0]);
-die("SUCCESS: " . $result);
-
-die("Logger endpoint reached, version=".$loggerversion);
+die($RESPONSE_BASE."SUCCESS: " . $result);
 ?>

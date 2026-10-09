@@ -3,6 +3,8 @@
  * Module for forwarding data to the monitor service.
  */
 function sendToMonitor($paramArray, $bodyObject) {
+   global $monitorEnabled;
+
    if ($monitorEnabled) {
       $loggerData = combineParamsAndBody($paramArray, $bodyObject);
       // $start_time_milliseconds = round(microtime(true) * 1000);
@@ -22,9 +24,10 @@ function sendToMonitor($paramArray, $bodyObject) {
 // send json package to flask app
 function transmitToMonitor($jsonPackage)
 {
-   include('config.php');
+    global $monitorURL, $monitorTimeout;
+    global $loggerVersion;
 
-   $jsonPackage["ogd_logger_version"] = $loggerversion;
+   $jsonPackage["ogd_logger_version"] = $loggerVersion;
    $ch = curl_init('https://'.$monitorURL.'/log/event');
    $headers = array(
       'Content-Type: application/json',

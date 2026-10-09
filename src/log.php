@@ -70,8 +70,6 @@ if (count($data) > 0) {
       case "bigquery":
          $arr = $query->AsBigQuery($conn);
          $result = BigQueryUtils::Insert($conn, $app_id, $arr);
-         // $result = "Dummy insert of ".count($arr)." events into BQ.";
-         error_log("Sending bigquery response: ".$result);
          break;
       case "mysql":
          $query_string = $query->AsMySQL($db_type, $app_id, $conn);

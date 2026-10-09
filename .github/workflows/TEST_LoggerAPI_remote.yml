@@ -20,7 +20,7 @@ jobs:
     name: Check for Existing Deploy
     runs-on: ubuntu-24.04
     concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-file
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-logger
       cancel-in-progress: false
 
     steps:

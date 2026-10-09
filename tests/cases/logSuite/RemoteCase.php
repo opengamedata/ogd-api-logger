@@ -27,11 +27,11 @@
       public function testOGDLegacyCall(): void
       {
          $url_params = [
-            "app_id" => "TEST_GAME",
+            "app_id" => "migration_test",
             "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
             "user_id" => "TestUser",
             "user_data" => "{}",
-            "app_version" => "1.0.0-testbed",
+            "app_version" => "1",
             "app_branch" => "testing-branch",
             "log_version" => "1"
          ];
@@ -76,7 +76,7 @@
             "Test Fail: Unexpected response code '".$code."' from call to ".$test_url
          );
          $this->assertSame(
-            $response, "SUCCESS: Dummy insert of 2 events into BQ.",
+            $response, "SUCCESS: Inserted 2 rows to BigQuery in migration_test.migration_test_daily_".(new DateTime())->format("Ymd").".",
             "Test Fail: Unexpected result '".$response."' from call to ".$test_url
          );
       }
@@ -143,7 +143,7 @@
             "Test Fail: Unexpected response code '".$code."' from call to ".$test_url
          );
          $this->assertSame(
-            $response, "SUCCESS: Dummy insert of 2 events into BQ.",
+            $response, "SUCCESS: Inserted 2 rows to BigQuery in migration_test.migration_test_daily_".(new DateTime())->format("Ymd").".",
             "Test Fail: Unexpected result '".$response."' from call to ".$test_url
          );
       }

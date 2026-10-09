@@ -54,8 +54,8 @@
          $this->events = array_map($lambda, $data);
       }
 
-      function AsBigQuery() {
-         $lambda = fn(Event $next_event) => [ 'data' => $next_event->AsBigQuery() ];
+      function AsBigQuery($conn) {
+         $lambda = fn(Event $next_event) => [ 'data' => $next_event->AsBigQuery($conn) ];
          return array_map($lambda, $this->events);
       }
 
@@ -537,7 +537,7 @@
          ")";
       }
 
-      function AsBigQuery() : array
+      function AsBigQuery($conn) : array
       {
          return [
             "session_id"           => $this->session_id,
@@ -546,6 +546,7 @@
             "client_time"          => $this->timestamp,
             // "client_time_ms" => $this->client_time_ms,
             "client_offset"        => "placeholder offset",
+            "server_time"          => $conn->timestamp(new DateTimeImmutable()),
             "event_name"           => $this->event_name,
             "event_data"           => $this->event_data,
             "event_source"         => Event::$event_source,
@@ -555,8 +556,9 @@
             "app_branch"           => $this->condition,
             "log_version"          => $this->log_version,
             "event_sequence_index" => $this->session_sequence_index,
-            "host"                 => Event::$host,
-            "remote_addr"          => Event::$remote_addr
+            // "host"                 => Event::$host,
+            "remote_addr"          => Event::$remote_addr,
+            "http_user_agent"      => $this->http_user_agent
          ];
       }
    }

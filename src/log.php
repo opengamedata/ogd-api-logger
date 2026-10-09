@@ -19,30 +19,43 @@ $conn = null;
 switch ($db_type) {
    case "bigquery":
       // $conn = new BigQueryClient([ 'projectId' => $db ]);
-      error_log("Dummy connect to BQ\n");
+      $conn = new BigQueryClient();
+      $test_datasets = $conn->datasets(["resultLimit" => 1]);
+      if ($test_datasets->current()) {
+         error_log("Made connection to BQ project, containing dataset ".$test_datasets->current()->id()."\n");
+      }
+      else {
+         throw new Exception("Didn't find any datasets when trying to connect to BigQuery.");
+      }
       break;
    case "mysql":
       // $conn = mysqli_connect($servername, $username, $password, $db);
       // if (!$conn) {
       //    die("FAIL: Could not connect to the database.\nError message: " . mysqli_connect_error());
       // }
-      error_log("Dummy connect to MySQL\n");
+      die("FAIL: Logging with MySQL is currently not supported!");
       break;
    default:
       die("FAIL: API software was misconfigured, invalid db_type setting!");
       break;
 }
 
+if (isset($_REQUEST["app_id"])) {
+  $app_id = strtoupper($_REQUEST["app_id"]);
+}
+else {
+   die("FAIL: Request is missing app_id!");
+}
+
 # 2. Figure out what the input schema looks like, defaulting to v0.1 OGD schema.
+
 $schema_version = $_REQUEST["schema_version"] ?? "N/A";
 switch ($schema_version) {
    case "1.0-alpha":
       $request_schema = OGD_SCHEMA_10;
-      $app_id = strtoupper($_REQUEST["game_id"]) ?? "NO GAME ID";
       break;
    default:
       $request_schema = OGD_SCHEMA_01;
-      $app_id = strtoupper($_REQUEST["app_id"]) ?? "NO GAME ID";
       if (in_array($app_id, $LOGGER_GAMES)) {
          $request_schema = LOGGER_SCHEMA;
       }
@@ -69,10 +82,8 @@ if (count($data) > 0) {
 
    switch ($db_type) {
       case "bigquery":
-         $arr = $query->AsBigQuery();
-         // $result = BigQueryUtils::Insert($conn, $app_id, $arr);
-         $result = "Dummy insert of ".count($arr)." events into BQ.";
-         error_log("Sending bigquery response: ".$result);
+         $arr = $query->AsBigQuery($conn);
+         $result = BigQueryUtils::Insert($conn, $app_id, $arr);
          break;
       case "mysql":
          $query_string = $query->AsMySQL($conn);

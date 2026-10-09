@@ -49,6 +49,9 @@ if (isset($_REQUEST["app_id"])) {
     $request_schema = $LOGGER_SCHEMA;
   }
 }
+else {
+   die("FAIL: Request is missing app_id!");
+}
 
 # 3. Generate the query data from raw input data.
 /**

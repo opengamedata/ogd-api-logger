@@ -191,13 +191,13 @@
          # Category 2 Data: Sequencing
 
          $timestamp = date("Y-m-d H:i:s\\T");
-         if(isset($datum->timestamp) && (DateTimeImmutable::createFromFormat('Y-m-d\Th:i:s.uT', $datum->timestamp) !== false))
+         if(isset($datum->timestamp) && (DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.uT', $datum->timestamp) !== false))
          {
             $timestamp = $datum->timestamp;
          }
 
          $auth_timestamp = date("Y-m-d H:i:s\\T");
-         if(isset($datum->authoritative_timestamp) && (DateTimeImmutable::createFromFormat('Y-m-d\Th:i:s.uT', $datum->authoritative_timestamp) !== false))
+         if(isset($datum->authoritative_timestamp) && (DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.uT', $datum->authoritative_timestamp) !== false))
          {
             $auth_timestamp = $datum->authoritative_timestamp;
          }

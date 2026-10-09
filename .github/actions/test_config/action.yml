@@ -1,0 +1,28 @@
+name: "Configure phpunit.xml file for testing a deploy"
+author: Luke Swanson
+description: "Given a set of appropriate inputs, this action prepares the phpunit.xml file for running the API testbed."
+branding:
+  icon: 'clipboard'
+  color: 'blue'
+inputs:
+  endpoint:
+    description: "The external endpoint where the app is deployed"
+    required: true
+    default: 'https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/app.wsgi'
+  config_path:
+    description: "Local path to test config folder"
+    required: false
+    default: 'tests/config'
+  shell:
+    description: "The shell to use to execute the steps"
+    required: false
+    default: bash
+runs:
+  using: "composite"
+  steps:
+    - name: Set up config
+      run: cp ${{ inputs.config_path }}/phpunit.xml.template ./phpunit.xml
+      shell: ${{ inputs.shell }}
+    - name: Set Endpoint Location
+      run: sed -i 's@PLACEHOLDER_URL@${{inputs.endpoint}}@g' ./phpunit.xml
+      shell: ${{ inputs.shell }}

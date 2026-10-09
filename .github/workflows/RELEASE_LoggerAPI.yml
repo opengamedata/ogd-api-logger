@@ -1,0 +1,67 @@
+# Workflow to build and deploy designer dashboard to server.
+name: Release Script - LoggerAPI
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'release' && github.ref || 'Manual Run') }}
+on:
+  #create:
+  #  tags:
+  #    - '*'
+  workflow_dispatch:
+  release:
+    types: [released, prereleased]
+
+jobs:
+
+  # *** 1. Pre-Deploy Testing ***
+
+  # *** 2. Deploy to GCP ***
+
+  build:
+    name: Build Docker Image for Deploy
+    uses: ./.github/workflows/BUILD_LoggerAPI.yml
+    with:
+      image_tag:  ${{ github.ref_name }}
+    secrets:
+      image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
+
+  get_branch:
+    name: Get Branch
+    needs: [build]
+    runs-on: ubuntu-24.04
+    outputs:
+      branch_tag: ${{ steps.get-branch.outputs.branch-name }}
+    steps:
+    - name: Get Branch
+      id: get-branch
+      uses: opengamedata/actions-get-branch@v1.1
+      with:
+        n: 20
+        remove: '\.'
+
+  deploy:
+    name: Release Deploy to GCP
+    if: github.event.action == 'released'
+    needs: [build, get_branch]
+    uses: ./.github/workflows/DEPLOY_LoggerAPI.yml
+    with:
+      service_name: "ogd-api-logger"
+      image_name:   ${{ needs.build.outputs.image_name }}
+      revision_tag: ${{ case(github.event.action == 'released', 'latest', needs.get_branch.outputs.branch_tag) }}
+      remove:       false
+      as_latest:    ${{ case(github.event.action == 'released', true, false) }}
+    secrets: inherit
+
+  # *** 3. Remote Testbeds ***
+
+  testbed_helloapi_remote:
+    name: HelloAPI Remote Testbeds
+    needs: [deploy]
+    uses: ./.github/workflows/TEST_HelloAPI_remote.yml
+    with:
+      base_url: ${{ needs.deploy.outputs.url }}
+
+  testbed_loggerapi_remote:
+    name: LoggerAPI Remote Testbeds
+    needs: [deploy]
+    uses: ./.github/workflows/TEST_LoggerAPI_remote.yml
+    with:
+      base_url: ${{ needs.deploy.outputs.url }}

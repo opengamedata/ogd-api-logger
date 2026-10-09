@@ -1,1 +1,5 @@
 config.php
+phpunit.xml
+.vscode
+vendor/
+*.cache

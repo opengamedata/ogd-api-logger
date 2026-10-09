@@ -2,45 +2,92 @@
 header("Access-Control-Allow-Headers: Origin, Authorization, X-Requested-With, Content-Type, Accept");
 header("Access-Control-Allow-Origin: *");
 
-include('config.php');
-include('parser.php');
-include('query_generator.php');
-include('monitor.php');
+# 3rd-party imports
+require 'vendor/autoload.php';
+use Google\Cloud\BigQuery\BigQueryClient;
+# Local imports
+require 'config.php';
+require 'parsers.php';
+require 'bigquery.php';
+require 'mysql.php';
+require 'query.php';
+require 'monitor.php';
 
+$LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
+                     "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND");
 $RESPONSE_BASE = "ogd-logger ".($loggerVersion ?? "")." ";
 
-# 1. Figure out what the input schema looks like, defaulting to full OGD schema.
-$APP_ID = $_REQUEST["app_id"] ?? "NO APP ID";
-$REQUEST_SCHEMA = schemaFromAppID($APP_ID);
+# 1. Make the db connection before we go to the trouble of looking at the data.
+switch ($db_type) {
+   case "bigquery":
+      // $conn = new BigQueryClient([ 'projectId' => $db ]);
+      $conn = new BigQueryClient();
+      $test_datasets = $conn->datasets(["resultLimit" => 1]);
+      if ($test_datasets->current()) {
+         error_log($RESPONSE_BASE."Made connection to BQ project, containing dataset ".$test_datasets->current()->id()."\n");
+      }
+      else {
+         throw new Exception("Didn't find any datasets when trying to connect to BigQuery.");
+      }
+      break;
+   case "mysql":
+      // $conn = mysqli_connect($servername, $username, $password, $db);
+      // if (!$conn) {
+      //    die("FAIL: Could not connect to the database.\nError message: " . mysqli_connect_error());
+      // }
+      die($RESPONSE_BASE."FAIL: Logging with MySQL is currently not supported!");
+      break;
+   default:
+      die($RESPONSE_BASE."FAIL: API software was misconfigured, invalid db_type setting!");
+      break;
+}
 
-# 2. Make the db connection before we go to the trouble of generating query.
-$conn = mysqli_connect($servername, $username, $password, $db);
-if (!$conn) {
-  die($RESPONSE_BASE."FAILURE: Could not connect to the database.\n   Error message: " . mysqli_connect_error());
+# 2. Figure out what the input schema looks like, defaulting to full OGD schema.
+$request_schema = $OGD_SCHEMA;
+$app_id = "NO APP ID";
+
+if (isset($_REQUEST["app_id"])) {
+  $app_id = strtoupper($_REQUEST["app_id"]);
+  if (in_array($app_id, $LOGGER_GAMES)) {
+    $request_schema = $LOGGER_SCHEMA;
+  }
+}
+else {
+   die("FAIL: Request is missing app_id!");
 }
 
 # 3. Generate the query data from raw input data.
+/**
+ * An array of event data bodies, containing event_name, event_data, and similar columns.
+* @var data
+*/
 $data = json_decode(base64_decode($_POST["data"]));
 $data = dataToArray($data);
 
+# 4. Generate and send query.
 if (count($data) > 0) {
-  # 4. Send the query itself. Log errors if failed.
-  $query = generateQueryString($REQUEST_SCHEMA, $APP_ID, $data, $conn);
-  $result = mysqli_query($conn, $query);
-  if (!$result) {
-    $sql_err = "Query for ".$APP_ID." failed with error: ".mysqli_error($conn);
-    error_log($sql_err);
-    die($RESPONSE_BASE."FAILURE: ".$sql_err);
-  }
-  # 5. Send event to flask monitor after sending to db
-  if ($monitorEnabled) {
-    SendToMonitor($_POST, $data);
-    $end_time_milliseconds = round(microtime(true) * 1000);
-    }
+   $query = new EventQuery($request_schema, $app_id, $data);
+
+   switch ($db_type) {
+      case "bigquery":
+         $arr = $query->AsBigQuery($conn);
+         $result = BigQueryUtils::Insert($conn, $app_id, $arr);
+         break;
+      case "mysql":
+         $query_string = $query->AsMySQL($db_type, $app_id, $conn);
+         // $result = MySQLUtils::Insert($conn, $app_id, $query_string);
+         $result = "Dummy run of \n".$query_string."\n in MySQL.";
+         error_log($RESPONSE_BASE."Sending mysql response: ".$result);
+         break;
+      default:
+         die($RESPONSE_BASE."FAIL: API software was misconfigured, invalid db_type setting!");
+         break;
+   }
 } else {
-  $_msg = "Didn't perform query, data column was empty!";
-  error_log(_msg);
-  die($RESPONSE_BASE."FAILURE: "._msg);
+   die($RESPONSE_BASE."FAIL: Could not log event(s), no valid data received!");
 }
-die($RESPONSE_BASE."SUCCESS: ".$query);
+
+# 5. If successful, forward data to monitor and return.
+// sendToMonitor($_REQUEST, $data[0]);
+die($RESPONSE_BASE."SUCCESS: " . $result);
 ?>

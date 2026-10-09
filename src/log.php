@@ -32,7 +32,7 @@ switch ($db_type) {
       // if (!$conn) {
       //    die("FAIL: Could not connect to the database.\nError message: " . mysqli_connect_error());
       // }
-      error_log("Dummy connect to MySQL\n");
+      die("FAIL: Logging with MySQL is currently not supported!");
       break;
    default:
       die("FAIL: API software was misconfigured, invalid db_type setting!");

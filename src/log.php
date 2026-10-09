@@ -15,6 +15,7 @@ require 'monitor.php';
 $LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
                      "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND");
 # 1. Make the db connection before we go to the trouble of looking at the data.
+$conn = null;
 switch ($db_type) {
    case "bigquery":
       // $conn = new BigQueryClient([ 'projectId' => $db ]);
@@ -39,21 +40,31 @@ switch ($db_type) {
       break;
 }
 
-# 2. Figure out what the input schema looks like, defaulting to full OGD schema.
-$request_schema = $OGD_SCHEMA;
-$app_id = "NO APP ID";
-
 if (isset($_REQUEST["app_id"])) {
   $app_id = strtoupper($_REQUEST["app_id"]);
-  if (in_array($app_id, $LOGGER_GAMES)) {
-    $request_schema = $LOGGER_SCHEMA;
-  }
 }
 else {
    die("FAIL: Request is missing app_id!");
 }
 
-# 3. Generate the query data from raw input data.
+# 2. Figure out what the input schema looks like, defaulting to v0.1 OGD schema.
+
+$schema_version = $_REQUEST["schema_version"] ?? "N/A";
+switch ($schema_version) {
+   case "1.0-alpha":
+      $request_schema = OGD_SCHEMA_10;
+      break;
+   default:
+      $request_schema = OGD_SCHEMA_01;
+      if (in_array($app_id, $LOGGER_GAMES)) {
+         $request_schema = LOGGER_SCHEMA;
+      }
+      break;
+}
+
+
+
+# 3. Parse the query data from raw input data.
 /**
  * An array of event data bodies, containing event_name, event_data, and similar columns.
 * @var data
@@ -75,7 +86,7 @@ if (count($data) > 0) {
          $result = BigQueryUtils::Insert($conn, $app_id, $arr);
          break;
       case "mysql":
-         $query_string = $query->AsMySQL($db_type, $app_id, $conn);
+         $query_string = $query->AsMySQL($conn);
          // $result = MySQLUtils::Insert($conn, $app_id, $query_string);
          $result = "Dummy run of \n".$query_string."\n in MySQL.";
          error_log("Sending mysql response: ".$result);

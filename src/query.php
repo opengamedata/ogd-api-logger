@@ -29,26 +29,26 @@
       ") VALUES";
 
       private array $events;
-      private string $app_id;
+      private string $game_id;
 
-      function __construct($schema, $app_id, $data)
+      function __construct($schema, $game_id, $data)
       {
          $n_rows = count($data);
 
-         $this->app_id = $app_id;
+         $this->game_id = $game_id;
          switch ($schema) {
             case LOGGER_SCHEMA:
-               $lambda = fn($datum) => Event::FromLoggerLegacyFormat($app_id, $datum);
+               $lambda = fn($datum) => Event::FromLoggerLegacyFormat($game_id, $datum);
                break;
             case OGD_SCHEMA_01:
-               $lambda = fn($datum) => Event::FromOGDLegacyFormat($app_id, $datum);
+               $lambda = fn($datum) => Event::FromOGDLegacyFormat($game_id, $datum);
                break;
             case OGD_SCHEMA_10:
-               $lambda = fn($datum) => Event::FromOGDStandardFormat($app_id, $datum);
+               $lambda = fn($datum) => Event::FromOGDStandardFormat($game_id, $datum);
                break;
             default:
                error_log("Got schema name ".$schema." that did not match ".LOGGER_SCHEMA." or ".OGD_SCHEMA_01." or ".OGD_SCHEMA_10.", defaulting to ".OGD_SCHEMA_10);
-               $lambda = fn($datum) => Event::FromOGDStandardFormat($app_id, $datum);
+               $lambda = fn($datum) => Event::FromOGDStandardFormat($game_id, $datum);
                break;
          }
          $this->events = array_map($lambda, $data);
@@ -62,7 +62,7 @@
       function AsMySQL($conn) : string
       {
          $lambda = fn(Event $next_event) => $next_event->AsMySQLQuery($conn);
-         $cols = "INSERT INTO ".$this->app_id." ".EventQuery::OGD_01_COLUMNS;
+         $cols = "INSERT INTO ".$this->game_id." ".EventQuery::OGD_01_COLUMNS;
          $vals = join(",", array_map($lambda, $this->events));
          return $cols.$vals;
       }

@@ -41,10 +41,10 @@ switch ($db_type) {
 }
 
 if (isset($_REQUEST["game_id"])) {
-  $app_id = strtoupper($_REQUEST["game_id"]);
+  $game_id = strtoupper($_REQUEST["game_id"]);
 }
 else if (isset($_REQUEST["app_id"])) {
-  $app_id = strtoupper($_REQUEST["app_id"]);
+  $game_id = strtoupper($_REQUEST["app_id"]);
 }
 else {
    die("FAIL: Request is missing app_id!");
@@ -59,7 +59,7 @@ switch ($schema_version) {
       break;
    default:
       $request_schema = OGD_SCHEMA_01;
-      if (in_array($app_id, $LOGGER_GAMES)) {
+      if (in_array($game_id, $LOGGER_GAMES)) {
          $request_schema = LOGGER_SCHEMA;
       }
       break;
@@ -81,16 +81,16 @@ if (!is_array($data)) {
 
 # 4. Generate and send query.
 if (count($data) > 0) {
-   $query = new EventQuery($request_schema, $app_id, $data);
+   $query = new EventQuery($request_schema, $game_id, $data);
 
    switch ($db_type) {
       case "bigquery":
          $arr = $query->AsBigQuery($conn);
-         $result = BigQueryUtils::Insert($conn, $app_id, $arr);
+         $result = BigQueryUtils::Insert($conn, $game_id, $arr);
          break;
       case "mysql":
          $query_string = $query->AsMySQL($conn);
-         // $result = MySQLUtils::Insert($conn, $app_id, $query_string);
+         // $result = MySQLUtils::Insert($conn, $game_id, $query_string);
          $result = "Dummy run of \n".$query_string."\n in MySQL.";
          error_log("Sending mysql response: ".$result);
          break;

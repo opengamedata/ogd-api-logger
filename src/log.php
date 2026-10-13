@@ -40,7 +40,10 @@ switch ($db_type) {
       break;
 }
 
-if (isset($_REQUEST["app_id"])) {
+if (isset($_REQUEST["game_id"])) {
+  $app_id = strtoupper($_REQUEST["game_id"]);
+}
+else if (isset($_REQUEST["app_id"])) {
   $app_id = strtoupper($_REQUEST["app_id"]);
 }
 else {

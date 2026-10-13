@@ -26,8 +26,9 @@
 
       public function testOGDLegacyCall(): void
       {
+         $game_id = "test_game";
          $url_params = [
-            "app_id" => "TEST_GAME",
+            "app_id" => $game_id,
             "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
             "user_id" => "TestUser",
             "user_data" => "{}",
@@ -76,15 +77,16 @@
             "Test Fail: Unexpected response code '".$code."' from call to ".$test_url
          );
          $this->assertSame(
-            $response, "SUCCESS: Inserted 2 rows to BigQuery in test_game.test_game_daily_".(new DateTime())->format("Ymd").".",
+            $response, "SUCCESS: Inserted 2 rows to BigQuery in ".$game_id.".".$game_id."_daily_".(new DateTime())->format("Ymd").".",
             "Test Fail: Unexpected result '".$response."' from call to ".$test_url
          );
       }
 
       public function testOGDStandardCall(): void
       {
+         $game_id = "test_game";
          $url_params = [
-            "game_id" => "TEST_GAME",
+            "game_id" => $game_id,
             "instance_id" => "fake_instance",
             "player_id" => "TestUser",
             "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
@@ -143,7 +145,7 @@
             "Test Fail: Unexpected response code '".$code."' from call to ".$test_url
          );
          $this->assertSame(
-            $response, "SUCCESS: Inserted 2 rows to BigQuery in test_game.test_game_daily_".(new DateTime())->format("Ymd").".",
+            $response, "SUCCESS: Inserted 2 rows to BigQuery in ".$game_id.".".$game_id."_daily_".(new DateTime())->format("Ymd").".",
             "Test Fail: Unexpected result '".$response."' from call to ".$test_url
          );
       }

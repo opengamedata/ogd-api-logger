@@ -86,7 +86,7 @@
       // TODO : sort out timestamp stuff, temporarily assuming client_time is our timestamp
       private  string $timestamp;
       private  ?string $authoritative_timestamp;
-      private  string $game_time;
+      private  float $game_time;
       private static string $server_time = "CURRENT_TIMESTAMP()"; // DEPRECATED
       private  int $session_sequence_index; // TODO : this is listed as non-required in standard, that's probably wrong.
       # Category 3 Data: Segmenting
@@ -113,7 +113,7 @@
       // Nothing here for now, in discussion for final standard
 
       function __construct(string $game_id,        ?string $instance_id,    ?string $player_id,     string $session_id,
-                           string $timestamp,      ?string $auth_timestamp,  string $game_time,
+                           string $timestamp,      ?string $auth_timestamp,  float $game_time,
                            string $sequence_index, ?string $game_segment,
                            string $game_version,   string $schema_version,  string $log_version,
                            ?string $condition,     ?string $game_config,    ?string $platform,
@@ -202,14 +202,14 @@
             $auth_timestamp = $datum->authoritative_timestamp;
          }
 
-         $game_time = "00:00:00.0000"; // Don't have a great default here
-         if(isset($datum->timestamp) && (DateTimeImmutable::createFromFormat('h:i:s.u', $datum->game_time) !== false))
+         $game_time = "0.0"; // Don't have a great default here
+         if(isset($datum->game_time))
          {
-            $game_time = $datum->game_time;
+            $game_time = (float) filter_var($datum->game_time, FILTER_SANITIZE_NUMBER_FLOAT);
          }
 
          if(isset($datum->session_sequence_index)) {
-            $session_sequence_index  = filter_var($datum->session_sequence_index, FILTER_SANITIZE_NUMBER_INT);
+            $session_sequence_index  = (int) filter_var($datum->session_sequence_index, FILTER_SANITIZE_NUMBER_INT);
             // error_log("From datum ".json_encode($datum).", event sequence index is ".$datum->session_sequence_index);
          } else { die("No event_sequence_index"); }
 
@@ -341,7 +341,7 @@
             $client_time = $datum->client_time;
          }
 
-         $game_time = "00:00:00.0000"; // Don't have a great default here
+         $game_time = 0.0; // Don't have a great default here
 
          $client_offset = "00:00";
          if(isset($datum->client_offset)) {
@@ -443,7 +443,7 @@
             $client_time = $datum->client_time."+00:00";
          }
 
-         $game_time = "00:00:00.0000"; // Don't have a great default here
+         $game_time = 0.0; // Don't have a great default here
 
          $session_n      = -1;
          if(isset($datum->session_n)) {

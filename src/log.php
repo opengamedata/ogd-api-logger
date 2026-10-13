@@ -47,7 +47,7 @@ else if (isset($_REQUEST["app_id"])) {
   $game_id = strtoupper($_REQUEST["app_id"]);
 }
 else {
-   die("FAIL: Request is missing app_id!");
+   die("FAIL: Request is missing game_id element!");
 }
 
 # 2. Figure out what the input schema looks like, defaulting to v0.1 OGD schema.

@@ -154,7 +154,7 @@
       /** Create an Event object from the standard OGD format (Schema v1.0)
        * 
        * Items from $_REQUEST:
-       * - app_id (technically getting this as input)
+       * - game_id (technically getting this as input)
        * - instance_id
        * - player_id
        * - session_id

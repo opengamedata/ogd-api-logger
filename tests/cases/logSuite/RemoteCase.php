@@ -27,7 +27,7 @@
       public function testOGDLegacyCall(): void
       {
          $url_params = [
-            "app_id" => "migration_test",
+            "app_id" => "TEST_GAME",
             "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
             "user_id" => "TestUser",
             "user_data" => "{}",

@@ -1,6 +1,35 @@
 <?php
 
 class BigQueryUtils {
+   const STANDARD_METADATA_1_0 = [
+      "schema" => [
+         "fields" => [
+            [ "name" => "game_id",                 "type" => "STRING",    "mode" => "REQUIRED" ],
+            [ "name" => "instance_id",             "type" => "STRING",    "mode" => "REQUIRED" ],
+            [ "name" => "player_id",               "type" => "STRING",    "mode" => "REQUIRED" ],
+            [ "name" => "session_id",              "type" => "STRING",    "mode" => "REQUIRED" ],
+            [ "name" => "timestamp",               "type" => "TIMESTAMP", "mode" => "REQUIRED" ],
+            [ "name" => "timezone_offset",         "type" => "STRING",    "mode" => "REQUIRED" ],
+            [ "name" => "authoritative_timestamp", "type" => "TIMESTAMP", "mode" => "NULLABLE" ],
+            [ "name" => "game_time",               "type" => "FLOAT",     "mode" => "NULLABLE" ],
+            [ "name" => "session_sequence_index",  "type" => "INTEGER",   "mode" => "REQUIRED" ],
+            [ "name" => "game_segment",            "type" => "JSON",      "mode" => "REQUIRED" ],
+            [ "name" => "event_source",            "type" => "STRING",    "mode" => "REQUIRED" ],
+            [ "name" => "source_version",          "type" => "STRING",    "mode" => "REQUIRED" ],
+            [ "name" => "game_version",            "type" => "STRING",    "mode" => "REQUIRED" ],
+            [ "name" => "schema_version",          "type" => "STRING",    "mode" => "REQUIRED" ],
+            [ "name" => "log_version",             "type" => "STRING",    "mode" => "REQUIRED" ],
+            [ "name" => "condition",               "type" => "STRING",    "mode" => "NULLABLE" ],
+            [ "name" => "game_configuration",      "type" => "JSON",      "mode" => "REQUIRED" ],
+            [ "name" => "platform",                "type" => "JSON",      "mode" => "REQUIRED" ],
+            [ "name" => "game_state",              "type" => "JSON",      "mode" => "REQUIRED" ],
+            [ "name" => "user_history",            "type" => "JSON",      "mode" => "REQUIRED" ],
+            [ "name" => "event_id",                "type" => "INTEGER",   "mode" => "REQUIRED" ],
+            [ "name" => "event_name",              "type" => "STRING",    "mode" => "REQUIRED" ],
+            [ "name" => "event_data",              "type" => "JSON",      "mode" => "REQUIRED" ],
+         ]
+      ]
+   ];
    const STANDARD_METADATA_0_1 = [
       "schema" => [
          "fields" => [
@@ -25,12 +54,12 @@ class BigQueryUtils {
    ];
 
    static function Insert($conn, string $app_id, array $query) : string {
-      $dataset = $conn->dataset(strtolower($app_id));
+      $dataset = $conn->dataset(strtoupper($app_id));
       $table_name = "{$dataset->id()}_daily_".date("Ymd");
       $table = $dataset->table($table_name);
       $opts = [
          "autoCreate" => true,
-         "tableMetadata" => BigQueryUtils::STANDARD_METADATA_0_1
+         "tableMetadata" => BigQueryUtils::STANDARD_METADATA_1_0
       ];
       $result = $table->insertRows($query, $opts);
       if (!$result->isSuccessful()) {

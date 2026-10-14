@@ -4,7 +4,6 @@ class BigQueryUtils {
    const STANDARD_METADATA_1_0 = [
       "schema" => [
          "fields" => [
-            [ "name" => "game_id",                 "type" => "STRING",    "mode" => "REQUIRED" ],
             [ "name" => "instance_id",             "type" => "STRING",    "mode" => "REQUIRED" ],
             [ "name" => "player_id",               "type" => "STRING",    "mode" => "REQUIRED" ],
             [ "name" => "session_id",              "type" => "STRING",    "mode" => "REQUIRED" ],

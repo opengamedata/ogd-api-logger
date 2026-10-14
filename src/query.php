@@ -330,9 +330,9 @@
                       ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?? new DateTimeImmutable()
                       : new DateTimeImmutable();
 
-         $client_offset = isset($datum->client_offset)
-                        ? new DateTimeZone($datum->client_offset) ?? new DateTimeZone("+00:00")
-                        : new DateTimeZone("+00:00");
+         $offset_components = explode(":", $datum->client_offset ?? "+00:00");
+         $offset_str = $offset_components[0].":".$offset_components[1];
+         $client_offset =  new DateTimeZone($offset_str);
          $client_time = $client_time->setTimezone($client_offset);
 
          $game_time = 0.0; // Don't have a great default here

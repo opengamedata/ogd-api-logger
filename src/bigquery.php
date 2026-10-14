@@ -22,7 +22,7 @@ class BigQueryUtils {
             [ "name" => "game_configuration",      "type" => "JSON",      "mode" => "REQUIRED" ],
             [ "name" => "platform",                "type" => "JSON",      "mode" => "REQUIRED" ],
             [ "name" => "game_state",              "type" => "JSON",      "mode" => "REQUIRED" ],
-            [ "name" => "user_history",            "type" => "JSON",      "mode" => "REQUIRED" ],
+            [ "name" => "player_history",          "type" => "JSON",      "mode" => "REQUIRED" ],
             [ "name" => "event_id",                "type" => "INTEGER",   "mode" => "REQUIRED" ],
             [ "name" => "event_name",              "type" => "STRING",    "mode" => "REQUIRED" ],
             [ "name" => "event_data",              "type" => "JSON",      "mode" => "REQUIRED" ],

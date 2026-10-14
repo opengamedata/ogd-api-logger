@@ -545,7 +545,7 @@
             "user_data"            => $this->player_history,
             "client_time"          => $this->timestamp,
             // "client_time_ms" => $this->client_time_ms,
-            "client_offset"        => "placeholder offset",
+            "client_offset"        => "0",
             "server_time"          => $conn->timestamp(new DateTimeImmutable()),
             "event_name"           => $this->event_name,
             "event_data"           => $this->event_data,

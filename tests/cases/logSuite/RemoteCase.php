@@ -90,8 +90,7 @@
             "instance_id" => "fake_instance",
             "player_id" => "TestUser",
             "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
-            // "game_version" => "1.0.0-testbed", // go back to this when we're testing with v1.0 backend
-            "game_version" => "1",
+            "game_version" => "1.0.0-testbed",
             "schema_version" => "1.0-alpha",
             "log_version" => "1",
             "condition" => "testing-branch",

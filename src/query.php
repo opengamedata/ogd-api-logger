@@ -109,8 +109,8 @@
       // Nothing here for now, in discussion for final standard
 
       function __construct(string $game_id,              ?string $instance_id,    ?string $player_id,     string $session_id,
-                           DateTimeImmutable $timestamp, ?string $auth_timestamp,  float $game_time,
-                           string $sequence_index,       ?string $game_segment,
+                           DateTimeImmutable $timestamp, ?DateTimeImmutable $auth_timestamp,
+                           float $game_time,             string $sequence_index,  ?string $game_segment,
                            string $game_version,         string $schema_version,  string $log_version,
                            ?string $condition,           ?string $game_config,    ?string $platform,
                            ?string $game_state,          ?string $player_history,

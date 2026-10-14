@@ -205,7 +205,7 @@
          $game_time = "0.0"; // Don't have a great default here
          if(isset($datum->game_time))
          {
-            $game_time = (float) filter_var($datum->game_time, FILTER_SANITIZE_NUMBER_FLOAT);
+            $game_time = (float) filter_var($datum->game_time, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
          }
 
          if(isset($datum->session_sequence_index)) {

@@ -34,9 +34,9 @@ class BigQueryUtils {
       ];
       $result = $table->insertRows($query, $opts);
       if (!$result->isSuccessful()) {
-         $lambda = function($err) { return $err['reason'].": ".$err['message']; };
-         // $msg = "Query for ".$game_id." failed with errors: ".join("\n", array_map($lambda, $result->failedRows()));
-         $msg = "Query for ".$game_id." failed with errors: ".json_encode($result->failedRows());
+         $lambda = function($err) { return $err['errors']['reason'].": ".$err['errors']['message']; };
+         $msg = "Query for ".$game_id." failed with errors: ".join("\n", array_map($lambda, $result->failedRows()));
+         // $msg = "Query for ".$game_id." failed with errors: ".json_encode($result->failedRows());
          error_log($msg);
          die("FAIL: ".$msg);
       }

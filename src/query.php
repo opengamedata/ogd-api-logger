@@ -557,7 +557,7 @@
             "log_version"          => $this->log_version,
             "event_sequence_index" => $this->session_sequence_index,
             // "host"                 => Event::$host,
-            "remote_addr"          => Event::$remote_addr,
+            "remote_addr"          => Event::$remote_addr ?? "0.0.0.0", // temporary resolution until we have 1.0 BQ backend ready
             "http_user_agent"      => $this->http_user_agent
          ];
       }

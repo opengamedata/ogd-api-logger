@@ -29,26 +29,26 @@
       ") VALUES";
 
       private array $events;
-      private string $app_id;
+      private string $game_id;
 
-      function __construct($schema, $app_id, $data)
+      function __construct($schema, $game_id, $data)
       {
          $n_rows = count($data);
 
-         $this->app_id = $app_id;
+         $this->game_id = $game_id;
          switch ($schema) {
             case LOGGER_SCHEMA:
-               $lambda = fn($datum) => Event::FromLoggerLegacyFormat($app_id, $datum);
+               $lambda = fn($datum) => Event::FromLoggerLegacyFormat($game_id, $datum);
                break;
             case OGD_SCHEMA_01:
-               $lambda = fn($datum) => Event::FromOGDLegacyFormat($app_id, $datum);
+               $lambda = fn($datum) => Event::FromOGDLegacyFormat($game_id, $datum);
                break;
             case OGD_SCHEMA_10:
-               $lambda = fn($datum) => Event::FromOGDStandardFormat($app_id, $datum);
+               $lambda = fn($datum) => Event::FromOGDStandardFormat($game_id, $datum);
                break;
             default:
                error_log("Got schema name ".$schema." that did not match ".LOGGER_SCHEMA." or ".OGD_SCHEMA_01." or ".OGD_SCHEMA_10.", defaulting to ".OGD_SCHEMA_10);
-               $lambda = fn($datum) => Event::FromOGDStandardFormat($app_id, $datum);
+               $lambda = fn($datum) => Event::FromOGDStandardFormat($game_id, $datum);
                break;
          }
          $this->events = array_map($lambda, $data);
@@ -62,7 +62,7 @@
       function AsMySQL($conn) : string
       {
          $lambda = fn(Event $next_event) => $next_event->AsMySQLQuery($conn);
-         $cols = "INSERT INTO ".$this->app_id." ".EventQuery::OGD_01_COLUMNS;
+         $cols = "INSERT INTO ".$this->game_id." ".EventQuery::OGD_01_COLUMNS;
          $vals = join(",", array_map($lambda, $this->events));
          return $cols.$vals;
       }
@@ -154,7 +154,7 @@
       /** Create an Event object from the standard OGD format (Schema v1.0)
        * 
        * Items from $_REQUEST:
-       * - app_id (technically getting this as input)
+       * - game_id (technically getting this as input)
        * - instance_id
        * - player_id
        * - session_id
@@ -191,13 +191,13 @@
          # Category 2 Data: Sequencing
 
          $timestamp = date("Y-m-d H:i:s\\T");
-         if(isset($datum->timestamp) && (DateTimeImmutable::createFromFormat('Y-m-d\Th:i:s.uT', $datum->timestamp) !== false))
+         if(isset($datum->timestamp) && (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $datum->timestamp) !== false))
          {
             $timestamp = $datum->timestamp;
          }
 
          $auth_timestamp = date("Y-m-d H:i:s\\T");
-         if(isset($datum->authoritative_timestamp) && (DateTimeImmutable::createFromFormat('Y-m-d\Th:i:s.uT', $datum->authoritative_timestamp) !== false))
+         if(isset($datum->authoritative_timestamp) && (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $datum->authoritative_timestamp) !== false))
          {
             $auth_timestamp = $datum->authoritative_timestamp;
          }
@@ -545,7 +545,7 @@
             "user_data"            => $this->player_history,
             "client_time"          => $this->timestamp,
             // "client_time_ms" => $this->client_time_ms,
-            "client_offset"        => "placeholder offset",
+            "client_offset"        => "0",
             "server_time"          => $conn->timestamp(new DateTimeImmutable()),
             "event_name"           => $this->event_name,
             "event_data"           => $this->event_data,
@@ -557,7 +557,7 @@
             "log_version"          => $this->log_version,
             "event_sequence_index" => $this->session_sequence_index,
             // "host"                 => Event::$host,
-            "remote_addr"          => Event::$remote_addr,
+            "remote_addr"          => Event::$remote_addr ?? "0.0.0.0", // temporary resolution until we have 1.0 BQ backend ready
             "http_user_agent"      => $this->http_user_agent
          ];
       }

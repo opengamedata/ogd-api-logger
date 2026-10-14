@@ -38,16 +38,16 @@
          ];
          $body_params = [
             [
-               "client_time" => date('Y-m-d H:i:s'),
-               "client_offset" => 0,
+               "client_time" => "2020-01-01 13:42:56.789", //date('Y-m-d H:i:s'),
+               "client_offset" => "00:00",
                "event_name" => "fake_event",
                "event_data" => json_encode(["some_element" => "some_value", "some_int" => 0]),
                "game_state" => json_encode(["state_var" => "active"]),
                "event_sequence_index" => 1
             ],
             [
-               "client_time" => date('Y-m-d H:i:s'),
-               "client_offset" => 0,
+               "client_time" => "2020-01-01 13:42:57.123", //date('Y-m-d H:i:s'),
+               "client_offset" => "01:00",
                "event_name" => "another_event",
                "event_data" => json_encode(["some_element" => "new_value", "some_int" => 42]),
                "game_state" => json_encode(["state_var" => "inactive"]),
@@ -90,7 +90,8 @@
             "instance_id" => "fake_instance",
             "player_id" => "TestUser",
             "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
-            "game_version" => "1.0.0-testbed",
+            // "game_version" => "1.0.0-testbed", // go back to this when we're testing with v1.0 backend
+            "game_version" => "1",
             "schema_version" => "1.0-alpha",
             "log_version" => "1",
             "condition" => "testing-branch",
@@ -100,7 +101,7 @@
          ];
          $body_params = [
             [
-               "timestamp" => date('Y-m-d\TH:i:s.uT'),
+               "timestamp" => "2020-01-01 13:42:56.789Z", // date('Y-m-d\TH:i:s.uT'),
                "authoritative_timestamp" => date('Y-m-d\TH:i:s.uT'),
                "game_time" => "00:15:49.345",
                "session_sequence_index" => 1,
@@ -111,7 +112,7 @@
                "event_data" => json_encode(["some_element" => "some_value", "some_int" => 0])
             ],
             [
-               "timestamp" => date('Y-m-d\TH:i:s.uT'),
+               "timestamp" => "2020-01-01 13:42:57.123+01:00", // date('Y-m-d\TH:i:s.uT'),
                "authoritative_timestamp" => date('Y-m-d\TH:i:s.uT'),
                "game_time" => "00:15:49.345",
                "session_sequence_index" => 2,

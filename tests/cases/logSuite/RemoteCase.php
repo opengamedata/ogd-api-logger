@@ -47,7 +47,7 @@
             ],
             [
                "client_time" => "2020-01-01 13:42:57.123", //date('Y-m-d H:i:s'),
-               "client_offset" => "00:00",
+               "client_offset" => "01:00",
                "event_name" => "another_event",
                "event_data" => json_encode(["some_element" => "new_value", "some_int" => 42]),
                "game_state" => json_encode(["state_var" => "inactive"]),
@@ -112,7 +112,7 @@
                "event_data" => json_encode(["some_element" => "some_value", "some_int" => 0])
             ],
             [
-               "timestamp" => "2020-01-01 13:42:57.123+00:00", // date('Y-m-d\TH:i:s.uT'),
+               "timestamp" => "2020-01-01 13:42:57.123+01:00", // date('Y-m-d\TH:i:s.uT'),
                "authoritative_timestamp" => date('Y-m-d\TH:i:s.uT'),
                "game_time" => "00:15:49.345",
                "session_sequence_index" => 2,

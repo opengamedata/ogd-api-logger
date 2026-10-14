@@ -331,7 +331,10 @@
                       : new DateTimeImmutable();
 
          $offset_components = explode(":", $datum->client_offset ?? "+00:00");
-         $offset_str = $offset_components[0].":".$offset_components[1];
+         $prefix = (str_starts_with($offset_components[0], "+") || str_starts_with($offset_components[0], "-"))
+                 ? ""
+                 : "+";
+         $offset_str = $prefix.$offset_components[0].":".$offset_components[1];
          $client_offset =  new DateTimeZone($offset_str);
          $client_time = $client_time->setTimezone($client_offset);
 

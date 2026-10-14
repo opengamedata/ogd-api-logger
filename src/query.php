@@ -516,9 +516,9 @@
             "\"".mysqli_real_escape_string($conn, $this->condition)."\",".
             "\"".mysqli_real_escape_string($conn, $this->log_version)."\",".
             "\"".mysqli_real_escape_string($conn, $this->session_sequence_index)."\",".
-            "\"".mysqli_real_escape_string($conn, Event::$host)."\",".
-            "\"".mysqli_real_escape_string($conn, Event::$remote_addr)."\",".
-            "\"".mysqli_real_escape_string($conn, Event::$http_user_agent)."\",".
+            // "\"".mysqli_real_escape_string($conn, Event::$host)."\",".
+            // "\"".mysqli_real_escape_string($conn, Event::$remote_addr)."\",".
+            // "\"".mysqli_real_escape_string($conn, Event::$http_user_agent)."\",".
             "\"".Event::$synced."\"".
          ")";
       }

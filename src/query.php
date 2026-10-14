@@ -73,9 +73,6 @@
 
       # Category 0 Data: Non-logged data
       private static int $synced = 0;
-      private static ?string $http_user_agent = null; // DEPRECATED
-      private static ?string $host = null; // DEPRECATED
-      private static ?string $remote_addr = null; // DEPRECATED
 
       # Category 1 Data: Identification
       private  string $game_id;
@@ -83,9 +80,8 @@
       private ?string $player_id;
       private  string $session_id;
       # Category 2 Data: Sequencing
-      // TODO : sort out timestamp stuff, temporarily assuming client_time is our timestamp
-      private  string $timestamp;
-      private  ?string $authoritative_timestamp;
+      private  DateTimeImmutable $timestamp;
+      private  ?DateTimeImmutable $authoritative_timestamp;
       private  float $game_time;
       private static string $server_time = "CURRENT_TIMESTAMP()"; // DEPRECATED
       private  int $session_sequence_index; // TODO : this is listed as non-required in standard, that's probably wrong.
@@ -112,13 +108,13 @@
       # Category 9 Data: Private
       // Nothing here for now, in discussion for final standard
 
-      function __construct(string $game_id,        ?string $instance_id,    ?string $player_id,     string $session_id,
-                           string $timestamp,      ?string $auth_timestamp,  float $game_time,
-                           string $sequence_index, ?string $game_segment,
-                           string $game_version,   string $schema_version,  string $log_version,
-                           ?string $condition,     ?string $game_config,    ?string $platform,
-                           ?string $game_state,    ?string $player_history,
-                           int $event_id,          ?string $event_name,     string $event_data,
+      function __construct(string $game_id,              ?string $instance_id,    ?string $player_id,     string $session_id,
+                           DateTimeImmutable $timestamp, ?string $auth_timestamp,  float $game_time,
+                           string $sequence_index,       ?string $game_segment,
+                           string $game_version,         string $schema_version,  string $log_version,
+                           ?string $condition,           ?string $game_config,    ?string $platform,
+                           ?string $game_state,          ?string $player_history,
+                           int $event_id,                ?string $event_name,     string $event_data,
                           )
       {
          $this->game_id = $game_id;
@@ -190,17 +186,13 @@
 
          # Category 2 Data: Sequencing
 
-         $timestamp = date("Y-m-d H:i:s\\T");
-         if(isset($datum->timestamp) && (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $datum->timestamp) !== false))
-         {
-            $timestamp = $datum->timestamp;
-         }
+         $timestamp = isset($datum->timestamp)
+                    ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $datum->timestamp) ?? new DateTimeImmutable()
+                    : new DateTimeImmutable();
 
-         $auth_timestamp = date("Y-m-d H:i:s\\T");
-         if(isset($datum->authoritative_timestamp) && (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $datum->authoritative_timestamp) !== false))
-         {
-            $auth_timestamp = $datum->authoritative_timestamp;
-         }
+         $auth_timestamp = isset($datum->authoritative_timestamp)
+                         ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $datum->authoritative_timestamp) ?? null
+                         : null;
 
          $game_time = "0.0"; // Don't have a great default here
          if(isset($datum->game_time))
@@ -317,9 +309,6 @@
          // per dump
          $player_id = NULL;   
          $player_history = NULL;
-         $client_time = date("Y-m-d H:i:s");
-         $client_time_ms = 0;
-         $client_offset = "00:00:00";
          $event_data = NULL;
          $game_state = NULL;
          $condition = NULL;
@@ -336,17 +325,17 @@
 
          # Category 2 Data: Sequencing
 
-         if(isset($datum->client_time))
-         {
-            $client_time = $datum->client_time;
-         }
+         // $client_time = $datum->client_time ?? new DateTimeImmutable("Y-m-d H:i:s");
+         $client_time = isset($datum->client_time)
+                      ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?? new DateTimeImmutable()
+                      : new DateTimeImmutable();
+
+         $client_offset = isset($datum->client_offset)
+                        ? new DateTimeZone($datum->client_offset) ?? new DateTimeZone("+00:00")
+                        : new DateTimeZone("+00:00");
+         $client_time = $client_time->setTimezone($client_offset);
 
          $game_time = 0.0; // Don't have a great default here
-
-         $client_offset = "00:00";
-         if(isset($datum->client_offset)) {
-            $client_offset = $datum->client_offset;
-         }
 
          if(isset($datum->event_sequence_index)) {
             $session_sequence_index  = filter_var($datum->event_sequence_index, FILTER_SANITIZE_NUMBER_INT);
@@ -408,10 +397,9 @@
 
          # Category 9 Data: Private
 
-         $timestamp = $client_time."+".$client_offset;
          return new Event(
             game_id:$game_id,                       instance_id:null,               player_id:$player_id,     session_id:$session_id,
-            timestamp:$timestamp,                   auth_timestamp:null,           game_time:$game_time,
+            timestamp:$client_time,                 auth_timestamp:null,            game_time:$game_time,
             sequence_index:$session_sequence_index, game_segment:null,
             game_version:$game_version,             schema_version:$schema_version, log_version:$log_version,
             condition:$condition,                   game_config:null,               platform:null,
@@ -437,11 +425,9 @@
 
          # Category 2 Data: Sequencing
 
-         $client_time = date("Y-m-d H:i:s");
-         if(isset($datum->client_time))
-         {
-            $client_time = $datum->client_time."+00:00";
-         }
+         $client_time = isset($datum->client_time)
+                      ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?? new DateTimeImmutable()
+                      : new DateTimeImmutable();
 
          $game_time = 0.0; // Don't have a great default here
 

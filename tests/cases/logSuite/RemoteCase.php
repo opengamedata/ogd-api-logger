@@ -26,7 +26,7 @@
 
       public function testOGDLegacyCall(): void
       {
-         $game_id = "test_game";
+         $game_id = "TEST_GAME";
          $url_params = [
             "app_id" => $game_id,
             "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
@@ -84,7 +84,7 @@
 
       public function testOGDStandardCall(): void
       {
-         $game_id = "test_game";
+         $game_id = "TEST_GAME";
          $url_params = [
             "game_id" => $game_id,
             "instance_id" => "fake_instance",

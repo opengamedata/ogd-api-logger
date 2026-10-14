@@ -526,25 +526,28 @@
       function AsBigQuery($conn) : array
       {
          return [
-            "session_id"           => $this->session_id,
-            "user_id"              => $this->player_id,
-            "user_data"            => $this->player_history,
-            "client_time"          => $this->timestamp,
-            // "client_time_ms" => $this->client_time_ms,
-            "client_offset"        => "0",
-            "server_time"          => $conn->timestamp(new DateTimeImmutable()),
-            "event_name"           => $this->event_name,
-            "event_data"           => $this->event_data,
-            "event_source"         => Event::$event_source,
-            // "synced" => $this::synced,
-            "game_state"           => $this->game_state,
-            "app_version"          => $this->game_version,
-            "app_branch"           => $this->condition,
-            "log_version"          => $this->log_version,
-            "event_sequence_index" => $this->session_sequence_index,
-            // "host"                 => Event::$host,
-            "remote_addr"          => Event::$remote_addr ?? "0.0.0.0", // temporary resolution until we have 1.0 BQ backend ready
-            "http_user_agent"      => $this->http_user_agent
+            "instance_id"             => $this->instance_id,
+            "player_id"               => $this->player_id,
+            "session_id"              => $this->session_id,
+            "timestamp"               => $conn->timestamp($this->timestamp),
+            "timezone_offset"         => $this->timestamp->format("P"), // get just the timezone offset
+            "authoritative_timestamp" => $this->authoritative_timestamp ? $conn->timestamp($this->authoritative_timestamp) : null,
+            "game_time"               => $this->game_time,
+            "session_sequence_index"  => $this->session_sequence_index,
+            "game_segment"            => $this->game_segment,
+            "event_source"            => Event::$event_source,
+            "source_version"          => $this->source_version,
+            "game_version"            => $this->game_version,
+            "schema_version"          => $this->schema_version,
+            "log_version"             => $this->log_version,
+            "condition"               => $this->condition,
+            "game_configuration"      => $this->game_configuration,
+            "platform"                => $this->platform,
+            "game_state"              => $this->game_state,
+            "player_history"          => $this->player_history,
+            "event_id"                => $this->event_id,
+            "event_name"              => $this->event_name,
+            "event_data"              => $this->event_data,
          ];
       }
    }

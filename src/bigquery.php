@@ -11,7 +11,7 @@ class BigQueryUtils {
             [ "name" => "timezone_offset",         "type" => "STRING",    "mode" => "REQUIRED" ],
             [ "name" => "authoritative_timestamp", "type" => "TIMESTAMP", "mode" => "NULLABLE" ],
             [ "name" => "game_time",               "type" => "FLOAT",     "mode" => "NULLABLE" ],
-            [ "name" => "session_sequence_index",  "type" => "INTEGER",   "mode" => "REQUIRED" ],
+            [ "name" => "session_sequence_index",  "type" => "INTEGER",   "mode" => "NULLABLE" ],
             [ "name" => "game_segment",            "type" => "JSON",      "mode" => "REQUIRED" ],
             [ "name" => "event_source",            "type" => "STRING",    "mode" => "REQUIRED" ],
             [ "name" => "source_version",          "type" => "STRING",    "mode" => "REQUIRED" ],

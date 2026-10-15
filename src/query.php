@@ -178,10 +178,10 @@
 
          # Category 1 Data: Identification
 
-         $instance_id = isset($_REQUEST["instance_id"]) ? preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["instance_id"]) : NULL;
-         $player_id   = isset($_REQUEST["player_id"])   ? preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["player_id"])   : NULL;
-         if(isset($_REQUEST["session_id"])) {
-            $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
+         $instance_id = isset($_POST["instance_id"]) ? preg_replace("/[^a-zA-Z0-9]+/", "", $_POST["instance_id"]) : NULL;
+         $player_id   = isset($_POST["player_id"])   ? preg_replace("/[^a-zA-Z0-9]+/", "", $_POST["player_id"])   : NULL;
+         if(isset($_POST["session_id"])) {
+            $session_id = filter_var($_POST["session_id"], FILTER_SANITIZE_NUMBER_INT);
          } else { die("No session_id"); }
 
          # Category 2 Data: Sequencing
@@ -220,29 +220,29 @@
 
          // source_version is given the game_version
 
-         if(isset($_REQUEST["game_version"])) {
-            $game_version = filter_var($_REQUEST["game_version"], FILTER_SANITIZE_NUMBER_INT);
+         if(isset($_POST["game_version"])) {
+            $game_version = filter_var($_POST["game_version"], FILTER_SANITIZE_NUMBER_INT);
          } else { die("No game_version"); }
 
          $schema_version = $_REQUEST["schema_version"] ?? "N/A";
 
-         if(isset($_REQUEST["log_version"])) {
-            $log_version = filter_var($_REQUEST["log_version"], FILTER_SANITIZE_NUMBER_INT);
+         if(isset($_POST["log_version"])) {
+            $log_version = filter_var($_POST["log_version"], FILTER_SANITIZE_NUMBER_INT);
          } else { die("No log_version"); }
 
          # Category 6 Data: Configuration
 
          $condition = NULL;
-         if(isset($_REQUEST["condition"])) {
-            $condition = preg_replace("/[^a-zA-Z0-9-_]+/", "", $_REQUEST["condition"]);
+         if(isset($_POST["condition"])) {
+            $condition = preg_replace("/[^a-zA-Z0-9-_]+/", "", $_POST["condition"]);
          }
 
-         $game_config = $_REQUEST["game_configuration"] ?? "{}";
+         $game_config = $_POST["game_configuration"] ?? "{}";
          if (!json_validate($game_config)) {
             die("Invalid JSON in game_configuration! ".json_last_error()." : ".json_last_error_msg());
          }
 
-         $platform = $_REQUEST["platform"] ?? "{}";
+         $platform = $_POST["platform"] ?? "{}";
          if (!json_validate($platform)) {
             die("Invalid JSON in platform! ".json_last_error()." : ".json_last_error_msg());
          }
@@ -254,7 +254,7 @@
             die("Invalid JSON in game_state! ".json_last_error()." : ".json_last_error_msg());
          }
 
-         $player_history = $_REQUEST["player_history"] ?? "{}";
+         $player_history = $_POST["player_history"] ?? "{}";
          if (!json_validate($player_history)) {
             die("Invalid JSON in player_history! ".json_last_error()." : ".json_last_error_msg());
          }

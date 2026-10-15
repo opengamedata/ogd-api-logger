@@ -180,7 +180,7 @@
             "condition" => "testing-branch",
             "game_configuration" => "{}",
             "platform" => "{}",
-            "user_data" => "{}",
+            "user_history" => "{}",
             "data" => base64_encode(json_encode($payload))
          ];
 

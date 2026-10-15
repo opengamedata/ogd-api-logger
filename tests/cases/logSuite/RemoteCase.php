@@ -145,18 +145,9 @@
          $game_id = "TEST_GAME";
          $url_params = [
             "game_id" => $game_id,
-            "instance_id" => "fake_instance",
-            "player_id" => "TestUser",
-            "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
-            "game_version" => "1.0.0-testbed",
             "schema_version" => "1.0-alpha",
-            "log_version" => "1",
-            "condition" => "testing-branch",
-            "game_configuration" => "{}",
-            "platform" => "{}",
-            "user_data" => "{}"
          ];
-         $body_params = [
+         $payload = [
             [
                "timestamp" => "2020-01-01 13:42:56.789Z", // date('Y-m-d\TH:i:s.uT'),
                "authoritative_timestamp" => date('Y-m-d\TH:i:s.uT'),
@@ -180,6 +171,18 @@
                "event_data" => json_encode(["some_element" => "new_value", "some_int" => 42])
             ]
          ];
+         $post_fields = [
+            "instance_id" => "fake_instance",
+            "player_id" => "TestUser",
+            "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
+            "game_version" => "1.0.0-testbed",
+            "log_version" => "1",
+            "condition" => "testing-branch",
+            "game_configuration" => "{}",
+            "platform" => "{}",
+            "user_data" => "{}",
+            "data" => base64_encode(json_encode($payload))
+         ];
 
          $request = curl_init();
          $test_url = $_ENV['base_url']."/log.php?".http_build_query($url_params);
@@ -188,7 +191,7 @@
             CURLOPT_USERAGENT => "fake agent/1.0",
             CURLOPT_HTTPHEADER => LogRemoteCase::$headers,
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
+            CURLOPT_POSTFIELDS => $post_fields,
             CURLOPT_POSTREDIR => CURL_REDIR_POST_302,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_RETURNTRANSFER => true

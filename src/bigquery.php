@@ -26,7 +26,7 @@ class BigQueryUtils {
       ]
    ];
 
-   static function Connect() : ?BigQueryClient {
+   static function Connect() : BigQueryClient {
       try {
          $conn = new BigQueryClient();
          $test_datasets = $conn->datasets(["resultLimit" => 1]);

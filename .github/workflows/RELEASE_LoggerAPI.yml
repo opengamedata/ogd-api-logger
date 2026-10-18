@@ -39,7 +39,6 @@ jobs:
 
   deploy:
     name: Release Deploy to GCP
-    if: github.event.action == 'released'
     needs: [build, get_branch]
     uses: ./.github/workflows/DEPLOY_LoggerAPI.yml
     with:

@@ -1,6 +1,8 @@
 <?php
+use Google\Cloud\BigQuery\BigQueryClient;
 
 class BigQueryUtils {
+
    const STANDARD_METADATA_0_1 = [
       "schema" => [
          "fields" => [
@@ -23,6 +25,26 @@ class BigQueryUtils {
          ]
       ]
    ];
+
+   static function Connect() : ?BigQueryClient {
+      try {
+         $conn = new BigQueryClient();
+         $test_datasets = $conn->datasets(["resultLimit" => 1]);
+         if ($test_datasets->current()) {
+            error_log("Made connection to BQ project, containing dataset ".$test_datasets->current()->id()."\n");
+         }
+         else {
+            http_response_code(500);
+            die("Could not find any datasets when connecting to event database.");
+         }
+      }
+      catch (Exception $e) {
+         http_response_code(500);
+         error_log("Exception when trying to connect to BigQuery: ".$e->getMessage());
+         die("Could not connect to event database");
+      }
+      return $conn;
+   }
 
    static function Insert($conn, string $app_id, array $query) : string {
       $dataset = $conn->dataset(strtolower($app_id));

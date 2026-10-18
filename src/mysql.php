@@ -1,6 +1,27 @@
 <?php
 class MySQLUtils {
-   static function Insert($conn, $app_id, $query) : string {
+
+   static function Connect(string $servername, string $username, string $password, string $db) : mysqli|false {
+      die("FAIL: Logging with MySQL is currently not supported!");
+
+      try {
+         $conn = mysqli_connect($servername, $username, $password, $db);
+         if (!$conn) {
+            http_response_code(500);
+            error_log("Error when trying to connect to MySQL database: " . mysqli_connect_error());
+            die("Could not connect to event database");
+         }
+      }
+      catch (Exception $e) {
+         http_response_code(500);
+         error_log("Error when trying to connect to MySQL database: ".$e->getMessage());
+         die("Could not connect to event database");
+      }
+      return $conn;
+   }
+
+   static function Insert(mysqli $conn, string $app_id, string $query) : string {
+      die("FAIL: Logging with MySQL is currently not supported!");
       try {
          $result = mysqli_query($conn, $query);
          if (!$result) {

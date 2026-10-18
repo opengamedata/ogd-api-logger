@@ -4,7 +4,6 @@ header("Access-Control-Allow-Origin: *");
 
 # 3rd-party imports
 require 'vendor/autoload.php';
-use Google\Cloud\BigQuery\BigQueryClient;
 # Local imports
 require 'config.php';
 require 'bigquery.php';
@@ -21,11 +20,7 @@ switch ($db_type) {
       $conn = BigQueryUtils::Connect();
       break;
    case "mysql":
-      // $conn = mysqli_connect($servername, $username, $password, $db);
-      // if (!$conn) {
-      //    die("FAIL: Could not connect to the database.\nError message: " . mysqli_connect_error());
-      // }
-      die("FAIL: Logging with MySQL is currently not supported!");
+      $conn = MySQLUtils::Connect($servername, null, null, $db);
       break;
    default:
       die("FAIL: API software was misconfigured, invalid db_type setting!");

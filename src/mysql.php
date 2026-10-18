@@ -27,6 +27,7 @@ class MySQLUtils {
          if (!$result) {
             $sql_err = "Query for ".$app_id." failed with error: ".mysqli_error($conn);
             error_log($sql_err);
+            http_response_code(500);
             die("FAIL: ".$sql_err);
          }
       }
@@ -37,6 +38,7 @@ class MySQLUtils {
          }
          $sql_err = "Query for ".$app_id." failed with error: ".mysqli_error($conn);
          error_log($sql_err);
+         http_response_code(500);
          die("FAIL: ".$sql_err);
       }
       return $query;

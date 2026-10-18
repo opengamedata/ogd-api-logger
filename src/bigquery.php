@@ -60,6 +60,7 @@ class BigQueryUtils {
             $lambda = function($err) { return $err['reason'].": ".$err['message']; };
             // $msg = "Query for ".$app_id." failed with errors: ".join("\n", array_map($lambda, $result->failedRows()));
             $msg = "Query for ".$app_id." failed with errors: ".json_encode($result->failedRows());
+            http_response_code(500);
             error_log($msg);
             die("FAIL: ".$msg);
          }
@@ -67,6 +68,7 @@ class BigQueryUtils {
       catch(Exception $e) {
          $sql_err = "Query for ".$app_id." failed with error: ".$e->getMessage();
          error_log($sql_err);
+         http_response_code(500);
          die("FAIL: ".$sql_err);
       }
       return "Inserted ".count($query)." rows to BigQuery in ".$dataset->id().".".$table_name.".";

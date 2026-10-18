@@ -47,20 +47,27 @@ class BigQueryUtils {
    }
 
    static function Insert($conn, string $app_id, array $query) : string {
-      $dataset = $conn->dataset(strtolower($app_id));
-      $table_name = "{$dataset->id()}_daily_".date("Ymd");
-      $table = $dataset->table($table_name);
-      $opts = [
-         "autoCreate" => true,
-         "tableMetadata" => BigQueryUtils::STANDARD_METADATA_0_1
-      ];
-      $result = $table->insertRows($query, $opts);
-      if (!$result->isSuccessful()) {
-         $lambda = function($err) { return $err['reason'].": ".$err['message']; };
-         // $msg = "Query for ".$app_id." failed with errors: ".join("\n", array_map($lambda, $result->failedRows()));
-         $msg = "Query for ".$app_id." failed with errors: ".json_encode($result->failedRows());
-         error_log($msg);
-         die("FAIL: ".$msg);
+      try {
+         $dataset = $conn->dataset(strtolower($app_id));
+         $table_name = "{$dataset->id()}_daily_".date("Ymd");
+         $table = $dataset->table($table_name);
+         $opts = [
+            "autoCreate" => true,
+            "tableMetadata" => BigQueryUtils::STANDARD_METADATA_0_1
+         ];
+         $result = $table->insertRows($query, $opts);
+         if (!$result->isSuccessful()) {
+            $lambda = function($err) { return $err['reason'].": ".$err['message']; };
+            // $msg = "Query for ".$app_id." failed with errors: ".join("\n", array_map($lambda, $result->failedRows()));
+            $msg = "Query for ".$app_id." failed with errors: ".json_encode($result->failedRows());
+            error_log($msg);
+            die("FAIL: ".$msg);
+         }
+      }
+      catch(Exception $e) {
+         $sql_err = "Query for ".$app_id." failed with error: ".$e->getMessage();
+         error_log($sql_err);
+         die("FAIL: ".$sql_err);
       }
       return "Inserted ".count($query)." rows to BigQuery in ".$dataset->id().".".$table_name.".";
    }

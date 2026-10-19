@@ -1,7 +1,7 @@
 <?php
 class MySQLUtils {
 
-   static function Connect(string $servername, string $username, string $password, string $db) : mysqli|false {
+   static function Connect(string $servername, ?string $username, ?string $password, string $db) : mysqli|false {
       die("FAIL: Logging with MySQL is currently not supported!");
 
       try {

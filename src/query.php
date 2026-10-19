@@ -147,6 +147,16 @@
          $this->event_data = $event_data;
       }
 
+      static function IDtoName(int $event_id) : string {
+         $ret_val = null;
+
+         switch ($event_id) {
+            default:
+               $ret_val = "custom_event";
+         }
+         return $ret_val;
+      }
+
       static function FromOGDStandardFormat($game_id, $datum) : Event
       /** Create an Event object from the standard OGD format (Schema v1.0)
        * 

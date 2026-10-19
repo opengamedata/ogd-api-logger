@@ -75,47 +75,48 @@
       private static int $synced = 0;
 
       # Category 1 Data: Identification
-      private  string $game_id;
-      private ?string $instance_id;
-      private ?string $player_id;
-      private  string $session_id;
+      private        string $game_id;
+      private       ?string $instance_id;
+      private       ?string $player_id;
+      private        string $session_id;
       # Category 2 Data: Sequencing
-      private  DateTimeImmutable $timestamp;
-      private  ?DateTimeImmutable $authoritative_timestamp;
-      private  float $game_time;
+      private        DateTimeImmutable $timestamp;
+      private       ?DateTimeImmutable $authoritative_timestamp;
+      private       ?float $game_time;
       private static string $server_time = "CURRENT_TIMESTAMP()"; // DEPRECATED
-      private  int $session_sequence_index; // TODO : this is listed as non-required in standard, that's probably wrong.
+      private        int $session_sequence_index; // TODO : this is listed as non-required in standard, that's probably wrong.
       # Category 3 Data: Segmenting
-      private ?string $game_segment;
+      private       ?string $game_segment;
       # Category 4 Data: Provenance
       private static string $event_source = "GAME";
       # Category 5 Data: Versioning
-      private  string $source_version;
-      private  string $game_version;
-      private  string $schema_version;
-      private  string $log_version;
+      private        string $source_version;
+      private        string $game_version;
+      private        string $schema_version;
+      private        string $log_version;
       # Category 6 Data: Configuration
-      private ?string $condition;
-      private ?string $game_configuration;
-      private ?string $platform;
+      private       ?string $condition;
+      private       ?string $game_configuration;
+      private       ?string $platform;
       # Category 7 Data: Context
-      private ?string $game_state;
-      private ?string $player_history;
+      private       ?string $game_state;
+      private       ?string $player_history;
       # Category 8 Data: Event
-      private  string $event_id;
-      private ?string $event_name;
-      private  string $event_data;
+      private        string $event_id;
+      private       ?string $event_name;
+      private        string $event_data;
       # Category 9 Data: Private
       // Nothing here for now, in discussion for final standard
 
-      function __construct(string $game_id,              string $instance_id,     string $player_id,     string $session_id,
-                           DateTimeImmutable $timestamp, ?DateTimeImmutable $auth_timestamp,
-                           float $game_time,             string $sequence_index,  ?string $game_segment,
-                           string $game_version,         string $schema_version,  string $log_version,
-                           ?string $condition,           ?string $game_config,    ?string $platform,
-                           ?string $game_state,          ?string $player_history,
-                           int $event_id,                ?string $event_name,     string $event_data,
-                          )
+      function __construct(
+         string $game_id,              string $instance_id,     string $player_id,     string $session_id,
+         DateTimeImmutable $timestamp, ?DateTimeImmutable $auth_timestamp,
+         ?float $game_time,            string $sequence_index,  ?string $game_segment,
+         string $game_version,         string $schema_version,  string $log_version,
+         ?string $condition,           ?string $game_config,    ?string $platform,
+         ?string $game_state,          ?string $player_history,
+         int $event_id,                ?string $event_name,     string $event_data,
+      )
       {
          $this->game_id = $game_id;
          $this->session_id = $session_id;

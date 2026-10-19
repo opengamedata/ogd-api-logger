@@ -108,7 +108,7 @@
       # Category 9 Data: Private
       // Nothing here for now, in discussion for final standard
 
-      function __construct(string $game_id,              ?string $instance_id,    ?string $player_id,     string $session_id,
+      function __construct(string $game_id,              string $instance_id,     string $player_id,     string $session_id,
                            DateTimeImmutable $timestamp, ?DateTimeImmutable $auth_timestamp,
                            float $game_time,             string $sequence_index,  ?string $game_segment,
                            string $game_version,         string $schema_version,  string $log_version,
@@ -118,9 +118,9 @@
                           )
       {
          $this->game_id = $game_id;
-         $this->instance_id = $instance_id;
-         $this->player_id = $player_id;
          $this->session_id = $session_id;
+         $this->player_id = $player_id;
+         $this->instance_id = $instance_id;
 
          $this->timestamp = $timestamp;
          $this->authoritative_timestamp = $auth_timestamp;
@@ -178,11 +178,11 @@
 
          # Category 1 Data: Identification
 
-         $instance_id = isset($_POST["instance_id"]) ? preg_replace("/[^a-zA-Z0-9]+/", "", $_POST["instance_id"]) : NULL;
-         $player_id   = isset($_POST["player_id"])   ? preg_replace("/[^a-zA-Z0-9]+/", "", $_POST["player_id"])   : NULL;
          if(isset($_POST["session_id"])) {
             $session_id = filter_var($_POST["session_id"], FILTER_SANITIZE_NUMBER_INT);
          } else { die("No session_id"); }
+         $player_id   = isset($_POST["player_id"])   ? preg_replace("/[^a-zA-Z0-9]+/", "", $_POST["player_id"])   : $session_id;
+         $instance_id = isset($_POST["instance_id"]) ? preg_replace("/[^a-zA-Z0-9]+/", "", $_POST["instance_id"]) : $player_id;
 
          # Category 2 Data: Sequencing
 
@@ -194,10 +194,10 @@
                          ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $datum->authoritative_timestamp) ?? null
                          : null;
 
-         $game_time = "0.0"; // Don't have a great default here
+         $game_time = 0.0; // Don't have a great default here
          if(isset($datum->game_time))
          {
-            $game_time = (float) filter_var($datum->game_time, FILTER_SANITIZE_NUMBER_FLOAT);
+            $game_time = (float) filter_var($datum->game_time, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
          }
 
          if(isset($datum->session_sequence_index)) {
@@ -297,14 +297,6 @@
        */
       {
          # Category 1 Data: Identification
-         $instance_id = null;
-
-         if(isset($_REQUEST["user_id"])) {
-            $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
-         }
-         if(isset($_REQUEST["session_id"])) {
-            $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
-         } else { die("No session_id"); }
 
          // per dump
          $player_id = NULL;   
@@ -315,13 +307,14 @@
 
          # Category 1 Data: Identification
 
-         if(isset($_REQUEST["user_id"])) {
-            $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
-         }
-
          if(isset($_REQUEST["session_id"])) {
             $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
          } else { die("No session_id"); }
+
+         if(isset($_REQUEST["user_id"])) {
+            $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
+         }
+         $player_id = $session_id;
 
          # Category 2 Data: Sequencing
 
@@ -401,7 +394,7 @@
          # Category 9 Data: Private
 
          return new Event(
-            game_id:$game_id,                       instance_id:null,               player_id:$player_id,     session_id:$session_id,
+            game_id:$game_id,                       instance_id:$player_id,         player_id:$player_id,     session_id:$session_id,
             timestamp:$client_time,                 auth_timestamp:null,            game_time:$game_time,
             sequence_index:$session_sequence_index, game_segment:null,
             game_version:$game_version,             schema_version:$schema_version, log_version:$log_version,
@@ -422,9 +415,15 @@
          # Category 1 Data: Identification
 
          $session_id  = null;
-         if(isset($_REQUEST["session_id"])) $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT); else die("No session_id");
-         $player_id   = null;
-         if(isset($_REQUEST["player_id"]))  $player_id  = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["player_id"]);
+         if(isset($_REQUEST["session_id"])) {
+            $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
+         }
+         else {
+            die("No session_id");
+         }
+         $player_id = isset($_REQUEST["player_id"])
+                    ? preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["player_id"])
+                    : $session_id;
 
          # Category 2 Data: Sequencing
 
@@ -490,7 +489,7 @@
          $event_data = $datum->event_data_complex ?? "{}";
 
          return new Event(
-            game_id:$game_id,                       instance_id:null,               player_id:$player_id,     session_id:$session_id,
+            game_id:$game_id,                       instance_id:$player_id,         player_id:$player_id,     session_id:$session_id,
             timestamp:$client_time,                 game_time:$game_time,           auth_timestamp:null,
             sequence_index:$session_sequence_index, game_segment:$segment,
             game_version:$game_version,             schema_version:$schema_version, log_version:$log_version,
@@ -502,7 +501,8 @@
 
       function AsMySQLQuery($conn) : string
       {
-         $event_data_str = !is_null($this->event_data)    ?      mysqli_real_escape_string($conn, $this->event_data)         : "NULL";
+         throw new Exception("MySQL not supported!");
+         $event_data_str = !is_null($this->event_data) ? mysqli_real_escape_string($conn, $this->event_data)         : "NULL";
          return "(".
             "\"".mysqli_real_escape_string($conn, $this->session_id)."\",".
             "\"".mysqli_real_escape_string($conn, $this->player_id)."\",".
@@ -519,9 +519,6 @@
             "\"".mysqli_real_escape_string($conn, $this->condition)."\",".
             "\"".mysqli_real_escape_string($conn, $this->log_version)."\",".
             "\"".mysqli_real_escape_string($conn, $this->session_sequence_index)."\",".
-            // "\"".mysqli_real_escape_string($conn, Event::$host)."\",".
-            // "\"".mysqli_real_escape_string($conn, Event::$remote_addr)."\",".
-            // "\"".mysqli_real_escape_string($conn, Event::$http_user_agent)."\",".
             "\"".Event::$synced."\"".
          ")";
       }

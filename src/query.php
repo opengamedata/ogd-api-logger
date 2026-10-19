@@ -188,39 +188,54 @@
 
          # Category 1 Data: Identification
 
-         if(isset($_REQUEST["session_id"])) {
-            $session_id = filter_var($_REQUEST["session_id"], FILTER_SANITIZE_NUMBER_INT);
-         } else { die("No session_id"); }
-         $player_id   = isset($_REQUEST["player_id"])   ? preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["player_id"])   : $session_id;
-         $instance_id = isset($_REQUEST["instance_id"]) ? preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["instance_id"]) : $player_id;
+         $raw = $_REQUEST["session_id"];
+         $session_id = isset($raw)
+                     ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                     : die("No session_id found in the logger request.");
+
+         $raw = $_REQUEST["player_id"];
+         $player_id   = isset($raw)
+                      ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
+                      : null;
+
+         $raw = $_REQUEST["instance_id"];
+         $instance_id = isset($raw)
+                      ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
+                      : null;
 
          # Category 2 Data: Sequencing
-
-         $timestamp = isset($datum->timestamp)
-                    ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $datum->timestamp) ?? new DateTimeImmutable()
-                    : new DateTimeImmutable();
-
-         $auth_timestamp = isset($datum->authoritative_timestamp)
-                         ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $datum->authoritative_timestamp) ?? null
-                         : null;
-
-         $game_time = 0.0; // Don't have a great default here
-         if(isset($datum->game_time))
-         {
-            $game_time = (float) filter_var($datum->game_time, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+         $raw = $datum->timestamp;
+         $timestamp = isset($raw)
+                    ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $raw)
+                    : die("No timestamp found in the logger request.");
+         if ($timestamp == false) {
+            die("Invalid timestamp format, needs to match the format Y-m-d*H:i:s.uT");
          }
 
-         if(isset($datum->session_sequence_index)) {
-            $session_sequence_index  = (int) filter_var($datum->session_sequence_index, FILTER_SANITIZE_NUMBER_INT);
-            // error_log("From datum ".json_encode($datum).", event sequence index is ".$datum->session_sequence_index);
-         } else { die("No event_sequence_index"); }
+         $raw = $datum->authoritative_timestamp;
+         $auth_timestamp = isset($raw)
+                         ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $raw) ?? null
+                         : null;
+
+         $raw = $datum->game_time;
+         $game_time = isset($raw)
+                    ? (float) filter_var($raw, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION)
+                    : null;
+
+         $raw = $datum->session_sequence_index;
+         $session_sequence_index = isset($raw)
+                                 ? (int) filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                                 : die("No event_sequence_index");
 
          # Category 3 Data: Segmenting
 
-         $segment = $datum->game_segment ?? "{}";
-         if (!json_validate($segment)) {
-            die("Invalid JSON in game_segment! ".json_last_error()." : ".json_last_error_msg());
-         }
+         $raw = $datum->game_segment;
+         $segment = isset($raw)
+                  ? ( json_validate($raw)
+                    ? $raw
+                    : die("Invalid JSON in game_segment! ".json_last_error()." : ".json_last_error_msg())
+                  )
+                  : null;
 
          # Category 4 Data: Provenance
 
@@ -230,61 +245,69 @@
 
          // source_version is given the game_version
 
-         if(isset($_REQUEST["game_version"])) {
-            $game_version = filter_var($_REQUEST["game_version"], FILTER_SANITIZE_NUMBER_INT);
-         } else { die("No game_version"); }
+         $game_version = isset($_REQUEST["game_version"])
+                       ? filter_var($_REQUEST["game_version"], FILTER_SANITIZE_NUMBER_INT)
+                       : die("No game_version");
 
-         $schema_version = $_REQUEST["schema_version"] ?? "N/A";
+         $schema_version = isset($_REQUEST["schema_version"])
+                         ? $_REQUEST["schema_version"]
+                         : die("No schema_version");
 
-         if(isset($_REQUEST["log_version"])) {
-            $log_version = filter_var($_REQUEST["log_version"], FILTER_SANITIZE_NUMBER_INT);
-         } else { die("No log_version"); }
+         $log_version = isset($_REQUEST["log_version"])
+                      ? filter_var($_REQUEST["log_version"], FILTER_SANITIZE_NUMBER_INT)
+                      : die("No log_version");
 
          # Category 6 Data: Configuration
 
-         $condition = NULL;
-         if(isset($_REQUEST["condition"])) {
-            $condition = preg_replace("/[^a-zA-Z0-9-_]+/", "", $_REQUEST["condition"]);
-         }
+         $condition = isset($_REQUEST["condition"])
+                    ? preg_replace("/[^a-zA-Z0-9-_]+/", "", $_REQUEST["condition"])
+                    : null;
 
-         $game_config = $_REQUEST["game_configuration"] ?? "{}";
-         if (!json_validate($game_config)) {
-            die("Invalid JSON in game_configuration! ".json_last_error()." : ".json_last_error_msg());
-         }
+         $game_config = json_validate($_REQUEST["game_configuration"])
+                      ? $_REQUEST["game_configuration"] ?? "{}"
+                      : die("Invalid JSON in game_configuration! ".json_last_error()." : ".json_last_error_msg());
 
-         $platform = $_REQUEST["platform"] ?? "{}";
-         if (!json_validate($platform)) {
-            die("Invalid JSON in platform! ".json_last_error()." : ".json_last_error_msg());
-         }
+         $raw = $_REQUEST["platform"];
+         $platform = isset($raw)
+                   ? ( json_validate($raw)
+                     ? $raw
+                     : die("Invalid JSON in platform! ".json_last_error()." : ".json_last_error_msg())
+                   )
+                   : null;
 
          # Category 7 Data: Context
 
-         $game_state = $datum->game_state ?? "{}";
-         if (!json_validate($game_state)) {
-            die("Invalid JSON in game_state! ".json_last_error()." : ".json_last_error_msg());
-         }
+         $raw = $datum->game_state;
+         $game_state = isset($raw)
+                     ? ( json_validate($raw)
+                       ? $raw
+                       : die("Invalid JSON in game_state! ".json_last_error()." : ".json_last_error_msg())
+                     )
+                     : null;
 
-         $player_history = $_REQUEST["player_history"] ?? "{}";
-         if (!json_validate($player_history)) {
-            die("Invalid JSON in player_history! ".json_last_error()." : ".json_last_error_msg());
-         }
+         $raw = $_REQUEST["player_history"];
+         $player_history = isset($raw)
+                         ? ( json_validate($raw)
+                           ? $raw
+                           : die("Invalid JSON in player_history! ".json_last_error()." : ".json_last_error_msg())
+                         )
+                         : null;
 
          # Category 8 Data: Event
-         if(isset($datum->event_id)) {
-            $event_id = (int) filter_var($datum->event_id, FILTER_SANITIZE_NUMBER_INT);
-         } else { die("No event_id"); }
+         $raw = $datum->event_id;
+         $event_id = isset($raw)
+                   ? (int) filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                   : die("No event_id");
 
-         $event_name = $datum->event_name ?? "unnamed";
+         $event_name = $datum->event_name ?? null;
 
-         if (isset($datum->event_data)) {
-            $event_data = $datum->event_data;
-            if (!json_validate($event_data)) {
-               die("Invalid JSON in event_data! ".json_last_error()." : ".json_last_error_msg());
-            }
-         }
-         else {
-            die("No event_data");
-         }
+         $raw = $datum->event_data;
+         $event_data = isset($raw)
+                     ? ( json_validate($raw)
+                       ? $raw
+                       : die("Invalid JSON in event_data! ".json_last_error()." : ".json_last_error_msg())
+                     ) 
+                     : die("No event_data");
 
          # Category 9 Data: Private
 

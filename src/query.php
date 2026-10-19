@@ -245,16 +245,22 @@
 
          // source_version is given the game_version
 
-         $source_version = isset($_REQUEST["source_version"])
-                       ? filter_var($_REQUEST["source_version"], FILTER_SANITIZE_NUMBER_INT)
-                       : die("No source_version found in the logger request.");
-
-         $schema_version = isset($_REQUEST["schema_version"])
-                         ? $_REQUEST["schema_version"]
+         $raw = $_REQUEST["source_version"];
+         $source_version = isset($raw)
+                       ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                       : ( isset($_REQUEST["game_version"])
+                         ? filter_var($_REQUEST["game_version"], FILTER_SANITIZE_NUMBER_INT)
+                         : die("No source_version found in the logger request.")
+                       );
+                       
+         $raw = $_REQUEST["schema_version"];
+         $schema_version = isset($raw)
+                         ? $raw
                          : die("No schema_version found in the logger request.");
 
-         $log_version = isset($_REQUEST["log_version"])
-                      ? filter_var($_REQUEST["log_version"], FILTER_SANITIZE_NUMBER_INT)
+         $raw = $_REQUEST["log_version"];
+         $log_version = isset($raw)
+                      ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
                       : die("No log_version found in the logger request.");
 
          # Category 6 Data: Configuration

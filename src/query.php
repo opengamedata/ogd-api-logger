@@ -73,9 +73,6 @@
 
       # Category 0 Data: Non-logged data
       private static int $synced = 0;
-      private static ?string $http_user_agent = null; // DEPRECATED
-      private static ?string $host = null; // DEPRECATED
-      private static ?string $remote_addr = null; // DEPRECATED
 
       # Category 1 Data: Identification
       private  string $game_id;
@@ -513,7 +510,8 @@
 
       function AsMySQLQuery($conn) : string
       {
-         $event_data_str = !is_null($this->event_data)    ?      mysqli_real_escape_string($conn, $this->event_data)         : "NULL";
+         throw new Exception("MySQL not supported!");
+         $event_data_str = !is_null($this->event_data) ? mysqli_real_escape_string($conn, $this->event_data)         : "NULL";
          return "(".
             "\"".mysqli_real_escape_string($conn, $this->session_id)."\",".
             "\"".mysqli_real_escape_string($conn, $this->player_id)."\",".
@@ -530,9 +528,6 @@
             "\"".mysqli_real_escape_string($conn, $this->condition)."\",".
             "\"".mysqli_real_escape_string($conn, $this->log_version)."\",".
             "\"".mysqli_real_escape_string($conn, $this->session_sequence_index)."\",".
-            "\"".mysqli_real_escape_string($conn, Event::$host)."\",".
-            "\"".mysqli_real_escape_string($conn, Event::$remote_addr)."\",".
-            "\"".mysqli_real_escape_string($conn, Event::$http_user_agent)."\",".
             "\"".Event::$synced."\"".
          ")";
       }

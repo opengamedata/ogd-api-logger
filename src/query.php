@@ -76,14 +76,13 @@
 
       # Category 1 Data: Identification
       private        string $game_id;
-      private       ?string $instance_id;
-      private       ?string $player_id;
+      private        string $instance_id;
+      private        string $player_id;
       private        string $session_id;
       # Category 2 Data: Sequencing
       private        DateTimeImmutable $timestamp;
       private       ?DateTimeImmutable $authoritative_timestamp;
       private       ?float $game_time;
-      private static string $server_time = "CURRENT_TIMESTAMP()"; // DEPRECATED
       private        int $session_sequence_index; // TODO : this is listed as non-required in standard, that's probably wrong.
       # Category 3 Data: Segmenting
       private       ?string $game_segment;
@@ -109,41 +108,41 @@
       // Nothing here for now, in discussion for final standard
 
       function __construct(
-         string $game_id,              string $instance_id,     string $player_id,     string $session_id,
+         string $game_id,              ?string $instance_id,    ?string $player_id,    string $session_id,
          DateTimeImmutable $timestamp, ?DateTimeImmutable $auth_timestamp,
-         ?float $game_time,            string $sequence_index,  ?string $game_segment,
+         ?float $game_time,            ?string $sequence_index, ?string $game_segment,
          string $game_version,         string $schema_version,  string $log_version,
          ?string $condition,           ?string $game_config,    ?string $platform,
          ?string $game_state,          ?string $player_history,
-         int $event_id,                ?string $event_name,     string $event_data,
+         ?int $event_id,               ?string $event_name,     string $event_data,
       )
       {
-         $this->game_id = $game_id;
-         $this->session_id = $session_id;
-         $this->player_id = $player_id;
-         $this->instance_id = $instance_id;
+         $this->game_id     = $game_id;
+         $this->session_id  = $session_id;
+         $this->player_id   = $player_id ?? $this->session_id;
+         $this->instance_id = $instance_id ?? $this->player_id;
 
-         $this->timestamp = $timestamp;
+         $this->timestamp               = $timestamp;
          $this->authoritative_timestamp = $auth_timestamp;
-         $this->game_time = $game_time;
-         $this->session_sequence_index = $sequence_index;
+         $this->game_time               = $game_time;
+         $this->session_sequence_index  = $sequence_index;
 
-         $this->game_segment = $game_segment;
+         $this->game_segment = $game_segment ?? "{}";
 
          $this->source_version = $game_version; // Game is always the source here.
-         $this->game_version = $game_version;
+         $this->game_version   = $game_version;
          $this->schema_version = $schema_version;
-         $this->log_version = $log_version;
+         $this->log_version    = $log_version;
 
-         $this->condition = $condition;
-         $this->game_configuration = $game_config;
-         $this->platform = $platform;
+         $this->condition          = $condition;
+         $this->game_configuration = $game_config ?? "{}";
+         $this->platform           = $platform    ?? "{}";
 
-         $this->player_history = $player_history;
-         $this->game_state = $game_state;
+         $this->game_state     = $game_state     ?? "{}";
+         $this->player_history = $player_history ?? "{}";
 
-         $this->event_id = $event_id;
-         $this->event_name = $event_name;
+         $this->event_id   = $event_id   ?? 9999;
+         $this->event_name = $event_name ?? Event::IDtoName($this->event_id);
          $this->event_data = $event_data;
       }
 

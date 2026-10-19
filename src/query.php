@@ -188,20 +188,20 @@
 
          # Category 1 Data: Identification
 
-         $raw = $_REQUEST["session_id"];
-         $session_id = isset($raw)
-                     ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
-                     : die("No session_id found in the logger request.");
+         $raw = $_REQUEST["instance_id"];
+         $instance_id = isset($raw)
+                      ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
+                      : null;
 
          $raw = $_REQUEST["player_id"];
          $player_id   = isset($raw)
                       ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
                       : null;
 
-         $raw = $_REQUEST["instance_id"];
-         $instance_id = isset($raw)
-                      ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
-                      : null;
+         $raw = $_REQUEST["session_id"];
+         $session_id = isset($raw)
+                     ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                     : die("No session_id found in the logger request.");
 
          # Category 2 Data: Sequencing
          $raw = $datum->timestamp;

@@ -46,9 +46,9 @@ class BigQueryUtils {
       return $conn;
    }
 
-   static function Insert($conn, string $app_id, array $query) : string {
+   static function Insert($conn, string $game_id, array $query) : string {
       try {
-         $dataset = $conn->dataset(strtolower($app_id));
+         $dataset = $conn->dataset(strtolower($game_id));
          $table_name = "{$dataset->id()}_daily_".date("Ymd");
          $table = $dataset->table($table_name);
          $opts = [
@@ -57,17 +57,16 @@ class BigQueryUtils {
          ];
          $result = $table->insertRows($query, $opts);
          if (!$result->isSuccessful()) {
-            $lambda = function($err) { return $err['reason'].": ".$err['message']; };
-            // $msg = "Query for ".$app_id." failed with errors: ".join("\n", array_map($lambda, $result->failedRows()));
-            $msg = "Query for ".$app_id." failed with errors: ".json_encode($result->failedRows());
+            $lambda = function($err) { return json_encode($err['errors']); };
+            $msg = "Query for ".$game_id." failed with errors";
             http_response_code(500);
-            error_log($msg);
+            error_log($msg.": ".join("\n", array_map($lambda, $result->failedRows())));
             die("FAIL: ".$msg);
          }
       }
       catch(Exception $e) {
-         $sql_err = "Query for ".$app_id." failed with error: ".$e->getMessage();
-         error_log($sql_err);
+         $sql_err = "Query for ".$game_id." failed with error";
+         error_log($sql_err.": ".$e->getMessage());
          http_response_code(500);
          die("FAIL: ".$sql_err);
       }

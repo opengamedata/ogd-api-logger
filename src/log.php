@@ -28,17 +28,27 @@ switch ($db_type) {
 }
 
 # 2. IDENTIFY the input schema format, defaulting to full OGD schema.
-$request_schema = $OGD_SCHEMA;
-$app_id = "NO APP ID";
-
-if (isset($_REQUEST["app_id"])) {
-  $app_id = strtoupper($_REQUEST["app_id"]);
-  if (in_array($app_id, $LOGGER_GAMES)) {
-    $request_schema = $LOGGER_SCHEMA;
-  }
+if (isset($_REQUEST["game_id"])) {
+  $game_id = strtoupper($_REQUEST["game_id"]);
+}
+else if (isset($_REQUEST["app_id"])) {
+  $game_id = strtoupper($_REQUEST["app_id"]);
 }
 else {
-   die("FAIL: Request is missing app_id!");
+   die("FAIL: Request is missing game_id element!");
+}
+
+$schema_version = $_REQUEST["schema_version"] ?? "N/A";
+switch ($schema_version) {
+   case "1.0-alpha":
+      $request_schema = OGD_SCHEMA_10;
+      break;
+   default:
+      $request_schema = OGD_SCHEMA_01;
+      if (in_array($game_id, $LOGGER_GAMES)) {
+         $request_schema = LOGGER_SCHEMA;
+      }
+      break;
 }
 
 # 3. DECODE the query data from raw input data.
@@ -55,16 +65,16 @@ if (!is_array($data)) {
 
 # 4. PARSE and SEND data through a DB query.
 if (count($data) > 0) {
-   $query = new EventQuery($request_schema, $app_id, $data);
+   $query = new EventQuery($request_schema, $game_id, $data);
 
    switch ($db_type) {
       case "bigquery":
          $arr = $query->AsBigQuery($conn);
-         $result = BigQueryUtils::Insert($conn, $app_id, $arr);
+         $result = BigQueryUtils::Insert($conn, $game_id, $arr);
          break;
       case "mysql":
-         $query_string = $query->AsMySQL($db_type, $app_id, $conn);
-         // $result = MySQLUtils::Insert($conn, $app_id, $query_string);
+         $query_string = $query->AsMySQL($conn);
+         // $result = MySQLUtils::Insert($conn, $game_id, $query_string);
          $result = "Dummy run of \n".$query_string."\n in MySQL.";
          error_log("Sending mysql response: ".$result);
          break;

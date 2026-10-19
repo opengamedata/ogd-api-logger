@@ -25,15 +25,15 @@ class MySQLUtils {
       try {
          $result = mysqli_query($conn, $query);
          if (!$result) {
-            $sql_err = "Query for ".$game_id." failed with error: ".mysqli_error($conn);
-            error_log($sql_err);
+            $sql_err = "Query for ".$game_id." failed with error";
+            error_log($sql_err.": ".mysqli_error($conn));
             http_response_code(500);
             die("FAIL: ".$sql_err);
          }
       }
       catch(mysqli_sql_exception) {
-         $sql_err = "Query for ".$game_id." failed with error: ".mysqli_error($conn);
-         error_log($sql_err);
+         $sql_err = "Query for ".$game_id." failed with error";
+         error_log($sql_err.": ".mysqli_error($conn));
          http_response_code(500);
          die("FAIL: ".$sql_err);
       }

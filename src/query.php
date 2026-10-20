@@ -1,10 +1,13 @@
 <?php
 
-   const LOGGER_SCHEMA = "LOGGER";
-   const OGD_SCHEMA_01 = "OPENGAMEDATA_V0";
-   const OGD_SCHEMA_10 = "OPENGAMEDATA_V1";
+   namespace Logger;
+
+   use \Exception;
+   use \DateTimeImmutable;
+   use \DateTimeZone;
 
    class EventQuery {
+
       const string OGD_01_COLUMNS =
       "(".
          "session_id,".
@@ -110,7 +113,7 @@
       function __construct(
          string $game_id,              ?string $instance_id,    ?string $player_id,    string $session_id,
          DateTimeImmutable $timestamp, ?DateTimeImmutable $auth_timestamp,
-         ?float $game_time,            ?string $sequence_index, ?string $game_segment,
+         ?float $game_time,            ?int $sequence_index,    ?string $game_segment,
          string $game_version,         string $schema_version,  string $log_version,
          ?string $condition,           ?string $game_config,    ?string $platform,
          ?string $game_state,          ?string $player_history,
@@ -339,7 +342,7 @@
       static function FromOGDLegacyFormat($game_id, $datum) : Event
       /** Create an Event object from the original/legacy OGD format (Schema v0.1)
        * 
-       * Items from $_REQUEST: session_id, user_id, user_data, app_version, app_branch, log_version, 
+       * Items from $_REQUEST: session_id, user_id, player_history, app_version, app_branch, log_version, 
        * Items from $datum: client_time, client_offset, event_name, event_data, game_state, event_sequence_index
        */
       {

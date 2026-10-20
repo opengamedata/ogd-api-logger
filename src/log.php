@@ -3,15 +3,21 @@ header("Access-Control-Allow-Headers: Origin, Authorization, X-Requested-With, C
 header("Access-Control-Allow-Origin: *");
 
 # 3rd-party imports
-require 'vendor/autoload.php';
+require_once 'vendor/autoload.php';
 # Local imports
-require 'config.php';
-require 'bigquery.php';
-require 'mysql.php';
-require 'query.php';
-require 'monitor.php';
+require_once 'config.php';
+require_once 'bigquery.php';
+require_once 'mysql.php';
+require_once 'query.php';
+require_once 'monitor.php';
 
-$LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
+use Logger\EventQuery;
+
+const LOGGER_SCHEMA = "LOGGER";
+const OGD_SCHEMA_01 = "OPENGAMEDATA_V0";
+const OGD_SCHEMA_10 = "OPENGAMEDATA_V1";
+
+const LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
                      "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND");
 
 # 1. CONNECT to DB before we go to the trouble of looking at the data.
@@ -45,7 +51,7 @@ switch ($schema_version) {
       break;
    default:
       $request_schema = OGD_SCHEMA_01;
-      if (in_array($game_id, $LOGGER_GAMES)) {
+      if (in_array($game_id, LOGGER_GAMES)) {
          $request_schema = LOGGER_SCHEMA;
       }
       break;

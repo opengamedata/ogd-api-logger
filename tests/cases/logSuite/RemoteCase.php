@@ -154,7 +154,7 @@
             "condition" => "testing-branch",
             "game_configuration" => "{}",
             "platform" => "{}",
-            "user_data" => "{}"
+            "player_history" => "{}"
          ];
          $body_params = [
             [

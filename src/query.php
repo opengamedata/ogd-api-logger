@@ -188,20 +188,20 @@
 
          # Category 1 Data: Identification
 
-         $raw = $_REQUEST["session_id"];
-         $session_id = isset($raw)
-                     ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
-                     : die("No session_id found in the logger request.");
+         $raw = $_REQUEST["instance_id"];
+         $instance_id = isset($raw)
+                      ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
+                      : null;
 
          $raw = $_REQUEST["player_id"];
          $player_id   = isset($raw)
                       ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
                       : null;
 
-         $raw = $_REQUEST["instance_id"];
-         $instance_id = isset($raw)
-                      ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
-                      : null;
+         $raw = $_REQUEST["session_id"];
+         $session_id = isset($raw)
+                     ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                     : die("No session_id found in the logger request.");
 
          # Category 2 Data: Sequencing
          $raw = $datum->timestamp;
@@ -225,7 +225,7 @@
          $raw = $datum->session_sequence_index;
          $session_sequence_index = isset($raw)
                                  ? (int) filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
-                                 : die("No event_sequence_index");
+                                 : null;
 
          # Category 3 Data: Segmenting
 
@@ -245,27 +245,38 @@
 
          // source_version is given the game_version
 
-         $game_version = isset($_REQUEST["game_version"])
-                       ? filter_var($_REQUEST["game_version"], FILTER_SANITIZE_NUMBER_INT)
-                       : die("No game_version");
+         $raw = $_REQUEST["source_version"];
+         $source_version = isset($raw)
+                       ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                       : ( isset($_REQUEST["game_version"])
+                         ? filter_var($_REQUEST["game_version"], FILTER_SANITIZE_NUMBER_INT)
+                         : die("No source_version found in the logger request.")
+                       );
+                       
+         $raw = $_REQUEST["schema_version"];
+         $schema_version = isset($raw)
+                         ? $raw
+                         : die("No schema_version found in the logger request.");
 
-         $schema_version = isset($_REQUEST["schema_version"])
-                         ? $_REQUEST["schema_version"]
-                         : die("No schema_version");
-
-         $log_version = isset($_REQUEST["log_version"])
-                      ? filter_var($_REQUEST["log_version"], FILTER_SANITIZE_NUMBER_INT)
-                      : die("No log_version");
+         $raw = $_REQUEST["log_version"];
+         $log_version = isset($raw)
+                      ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                      : die("No log_version found in the logger request.");
 
          # Category 6 Data: Configuration
 
-         $condition = isset($_REQUEST["condition"])
-                    ? preg_replace("/[^a-zA-Z0-9-_]+/", "", $_REQUEST["condition"])
+         $raw = $_REQUEST["condition"];
+         $condition = isset($raw)
+                    ? preg_replace("/[^a-zA-Z0-9-_]+/", "", $raw)
                     : null;
 
-         $game_config = json_validate($_REQUEST["game_configuration"])
-                      ? $_REQUEST["game_configuration"] ?? "{}"
-                      : die("Invalid JSON in game_configuration! ".json_last_error()." : ".json_last_error_msg());
+         $raw = $_REQUEST["game_configuration"];
+         $game_config = isset($raw)
+                      ? ( json_validate($raw)
+                        ? $raw
+                        : die("Invalid JSON in game_configuration! ".json_last_error()." : ".json_last_error_msg())
+                      )
+                      : null;
 
          $raw = $_REQUEST["platform"];
          $platform = isset($raw)
@@ -297,9 +308,12 @@
          $raw = $datum->event_id;
          $event_id = isset($raw)
                    ? (int) filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
-                   : die("No event_id");
+                   : null;
 
-         $event_name = $datum->event_name ?? null;
+         $raw = $datum->event_name;
+         $event_name = isset($raw)
+                      ? preg_replace("/[^a-zA-Z0-9-_]+/", "", $raw)
+                      : null;
 
          $raw = $datum->event_data;
          $event_data = isset($raw)
@@ -307,7 +321,7 @@
                        ? $raw
                        : die("Invalid JSON in event_data! ".json_last_error()." : ".json_last_error_msg())
                      ) 
-                     : die("No event_data");
+                     : die("No event_data found in the logger request.");
 
          # Category 9 Data: Private
 
@@ -315,7 +329,7 @@
             game_id:$game_id,                       instance_id:$instance_id,             player_id:$player_id,     session_id:$session_id,
             timestamp:$timestamp,                   auth_timestamp:$auth_timestamp,       game_time:$game_time,
             sequence_index:$session_sequence_index, game_segment:$segment,
-            game_version:$game_version,             schema_version:$schema_version,       log_version:$log_version,
+            game_version:$source_version,           schema_version:$schema_version,       log_version:$log_version,
             condition:$condition,                   game_config:$game_config,             platform:$platform,
             game_state:$game_state,                 player_history:$player_history,
             event_id:$event_id,                     event_name:$event_name,               event_data:$event_data,     

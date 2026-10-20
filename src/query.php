@@ -2,6 +2,8 @@
 
    namespace Logger;
 
+   require_once 'event.php';
+
    class EventQuery {
 
       const string OGD_01_COLUMNS =

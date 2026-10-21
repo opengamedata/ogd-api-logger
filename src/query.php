@@ -376,7 +376,12 @@
                  : "+";
          $offset_str = $prefix.$offset_components[0].":".$offset_components[1];
          $client_offset =  new DateTimeZone($offset_str);
-         $client_time = $client_time->setTimezone($client_offset);
+         if (!$client_offset) {
+            error_log("Could not create timezone from offset string of ".$offset_str);
+         }
+         else {
+            $client_time = $client_time->setTimezone($client_offset) ?? $client_time;
+         }
 
          $game_time = 0.0; // Don't have a great default here
 

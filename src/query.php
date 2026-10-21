@@ -188,17 +188,17 @@
 
          # Category 1 Data: Identification
 
-         $raw = $_REQUEST["instance_id"];
+         $raw = $_POST["instance_id"];
          $instance_id = isset($raw)
                       ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
                       : null;
 
-         $raw = $_REQUEST["player_id"];
+         $raw = $_POST["player_id"];
          $player_id   = isset($raw)
                       ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
                       : null;
 
-         $raw = $_REQUEST["session_id"];
+         $raw = $_POST["session_id"];
          $session_id = isset($raw)
                      ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
                      : die("No session_id found in the logger request.");
@@ -245,7 +245,7 @@
 
          // source_version is given the game_version
 
-         $raw = $_REQUEST["source_version"];
+         $raw = $_POST["source_version"];
          $source_version = isset($raw)
                        ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
                        : ( isset($_REQUEST["game_version"])
@@ -258,19 +258,19 @@
                          ? $raw
                          : die("No schema_version found in the logger request.");
 
-         $raw = $_REQUEST["log_version"];
+         $raw = $_POST["log_version"];
          $log_version = isset($raw)
                       ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
                       : die("No log_version found in the logger request.");
 
          # Category 6 Data: Configuration
 
-         $raw = $_REQUEST["condition"];
+         $raw = $_POST["condition"];
          $condition = isset($raw)
                     ? preg_replace("/[^a-zA-Z0-9-_]+/", "", $raw)
                     : null;
 
-         $raw = $_REQUEST["game_configuration"];
+         $raw = $_POST["game_configuration"];
          $game_config = isset($raw)
                       ? ( json_validate($raw)
                         ? $raw
@@ -278,7 +278,7 @@
                       )
                       : null;
 
-         $raw = $_REQUEST["platform"];
+         $raw = $_POST["platform"];
          $platform = isset($raw)
                    ? ( json_validate($raw)
                      ? $raw
@@ -296,7 +296,7 @@
                      )
                      : null;
 
-         $raw = $_REQUEST["player_history"];
+         $raw = $_POST["player_history"];
          $player_history = isset($raw)
                          ? ( json_validate($raw)
                            ? $raw

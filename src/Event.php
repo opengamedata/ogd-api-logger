@@ -38,7 +38,7 @@
       private       ?string $game_state;
       private       ?string $player_history;
       # Category 8 Data: Event
-      private        string $event_id;
+      private        int $event_id;
       private       ?string $event_name;
       private        string $event_data;
       # Category 9 Data: Private

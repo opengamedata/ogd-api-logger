@@ -17,8 +17,10 @@ const LOGGER_SCHEMA = "LOGGER";
 const OGD_SCHEMA_01 = "OPENGAMEDATA_V0";
 const OGD_SCHEMA_10 = "OPENGAMEDATA_V1";
 
-const LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
-                     "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND");
+const LOGGER_GAMES = array(
+   "BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
+   "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND"
+);
 
 # 1. CONNECT to DB before we go to the trouble of looking at the data.
 switch ($db_type) {

@@ -1,6 +1,6 @@
 <?php
 
-   namespace Logger;
+   namespace Logger\event;
 
    use \Exception;
    use \DateTimeImmutable;

@@ -48,7 +48,7 @@
          string $game_id,              ?string $instance_id,    ?string $player_id,    string $session_id,
          DateTimeImmutable $timestamp, ?DateTimeImmutable $auth_timestamp,
          ?float $game_time,            ?int $sequence_index,    ?string $game_segment,
-         string $game_version,         string $schema_version,  string $log_version,
+         string $source_version,       string $schema_version,  string $log_version,
          ?string $condition,           ?string $game_config,    ?string $platform,
          ?string $game_state,          ?string $player_history,
          ?int $event_id,               ?string $event_name,     string $event_data,
@@ -66,8 +66,8 @@
 
          $this->game_segment = $game_segment ?? "{}";
 
-         $this->source_version = $game_version; // Game is always the source here.
-         $this->game_version   = $game_version;
+         $this->source_version = $source_version; // Game is always the source here.
+         $this->game_version   = $source_version;
          $this->schema_version = $schema_version;
          $this->log_version    = $log_version;
 
@@ -266,7 +266,7 @@
             game_id:$game_id,                       instance_id:$instance_id,             player_id:$player_id,     session_id:$session_id,
             timestamp:$timestamp,                   auth_timestamp:$auth_timestamp,       game_time:$game_time,
             sequence_index:$session_sequence_index, game_segment:$segment,
-            game_version:$source_version,           schema_version:$schema_version,       log_version:$log_version,
+            source_version:$source_version,           schema_version:$schema_version,       log_version:$log_version,
             condition:$condition,                   game_config:$game_config,             platform:$platform,
             game_state:$game_state,                 player_history:$player_history,
             event_id:$event_id,                     event_name:$event_name,               event_data:$event_data,     
@@ -381,7 +381,7 @@
             game_id:$game_id,                       instance_id:$player_id,         player_id:$player_id,     session_id:$session_id,
             timestamp:$client_time,                 auth_timestamp:null,            game_time:$game_time,
             sequence_index:$session_sequence_index, game_segment:null,
-            game_version:$game_version,             schema_version:$schema_version, log_version:$log_version,
+            source_version:$game_version,           schema_version:$schema_version, log_version:$log_version,
             condition:$condition,                   game_config:null,               platform:null,
             game_state:$game_state,                 player_history:$player_history,
             event_id:$event_id,                     event_name:$event_name,         event_data:$event_data,     
@@ -476,7 +476,7 @@
             game_id:$game_id,                       instance_id:$player_id,         player_id:$player_id,     session_id:$session_id,
             timestamp:$client_time,                 game_time:$game_time,           auth_timestamp:null,
             sequence_index:$session_sequence_index, game_segment:$segment,
-            game_version:$game_version,             schema_version:$schema_version, log_version:$log_version,
+            source_version:$game_version,           schema_version:$schema_version, log_version:$log_version,
             condition:$condition,                   game_config:null,               platform:null,
             game_state:$game_state,                 player_history:$player_history,
             event_id:$event_id,                     event_name:$event_name,         event_data:$event_data,     

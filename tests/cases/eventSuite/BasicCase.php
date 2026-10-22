@@ -7,7 +7,7 @@
    {
       private static array $vals;
       private $event;
-      function init()
+      protected function setUp() : void
       {
          EventBasicCase::$vals  = [
             "game_id" => "TEST_GAME",
@@ -57,7 +57,6 @@
 
       public function testConstructor(): void
       {
-         $this->init();
          $result = new ReflectionClass($this->event);
 
          $observed = $result->getProperty('game_id')->getValue($this->event);

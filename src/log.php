@@ -11,7 +11,7 @@ require_once 'mysql.php';
 require_once 'query.php';
 require_once 'monitor.php';
 
-use Logger\query\EventQuery;
+use Logger\EventQuery;
 
 const LOGGER_SCHEMA = "LOGGER";
 const OGD_SCHEMA_01 = "OPENGAMEDATA_V0";

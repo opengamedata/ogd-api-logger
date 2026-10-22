@@ -1,9 +1,9 @@
 <?php
 
-   namespace Logger\query;
+   namespace Logger;
 
    require_once 'event.php';
-   use Logger\event\Event as Event;
+   use Logger\Event;
 
    class EventQuery {
 

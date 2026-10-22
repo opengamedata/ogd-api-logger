@@ -92,7 +92,7 @@
          $observed = $result->getProperty('authoritative_timestamp')->getValue($this->event);
          $this->assertSame(
             $observed,
-            EventBasicCase::$vals["authoritative_timestamp"],
+            EventBasicCase::$vals["auth_timestamp"],
             "Incorrect authoritative timestamp ".($observed ? $observed->format("Y-m-d H:i:s.u") : $observed)."!"
          );
          $observed = $result->getProperty('game_time')->getValue($this->event);
@@ -104,7 +104,7 @@
          $observed = $result->getProperty('session_sequence_index')->getValue($this->event);
          $this->assertSame(
             $observed,
-            EventBasicCase::$vals["session_sequence_index"],
+            EventBasicCase::$vals["sequence_index"],
             "Incorrect sequence index ".$observed."!"
          );
          $observed = $result->getProperty('game_segment')->getValue($this->event);
@@ -152,7 +152,7 @@
          $observed = $result->getProperty('game_configuration')->getValue($this->event);
          $this->assertSame(
             $observed,
-            EventBasicCase::$vals["game_configuration"],
+            EventBasicCase::$vals["game_config"],
             "Incorrect game config ".$observed."!"
          );
          $observed = $result->getProperty('platform')->getValue($this->event);

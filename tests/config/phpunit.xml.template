@@ -9,10 +9,9 @@
     <testsuite name="log">
       <directory suffix="Case.php">tests/cases/logSuite</directory>
     </testsuite>
-
-    <!-- <testsuite name="query">
-      <directory suffix="Case.php">tests/cases/querySuite</directory>
-    </testsuite> -->
+    <testsuite name="event">
+      <directory suffix="Case.php">tests/cases/eventSuite</directory>
+    </testsuite>
 
   </testsuites>
   <php>

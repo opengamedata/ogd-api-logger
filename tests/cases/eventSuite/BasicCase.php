@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
    use PHPUnit\Framework\TestCase;
-   use Logger\event\Event as Event;
+   use Logger\Event;
 
    final class EventBasicCase extends TestCase
    {
@@ -9,7 +9,7 @@
       private $event;
       function init()
       {
-         $this->vals  = [
+         EventBasicCase::$vals  = [
             "game_id" => "TEST_GAME",
             "instance_id" => "fake_instance", 
             "player_id" =>  "TestUser", 
@@ -60,115 +60,137 @@
          $this->init();
          $result = new ReflectionClass($this->event);
 
+         $observed = $result->getProperty('game_id')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('game_id')->getValue(),
+            $observed,
             EventBasicCase::$vals["game_id"],
-            "Incorrect game ID ".$result."!"
+            "Incorrect game ID ".$observed."!"
          );
+         $observed = $result->getProperty('instance_id')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('instance_id')->getValue(),
+            $observed,
             EventBasicCase::$vals["instance_id"],
-            "Incorrect instance ID ".$result."!"
+            "Incorrect instance ID ".$observed."!"
          );
+         $observed = $result->getProperty('player_id')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('player_id')->getValue(),
+            $observed,
             EventBasicCase::$vals["player_id"],
-            "Incorrect player ID ".$result."!"
+            "Incorrect player ID ".$observed."!"
          );
+         $observed = $result->getProperty('session_id')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('session_id')->getValue(),
+            $observed,
             EventBasicCase::$vals["session_id"],
-            "Incorrect session ID ".$result."!"
+            "Incorrect session ID ".$observed."!"
          );
+         $observed = $result->getProperty('timestamp')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('timestamp')->getValue(),
+            $observed,
             EventBasicCase::$vals["timestamp"],
-            "Incorrect timestamp ".$result."!"
+            "Incorrect timestamp ".($observed ? $observed->format("Y-m-d H:i:s.u") : $observed)."!"
          );
+         $observed = $result->getProperty('authoritative_timestamp')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('authoritative_timestamp')->getValue(),
+            $observed,
             EventBasicCase::$vals["authoritative_timestamp"],
-            "Incorrect authoritative timestamp ".$result."!"
+            "Incorrect authoritative timestamp ".($observed ? $observed->format("Y-m-d H:i:s.u") : $observed)."!"
          );
+         $observed = $result->getProperty('game_time')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('game_time')->getValue(),
+            $observed,
             EventBasicCase::$vals["game_time"],
-            "Incorrect game time ".$result."!"
+            "Incorrect game time ".$observed."!"
          );
+         $observed = $result->getProperty('session_sequence_index')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('session_sequence_index')->getValue(),
+            $observed,
             EventBasicCase::$vals["session_sequence_index"],
-            "Incorrect sequence index ".$result."!"
+            "Incorrect sequence index ".$observed."!"
          );
+         $observed = $result->getProperty('game_segment')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('game_segment')->getValue(),
+            $observed,
             EventBasicCase::$vals["game_segment"],
-            "Incorrect game segment ".$result."!"
+            "Incorrect game segment ".$observed."!"
          );
+         $observed = $result->getProperty('event_source')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('event_source')->getValue(),
+            $observed,
             "GAME",
-            "Incorrect event source ".$result."!"
+            "Incorrect event source ".$observed."!"
          );
+         $observed = $result->getProperty('source_version')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('source_version')->getValue(),
+            $observed,
             EventBasicCase::$vals["game_version"],
-            "Incorrect source version ".$result."!"
+            "Incorrect source version ".$observed."!"
          );
+         $observed = $result->getProperty('game_version')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('game_version')->getValue(),
+            $observed,
             EventBasicCase::$vals["game_version"],
-            "Incorrect game version ".$result."!"
+            "Incorrect game version ".$observed."!"
          );
+         $observed = $result->getProperty('schema_version')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('schema_version')->getValue(),
+            $observed,
             EventBasicCase::$vals["schema_version"],
-            "Incorrect schema version ".$result."!"
+            "Incorrect schema version ".$observed."!"
          );
+         $observed = $result->getProperty('log_version')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('log_version')->getValue(),
+            $observed,
             EventBasicCase::$vals["log_version"],
-            "Incorrect log version ".$result."!"
+            "Incorrect log version ".$observed."!"
          );
+         $observed = $result->getProperty('condition')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('condition')->getValue(),
+            $observed,
             EventBasicCase::$vals["condition"],
-            "Incorrect condition ".$result."!"
+            "Incorrect condition ".$observed."!"
          );
+         $observed = $result->getProperty('game_configuration')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('game_configuration')->getValue(),
+            $observed,
             EventBasicCase::$vals["game_configuration"],
-            "Incorrect game config ".$result."!"
+            "Incorrect game config ".$observed."!"
          );
+         $observed = $result->getProperty('platform')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('platform')->getValue(),
+            $observed,
             EventBasicCase::$vals["platform"],
-            "Incorrect platform ".$result."!"
+            "Incorrect platform ".$observed."!"
          );
+         $observed = $result->getProperty('game_state')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('game_state')->getValue(),
+            $observed,
             EventBasicCase::$vals["game_state"],
-            "Incorrect game state ".$result."!"
+            "Incorrect game state ".$observed."!"
          );
+         $observed = $result->getProperty('player_history')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('player_history')->getValue(),
+            $observed,
             EventBasicCase::$vals["player_history"],
-            "Incorrect player history ".$result."!"
+            "Incorrect player history ".$observed."!"
          );
+         $observed = $result->getProperty('event_id')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('event_id')->getValue(),
+            $observed,
             EventBasicCase::$vals["event_id"],
-            "Incorrect event ID ".$result."!"
+            "Incorrect event ID ".$observed."!"
          );
+         $observed = $result->getProperty('event_name')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('event_name')->getValue(),
+            $observed,
             EventBasicCase::$vals["event_name"],
-            "Incorrect event name ".$result."!"
+            "Incorrect event name ".$observed."!"
          );
+         $observed = $result->getProperty('event_data')->getValue($this->event);
          $this->assertSame(
-            $result->getProperty('event_data')->getValue(),
+            $observed,
             EventBasicCase::$vals["event_data"],
-            "Incorrect event data ".$result."!"
+            "Incorrect event data ".$observed."!"
          );
       }
 

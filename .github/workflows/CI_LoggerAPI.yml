@@ -28,7 +28,7 @@ jobs:
           n: 17
           remove: '\.'
           with_hash: 'true'
-          hash_n: 2
+          hash_n: 0
 
   build:
     name: Build Docker Image

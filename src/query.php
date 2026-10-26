@@ -3,10 +3,16 @@
    namespace Logger;
 
    require_once 'event.php';
+   require_once 'models/Schemas.php';
+
    use Logger\Event;
+   use Logger\Schemas;
+
+   global $LOGGER_SCHEMA;
+   global $OGD_SCHEMA_01;
+   global $OGD_SCHEMA_10;
 
    class EventQuery {
-
       const string OGD_01_COLUMNS =
       "(".
          "session_id,".
@@ -39,17 +45,17 @@
 
          $this->game_id = $game_id;
          switch ($schema) {
-            case LOGGER_SCHEMA:
+            case Schemas::LOGGER_SCHEMA:
                $lambda = fn($datum) => Event::FromLoggerLegacyFormat($game_id, $datum);
                break;
-            case OGD_SCHEMA_01:
+            case Schemas::OGD_SCHEMA_01:
                $lambda = fn($datum) => Event::FromOGDLegacyFormat($game_id, $datum);
                break;
-            case OGD_SCHEMA_10:
+            case Schemas::OGD_SCHEMA_10:
                $lambda = fn($datum) => Event::FromOGDStandardFormat($game_id, $datum);
                break;
             default:
-               error_log("Got schema name ".$schema." that did not match ".LOGGER_SCHEMA." or ".OGD_SCHEMA_01." or ".OGD_SCHEMA_10.", defaulting to ".OGD_SCHEMA_10);
+               error_log("Got schema name ".$schema." that did not match ".Schemas::LOGGER_SCHEMA." or ".Schemas::OGD_SCHEMA_01." or ".Schemas::OGD_SCHEMA_10.", defaulting to ".Schemas::OGD_SCHEMA_10);
                $lambda = fn($datum) => Event::FromOGDStandardFormat($game_id, $datum);
                break;
          }

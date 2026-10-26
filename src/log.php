@@ -6,10 +6,10 @@ header("Access-Control-Allow-Origin: *");
 require_once 'vendor/autoload.php';
 # Local imports
 require_once 'config.php';
-require_once 'bigquery.php';
-require_once 'mysql.php';
-require_once 'query.php';
 require_once 'monitor.php';
+require_once 'outerfaces/bigquery.php';
+require_once 'outerfaces/mysql.php';
+require_once 'models/query.php';
 require_once 'models/Schemas.php';
 
 use Logger\EventQuery;

@@ -1,4 +1,6 @@
 <?php
+namespace Logger;
+
 class MySQLUtils {
 
    static function Connect(string $servername, ?string $username, ?string $password, string $db) : mysqli|false {

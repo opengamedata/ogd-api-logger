@@ -1,4 +1,6 @@
 <?php
+namespace Logger;
+
 use Google\Cloud\BigQuery\BigQueryClient;
 
 class BigQueryUtils {

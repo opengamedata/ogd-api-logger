@@ -1,6 +1,5 @@
 <?php
-
-   namespace Logger;
+namespace Logger;
 
    require_once 'event.php';
    require_once 'models/Schemas.php';

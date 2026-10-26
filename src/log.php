@@ -10,12 +10,10 @@ require_once 'bigquery.php';
 require_once 'mysql.php';
 require_once 'query.php';
 require_once 'monitor.php';
+require_once 'models/Schemas.php';
 
 use Logger\EventQuery;
-
-const LOGGER_SCHEMA = "LOGGER";
-const OGD_SCHEMA_01 = "OPENGAMEDATA_V0";
-const OGD_SCHEMA_10 = "OPENGAMEDATA_V1";
+use Logger\Schemas;
 
 const LOGGER_GAMES = array(
    "BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
@@ -49,12 +47,12 @@ else {
 $schema_version = $_REQUEST["schema_version"] ?? "N/A";
 switch ($schema_version) {
    case "1.0-alpha":
-      $request_schema = OGD_SCHEMA_10;
+      $request_schema = Schemas::OGD_SCHEMA_10;
       break;
    default:
-      $request_schema = OGD_SCHEMA_01;
+      $request_schema = Schemas::OGD_SCHEMA_01;
       if (in_array($game_id, LOGGER_GAMES)) {
-         $request_schema = LOGGER_SCHEMA;
+         $request_schema = Schemas::LOGGER_SCHEMA;
       }
       break;
 }

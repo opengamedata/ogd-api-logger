@@ -9,7 +9,7 @@ RUN --mount=type=bind,source=composer.json,target=composer.json \
     composer install --no-dev --no-interaction
 
 # Stage 2: Build final image
-FROM php:8.5.11-apache
+FROM php:8.5.12-apache
 WORKDIR /var/www/html/
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"

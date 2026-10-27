@@ -27,7 +27,7 @@ jobs:
         with:
           n: 17
           remove: '\.'
-          with_hash: 'true'
+          with_hash: 'false'
           hash_n: 0
 
   build:

@@ -7,8 +7,8 @@ require_once 'vendor/autoload.php';
 # Local imports
 require_once 'config.php';
 require_once 'monitor.php';
-require_once 'outerfaces/bigquery.php';
-require_once 'outerfaces/mysql.php';
+require_once 'outerfaces/BigQuery.php';
+require_once 'outerfaces/MySQL.php';
 require_once 'models/query.php';
 require_once 'models/Schemas.php';
 

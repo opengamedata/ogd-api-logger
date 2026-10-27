@@ -1,7 +1,7 @@
 <?php
 namespace Logger;
 
-   require_once 'event.php';
+   require_once 'models/Event.php';
    require_once 'models/Schemas.php';
 
    use Logger\Event;

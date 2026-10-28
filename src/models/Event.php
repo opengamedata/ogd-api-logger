@@ -182,24 +182,24 @@ namespace Logger;
 
          # Category 5 Data: Versioning
 
-         // source_version is given the game_version
+         // source_version is given as the game_version
 
          $raw = $_POST["source_version"];
          $source_version = isset($raw)
-                       ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                       ? preg_replace(Event::PRESERVE_VERSION, "", $raw)
                        : ( isset($_REQUEST["game_version"])
-                         ? filter_var($_REQUEST["game_version"], FILTER_SANITIZE_NUMBER_INT)
+                         ? preg_replace(Event::PRESERVE_VERSION, "", $raw)
                          : die("No source_version found in the logger request.")
                        );
                        
          $raw = $_REQUEST["schema_version"];
          $schema_version = isset($raw)
-                         ? $raw
+                         ? preg_replace(Event::PRESERVE_VERSION, "", $raw)
                          : die("No schema_version found in the logger request.");
 
          $raw = $_POST["log_version"];
          $log_version = isset($raw)
-                      ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                      ? preg_replace(Event::PRESERVE_VERSION, "", $raw)
                       : die("No log_version found in the logger request.");
 
          # Category 6 Data: Configuration

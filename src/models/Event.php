@@ -139,7 +139,7 @@ namespace Logger;
 
          $raw = $_POST["session_id"];
          $session_id = isset($raw)
-                     ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                     ? preg_replace(Event::PRESERVE_ALPHANUM, "", $raw)
                      : die("No session_id found in the logger request.");
 
          # Category 2 Data: Sequencing

@@ -188,7 +188,7 @@ namespace Logger;
          $source_version = isset($raw)
                        ? preg_replace(Event::PRESERVE_VERSION, "", $raw)
                        : ( isset($_REQUEST["game_version"])
-                         ? preg_replace(Event::PRESERVE_VERSION, "", $raw)
+                         ? preg_replace(Event::PRESERVE_VERSION, "", $_REQUEST["game_version"])
                          : die("No source_version found in the logger request.")
                        );
                        

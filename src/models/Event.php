@@ -320,7 +320,7 @@ namespace Logger;
          $game_time = 0.0; // Don't have a great default here
 
          if(isset($datum->event_sequence_index)) {
-            $session_sequence_index  = filter_var($datum->event_sequence_index, FILTER_SANITIZE_NUMBER_INT);
+            $session_sequence_index = (int) filter_var($datum->event_sequence_index, FILTER_SANITIZE_NUMBER_INT);
             // error_log("From datum ".json_encode($datum).", event sequence index is ".$datum->session_sequence_index);
          } else { die("No event_sequence_index"); }
 

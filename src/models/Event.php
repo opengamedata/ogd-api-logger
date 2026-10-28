@@ -6,6 +6,9 @@ namespace Logger;
    use \DateTimeZone;
 
    class Event {
+      const PRESERVE_ALPHANUM = "/[^a-zA-Z0-9]+/";
+      const PRESERVE_VARNAME  = "/[^a-zA-Z0-9-_]+/";
+      const PRESERVE_VERSION  = "/[^a-zA-Z0-9-.]+/";
 
       # Category 0 Data: Non-logged data
       private static int $synced = 0;
@@ -126,12 +129,12 @@ namespace Logger;
 
          $raw = $_POST["instance_id"];
          $instance_id = isset($raw)
-                      ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
+                      ? preg_replace(Event::PRESERVE_ALPHANUM, "", $raw)
                       : null;
 
          $raw = $_POST["player_id"];
          $player_id   = isset($raw)
-                      ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
+                      ? preg_replace(Event::PRESERVE_ALPHANUM, "", $raw)
                       : null;
 
          $raw = $_POST["session_id"];
@@ -203,7 +206,7 @@ namespace Logger;
 
          $raw = $_POST["condition"];
          $condition = isset($raw)
-                    ? preg_replace("/[^a-zA-Z0-9-_]+/", "", $raw)
+                    ? preg_replace(Event::PRESERVE_VARNAME, "", $raw)
                     : null;
 
          $raw = $_POST["game_configuration"];
@@ -248,7 +251,7 @@ namespace Logger;
 
          $raw = $datum->event_name;
          $event_name = isset($raw)
-                      ? preg_replace("/[^a-zA-Z0-9-_]+/", "", $raw)
+                      ? preg_replace(Event::PRESERVE_VARNAME, "", $raw)
                       : null;
 
          $raw = $datum->event_data;
@@ -295,7 +298,7 @@ namespace Logger;
          } else { die("No session_id"); }
 
          if(isset($_REQUEST["user_id"])) {
-            $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
+            $player_id = preg_replace(Event::PRESERVE_ALPHANUM, "", $_REQUEST["user_id"]);
          }
          $player_id = $session_id;
 
@@ -344,7 +347,7 @@ namespace Logger;
          # Category 6 Data: Configuration
 
          if(isset($_REQUEST["app_branch"])) {
-            $condition = preg_replace("/[^a-zA-Z0-9-_]+/", "", $_REQUEST["app_branch"]);
+            $condition = preg_replace(Event::PRESERVE_VARNAME, "", $_REQUEST["app_branch"]);
          }
 
          # Category 7 Data: Context
@@ -405,7 +408,7 @@ namespace Logger;
             die("No session_id");
          }
          $player_id = isset($_REQUEST["player_id"])
-                    ? preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["player_id"])
+                    ? preg_replace(Event::PRESERVE_ALPHANUM, "", $_REQUEST["player_id"])
                     : $session_id;
 
          # Category 2 Data: Sequencing

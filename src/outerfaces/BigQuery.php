@@ -1,4 +1,7 @@
 <?php
+namespace Logger;
+
+use Exception;
 use Google\Cloud\BigQuery\BigQueryClient;
 
 class BigQueryUtils {

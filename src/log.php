@@ -3,16 +3,24 @@ header("Access-Control-Allow-Headers: Origin, Authorization, X-Requested-With, C
 header("Access-Control-Allow-Origin: *");
 
 # 3rd-party imports
-require 'vendor/autoload.php';
+require_once 'vendor/autoload.php';
 # Local imports
-require 'config.php';
-require 'bigquery.php';
-require 'mysql.php';
-require 'query.php';
-require 'monitor.php';
+require_once 'config.php';
+require_once 'monitor.php';
+require_once 'outerfaces/BigQuery.php';
+require_once 'outerfaces/MySQL.php';
+require_once 'models/query.php';
+require_once 'models/Schemas.php';
 
-$LOGGER_GAMES = array("BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
-                     "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND");
+use Logger\EventQuery;
+use Logger\Schemas;
+use Logger\BigQueryUtils;
+use Logger\MySQLUtils;
+
+const LOGGER_GAMES = array(
+   "BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
+   "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND"
+);
 
 # 1. CONNECT to DB before we go to the trouble of looking at the data.
 switch ($db_type) {
@@ -41,12 +49,12 @@ else {
 $schema_version = $_REQUEST["schema_version"] ?? "N/A";
 switch ($schema_version) {
    case "1.0-alpha":
-      $request_schema = OGD_SCHEMA_10;
+      $request_schema = Schemas::OGD_SCHEMA_10;
       break;
    default:
-      $request_schema = OGD_SCHEMA_01;
-      if (in_array($game_id, $LOGGER_GAMES)) {
-         $request_schema = LOGGER_SCHEMA;
+      $request_schema = Schemas::OGD_SCHEMA_01;
+      if (in_array($game_id, LOGGER_GAMES)) {
+         $request_schema = Schemas::LOGGER_SCHEMA;
       }
       break;
 }

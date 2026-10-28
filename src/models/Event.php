@@ -1,73 +1,9 @@
-<?php
+<?php declare(strict_types=1);
+namespace Logger;
 
-   const LOGGER_SCHEMA = "LOGGER";
-   const OGD_SCHEMA_01 = "OPENGAMEDATA_V0";
-   const OGD_SCHEMA_10 = "OPENGAMEDATA_V1";
-
-   class EventQuery {
-      const string OGD_01_COLUMNS =
-      "(".
-         "session_id,".
-         "user_id,".
-         "user_data,".
-         "client_time,".
-         "client_time_ms,".
-         "client_offset,".
-         "server_time,".
-         "event_name,".
-         "event_data,".
-         "event_source,".
-         "game_state,".
-         "app_version,".
-         "app_branch,".
-         "log_version,".
-         "event_sequence_index,".
-         "host,".
-         "remote_addr,".
-         "http_user_agent,".
-         "synced".
-      ") VALUES";
-
-      private array $events;
-      private string $game_id;
-
-      function __construct($schema, $game_id, $data)
-      {
-         $n_rows = count($data);
-
-         $this->game_id = $game_id;
-         switch ($schema) {
-            case LOGGER_SCHEMA:
-               $lambda = fn($datum) => Event::FromLoggerLegacyFormat($game_id, $datum);
-               break;
-            case OGD_SCHEMA_01:
-               $lambda = fn($datum) => Event::FromOGDLegacyFormat($game_id, $datum);
-               break;
-            case OGD_SCHEMA_10:
-               $lambda = fn($datum) => Event::FromOGDStandardFormat($game_id, $datum);
-               break;
-            default:
-               error_log("Got schema name ".$schema." that did not match ".LOGGER_SCHEMA." or ".OGD_SCHEMA_01." or ".OGD_SCHEMA_10.", defaulting to ".OGD_SCHEMA_10);
-               $lambda = fn($datum) => Event::FromOGDStandardFormat($game_id, $datum);
-               break;
-         }
-         $this->events = array_map($lambda, $data);
-      }
-
-      function AsBigQuery($conn) {
-         $lambda = fn(Event $next_event) => [ 'data' => $next_event->AsBigQuery($conn) ];
-         return array_map($lambda, $this->events);
-      }
-
-      function AsMySQL($conn) : string
-      {
-         $lambda = fn(Event $next_event) => $next_event->AsMySQLQuery($conn);
-         $cols = "INSERT INTO ".$this->game_id." ".EventQuery::OGD_01_COLUMNS;
-         $vals = join(",", array_map($lambda, $this->events));
-         return $cols.$vals;
-      }
-
-   }
+   use \Exception;
+   use \DateTimeImmutable;
+   use \DateTimeZone;
 
    class Event {
 
@@ -101,7 +37,7 @@
       private       ?string $game_state;
       private       ?string $player_history;
       # Category 8 Data: Event
-      private        string $event_id;
+      private        int $event_id;
       private       ?string $event_name;
       private        string $event_data;
       # Category 9 Data: Private
@@ -110,8 +46,8 @@
       function __construct(
          string $game_id,              ?string $instance_id,    ?string $player_id,    string $session_id,
          DateTimeImmutable $timestamp, ?DateTimeImmutable $auth_timestamp,
-         ?float $game_time,            ?string $sequence_index, ?string $game_segment,
-         string $game_version,         string $schema_version,  string $log_version,
+         ?float $game_time,            ?int $sequence_index,    ?string $game_segment,
+         string $source_version,       string $schema_version,  string $log_version,
          ?string $condition,           ?string $game_config,    ?string $platform,
          ?string $game_state,          ?string $player_history,
          ?int $event_id,               ?string $event_name,     string $event_data,
@@ -129,8 +65,8 @@
 
          $this->game_segment = $game_segment ?? "{}";
 
-         $this->source_version = $game_version; // Game is always the source here.
-         $this->game_version   = $game_version;
+         $this->source_version = $source_version; // Game is always the source here.
+         $this->game_version   = $source_version;
          $this->schema_version = $schema_version;
          $this->log_version    = $log_version;
 
@@ -329,7 +265,7 @@
             game_id:$game_id,                       instance_id:$instance_id,             player_id:$player_id,     session_id:$session_id,
             timestamp:$timestamp,                   auth_timestamp:$auth_timestamp,       game_time:$game_time,
             sequence_index:$session_sequence_index, game_segment:$segment,
-            game_version:$source_version,           schema_version:$schema_version,       log_version:$log_version,
+            source_version:$source_version,           schema_version:$schema_version,       log_version:$log_version,
             condition:$condition,                   game_config:$game_config,             platform:$platform,
             game_state:$game_state,                 player_history:$player_history,
             event_id:$event_id,                     event_name:$event_name,               event_data:$event_data,     
@@ -339,7 +275,7 @@
       static function FromOGDLegacyFormat($game_id, $datum) : Event
       /** Create an Event object from the original/legacy OGD format (Schema v0.1)
        * 
-       * Items from $_REQUEST: session_id, user_id, user_data, app_version, app_branch, log_version, 
+       * Items from $_REQUEST: session_id, user_id, player_history, app_version, app_branch, log_version, 
        * Items from $datum: client_time, client_offset, event_name, event_data, game_state, event_sequence_index
        */
       {
@@ -386,7 +322,7 @@
          $game_time = 0.0; // Don't have a great default here
 
          if(isset($datum->event_sequence_index)) {
-            $session_sequence_index  = filter_var($datum->event_sequence_index, FILTER_SANITIZE_NUMBER_INT);
+            $session_sequence_index = (int) filter_var($datum->event_sequence_index, FILTER_SANITIZE_NUMBER_INT);
             // error_log("From datum ".json_encode($datum).", event sequence index is ".$datum->session_sequence_index);
          } else { die("No event_sequence_index"); }
 
@@ -449,7 +385,7 @@
             game_id:$game_id,                       instance_id:$player_id,         player_id:$player_id,     session_id:$session_id,
             timestamp:$client_time,                 auth_timestamp:null,            game_time:$game_time,
             sequence_index:$session_sequence_index, game_segment:null,
-            game_version:$game_version,             schema_version:$schema_version, log_version:$log_version,
+            source_version:$game_version,           schema_version:$schema_version, log_version:$log_version,
             condition:$condition,                   game_config:null,               platform:null,
             game_state:$game_state,                 player_history:$player_history,
             event_id:$event_id,                     event_name:$event_name,         event_data:$event_data,     
@@ -544,7 +480,7 @@
             game_id:$game_id,                       instance_id:$player_id,         player_id:$player_id,     session_id:$session_id,
             timestamp:$client_time,                 game_time:$game_time,           auth_timestamp:null,
             sequence_index:$session_sequence_index, game_segment:$segment,
-            game_version:$game_version,             schema_version:$schema_version, log_version:$log_version,
+            source_version:$game_version,           schema_version:$schema_version, log_version:$log_version,
             condition:$condition,                   game_config:null,               platform:null,
             game_state:$game_state,                 player_history:$player_history,
             event_id:$event_id,                     event_name:$event_name,         event_data:$event_data,     

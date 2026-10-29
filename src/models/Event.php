@@ -153,7 +153,7 @@ namespace Logger;
 
          $raw = $datum->authoritative_timestamp;
          $auth_timestamp = isset($raw)
-                         ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $raw) ?? null
+                         ? (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $raw) ?: null)
                          : null;
 
          $raw = $datum->game_time;
@@ -304,12 +304,12 @@ namespace Logger;
 
          # Category 2 Data: Sequencing
 
-         // $client_time = $datum->client_time ?? new DateTimeImmutable("Y-m-d H:i:s");
+         // $client_time = $datum->client_time ?: new DateTimeImmutable("Y-m-d H:i:s");
          $client_time = isset($datum->client_time)
-                      ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?? new DateTimeImmutable()
+                      ? (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?: new DateTimeImmutable())
                       : new DateTimeImmutable();
 
-         $offset_components = explode(":", $datum->client_offset ?? "+00:00");
+         $offset_components = explode(":", $datum->client_offset ?: "+00:00");
          $prefix = (str_starts_with($offset_components[0], "+") || str_starts_with($offset_components[0], "-"))
                  ? ""
                  : "+";
@@ -319,7 +319,7 @@ namespace Logger;
             error_log("Could not create timezone from offset string of ".$offset_str);
          }
          else {
-            $client_time = $client_time->setTimezone($client_offset) ?? $client_time;
+            $client_time = $client_time->setTimezone($client_offset) ?: $client_time;
          }
 
          $game_time = 0.0; // Don't have a great default here
@@ -419,7 +419,7 @@ namespace Logger;
          # Category 2 Data: Sequencing
 
          $client_time = isset($datum->client_time)
-                      ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?? new DateTimeImmutable()
+                      ? (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?: new DateTimeImmutable())
                       : new DateTimeImmutable();
 
          $game_time = 0.0; // Don't have a great default here

@@ -6,6 +6,9 @@ namespace Logger;
    use \DateTimeZone;
 
    class Event {
+      const PRESERVE_ALPHANUM = "/[^a-zA-Z0-9]+/";
+      const PRESERVE_VARNAME  = "/[^a-zA-Z0-9-_]+/";
+      const PRESERVE_VERSION  = "/[^a-zA-Z0-9-.]+/";
 
       # Category 0 Data: Non-logged data
       private static int $synced = 0;
@@ -126,17 +129,17 @@ namespace Logger;
 
          $raw = $_POST["instance_id"];
          $instance_id = isset($raw)
-                      ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
+                      ? preg_replace(Event::PRESERVE_ALPHANUM, "", $raw)
                       : null;
 
          $raw = $_POST["player_id"];
          $player_id   = isset($raw)
-                      ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
+                      ? preg_replace(Event::PRESERVE_ALPHANUM, "", $raw)
                       : null;
 
          $raw = $_POST["session_id"];
          $session_id = isset($raw)
-                     ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                     ? preg_replace(Event::PRESERVE_ALPHANUM, "", $raw)
                      : die("No session_id found in the logger request.");
 
          # Category 2 Data: Sequencing
@@ -150,7 +153,7 @@ namespace Logger;
 
          $raw = $datum->authoritative_timestamp;
          $auth_timestamp = isset($raw)
-                         ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $raw) ?? null
+                         ? (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $raw) ?: null)
                          : null;
 
          $raw = $datum->game_time;
@@ -179,31 +182,31 @@ namespace Logger;
 
          # Category 5 Data: Versioning
 
-         // source_version is given the game_version
+         // source_version is given as the game_version
 
          $raw = $_POST["source_version"];
          $source_version = isset($raw)
-                       ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                       ? preg_replace(Event::PRESERVE_VERSION, "", $raw)
                        : ( isset($_REQUEST["game_version"])
-                         ? filter_var($_REQUEST["game_version"], FILTER_SANITIZE_NUMBER_INT)
+                         ? preg_replace(Event::PRESERVE_VERSION, "", $_REQUEST["game_version"])
                          : die("No source_version found in the logger request.")
                        );
                        
          $raw = $_REQUEST["schema_version"];
          $schema_version = isset($raw)
-                         ? $raw
+                         ? preg_replace(Event::PRESERVE_VERSION, "", $raw)
                          : die("No schema_version found in the logger request.");
 
          $raw = $_POST["log_version"];
          $log_version = isset($raw)
-                      ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                      ? preg_replace(Event::PRESERVE_VERSION, "", $raw)
                       : die("No log_version found in the logger request.");
 
          # Category 6 Data: Configuration
 
          $raw = $_POST["condition"];
          $condition = isset($raw)
-                    ? preg_replace("/[^a-zA-Z0-9-_]+/", "", $raw)
+                    ? preg_replace(Event::PRESERVE_VARNAME, "", $raw)
                     : null;
 
          $raw = $_POST["game_configuration"];
@@ -248,7 +251,7 @@ namespace Logger;
 
          $raw = $datum->event_name;
          $event_name = isset($raw)
-                      ? preg_replace("/[^a-zA-Z0-9-_]+/", "", $raw)
+                      ? preg_replace(Event::PRESERVE_VARNAME, "", $raw)
                       : null;
 
          $raw = $datum->event_data;
@@ -295,18 +298,18 @@ namespace Logger;
          } else { die("No session_id"); }
 
          if(isset($_REQUEST["user_id"])) {
-            $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
+            $player_id = preg_replace(Event::PRESERVE_ALPHANUM, "", $_REQUEST["user_id"]);
          }
          $player_id = $session_id;
 
          # Category 2 Data: Sequencing
 
-         // $client_time = $datum->client_time ?? new DateTimeImmutable("Y-m-d H:i:s");
+         // $client_time = $datum->client_time ?: new DateTimeImmutable("Y-m-d H:i:s");
          $client_time = isset($datum->client_time)
-                      ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?? new DateTimeImmutable()
+                      ? (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?: new DateTimeImmutable())
                       : new DateTimeImmutable();
 
-         $offset_components = explode(":", $datum->client_offset ?? "+00:00");
+         $offset_components = explode(":", $datum->client_offset ?: "+00:00");
          $prefix = (str_starts_with($offset_components[0], "+") || str_starts_with($offset_components[0], "-"))
                  ? ""
                  : "+";
@@ -316,7 +319,7 @@ namespace Logger;
             error_log("Could not create timezone from offset string of ".$offset_str);
          }
          else {
-            $client_time = $client_time->setTimezone($client_offset) ?? $client_time;
+            $client_time = $client_time->setTimezone($client_offset) ?: $client_time;
          }
 
          $game_time = 0.0; // Don't have a great default here
@@ -349,7 +352,7 @@ namespace Logger;
          # Category 6 Data: Configuration
 
          if(isset($_REQUEST["app_branch"])) {
-            $condition = preg_replace("/[^a-zA-Z0-9-_]+/", "", $_REQUEST["app_branch"]);
+            $condition = preg_replace(Event::PRESERVE_VARNAME, "", $_REQUEST["app_branch"]);
          }
 
          # Category 7 Data: Context
@@ -410,13 +413,13 @@ namespace Logger;
             die("No session_id");
          }
          $player_id = isset($_REQUEST["player_id"])
-                    ? preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["player_id"])
+                    ? preg_replace(Event::PRESERVE_ALPHANUM, "", $_REQUEST["player_id"])
                     : $session_id;
 
          # Category 2 Data: Sequencing
 
          $client_time = isset($datum->client_time)
-                      ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?? new DateTimeImmutable()
+                      ? (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?: new DateTimeImmutable())
                       : new DateTimeImmutable();
 
          $game_time = 0.0; // Don't have a great default here

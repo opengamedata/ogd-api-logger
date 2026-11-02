@@ -419,7 +419,7 @@ namespace Logger;
          # Category 2 Data: Sequencing
 
          $client_time = isset($datum->client_time)
-                      ? (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?: new DateTimeImmutable())
+                      ? (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $datum->client_time) ?: new DateTimeImmutable())
                       : new DateTimeImmutable();
 
          $game_time = 0.0; // Don't have a great default here

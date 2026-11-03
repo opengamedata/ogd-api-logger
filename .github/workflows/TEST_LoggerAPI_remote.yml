@@ -2,6 +2,11 @@
 name: Remote Testbed - LoggerAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
+  push:
+    paths:
+    - '.github/workflows/TEST_LoggerAPI_remote.yml'
+    - 'tests/config/**'
+    - 'tests/cases/logSuite/RemoteCase.php'
   workflow_dispatch:
     inputs:
       base_url:

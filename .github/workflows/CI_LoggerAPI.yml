@@ -26,8 +26,8 @@ jobs:
         with:
           n: 17
           remove: '\.'
-          with_hash: 'false'
-          hash_n: 0
+          with_hash: ${{ case(github.ref_name == 'main', 'false', 'true') }}
+          hash_n: 2
 
   build:
     name: Build Docker Image

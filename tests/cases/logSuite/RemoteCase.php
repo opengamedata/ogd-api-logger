@@ -33,7 +33,7 @@
             "user_id" => "TestUser",
             "user_data" => "{}",
             "app_version" => "1",
-            "app_branch" => "testing-branch",
+            "app_branch" => $_ENV['branch']."-testbed",
             "log_version" => "1"
          ];
          $body_params = [
@@ -91,7 +91,7 @@
             "user_id" => "TestUser",
             "user_data" => "{}",
             "app_version" => "1",
-            "app_branch" => "testing-branch",
+            "app_branch" => $_ENV['branch']."-testbed",
             "log_version" => "1"
          ];
          $body_params = [
@@ -177,7 +177,7 @@
             "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
             "game_version" => "1.0.0-testbed",
             "log_version" => "1",
-            "condition" => "testing-branch",
+            "condition" => $_ENV['branch']."-testbed",
             "game_configuration" => "{}",
             "platform" => "{}",
             "player_history" => "{}",

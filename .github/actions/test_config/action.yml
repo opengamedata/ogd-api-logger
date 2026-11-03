@@ -26,3 +26,6 @@ runs:
     - name: Set Endpoint Location
       run: sed -i 's@PLACEHOLDER_URL@${{inputs.endpoint}}@g' ./phpunit.xml
       shell: ${{ inputs.shell }}
+    - name: Set Branch Name
+      run: sed -i 's@PLACEHOLDER_BRANCH@${{github.ref_name}}@g' ./phpunit.xml
+      shell: ${{ inputs.shell }}

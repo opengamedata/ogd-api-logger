@@ -7,6 +7,7 @@ on:
     - '.github/workflows/CI_LoggerAPI.yml'
     - '.github/workflows/BUILD_LoggerAPI.yml'
     - '.github/workflows/DEPLOY_LoggerAPI.yml'
+    - '.github/workflows/TEST_*.yml'
     - '.github/actions/LoggerAPI_config**'
     - 'src/**'
     - '.dockerignore'

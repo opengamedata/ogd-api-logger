@@ -17,5 +17,6 @@
   </testsuites>
   <php>
     <env name="base_url" value="PLACEHOLDER_URL"/>
+    <env name="branch" value="PLACEHOLDER_BRANCH"/>
   </php>
 </phpunit>

@@ -9,11 +9,13 @@ require_once 'config.php';
 require_once 'monitor.php';
 require_once 'outerfaces/BigQuery.php';
 require_once 'outerfaces/MySQL.php';
+require_once 'outerfaces/Echo.php';
 require_once 'models/query.php';
 require_once 'models/Schemas.php';
 
 use Logger\EventQuery;
 use Logger\Schemas;
+use Logger\EchoOutput;
 use Logger\BigQueryUtils;
 use Logger\MySQLUtils;
 
@@ -86,6 +88,9 @@ if (count($data) > 0) {
          $result = "Dummy run of \n".$query_string."\n in MySQL.";
          error_log("Sending mysql response: ".$result);
          break;
+      case "echo":
+         $arr = $query->AsArray();
+         $result = EchoOutput::Insert($game_id, $arr);
       default:
          http_response_code(500);
          die("FAIL: API software was misconfigured, invalid db_type setting!");

@@ -541,6 +541,34 @@ namespace Logger;
             "event_data"              => $this->event_data,
          ];
       }
+
+      function AsArray() : array
+      {
+         return [
+            "instance_id"             => $this->instance_id,
+            "player_id"               => $this->player_id,
+            "session_id"              => $this->session_id,
+            "timestamp"               => $this->timestamp,
+            "timezone_offset"         => $this->timestamp->format("P"),
+            "authoritative_timestamp" => $this->authoritative_timestamp,
+            "game_time"               => $this->game_time,
+            "session_sequence_index"  => $this->session_sequence_index,
+            "game_segment"            => $this->game_segment,
+            "event_source"            => Event::$event_source,
+            "source_version"          => $this->source_version,
+            "game_version"            => $this->game_version,
+            "schema_version"          => $this->schema_version,
+            "log_version"             => $this->log_version,
+            "condition"               => $this->condition,
+            "game_configuration"      => $this->game_configuration,
+            "platform"                => $this->platform,
+            "game_state"              => $this->game_state,
+            "player_history"          => $this->player_history,
+            "event_id"                => $this->event_id,
+            "event_name"              => $this->event_name,
+            "event_data"              => $this->event_data,
+         ];
+      }
    }
 
 ?>

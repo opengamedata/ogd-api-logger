@@ -32,6 +32,9 @@ switch ($db_type) {
    case "mysql":
       $conn = MySQLUtils::Connect($servername, null, null, $db);
       break;
+   case "echo":
+      $conn = null;
+      break;
    default:
       die("FAIL: API software was misconfigured, invalid db_type setting!");
       break;

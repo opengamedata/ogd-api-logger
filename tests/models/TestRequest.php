@@ -17,7 +17,7 @@ class TestRequest {
    private $request;
 
    function __construct(string $base_url, array $url_params, array $post_params) {
-      $request = curl_init();
+      $this->request = curl_init();
 
       $base_url = $base_url ?: $_ENV['base_url'];
       $url = $base_url."/log.php?".http_build_query($url_params);
@@ -32,7 +32,7 @@ class TestRequest {
          CURLOPT_FOLLOWLOCATION => true,
          CURLOPT_RETURNTRANSFER => true
       ];
-      curl_setopt_array($request, $opts);
+      curl_setopt_array($this->request, $opts);
    }
 
    function Execute(): string | bool {

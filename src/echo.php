@@ -1,0 +1,70 @@
+<?php
+header("Access-Control-Allow-Headers: Origin, Authorization, X-Requested-With, Content-Type, Accept");
+header("Access-Control-Allow-Origin: *");
+
+# 3rd-party imports
+require_once 'vendor/autoload.php';
+# Local imports
+require_once 'config.php';
+require_once 'monitor.php';
+require_once 'outerfaces/BigQuery.php';
+require_once 'outerfaces/MySQL.php';
+require_once 'outerfaces/Echo.php';
+require_once 'models/query.php';
+require_once 'models/Schemas.php';
+
+use Logger\EventQuery;
+use Logger\Schemas;
+use Logger\EchoOutput;
+use Logger\BigQueryUtils;
+use Logger\MySQLUtils;
+
+const LOGGER_GAMES = array(
+   "BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",
+   "EARTHQUAKE", "JOWILDER", "LAKELAND",   "MAGNET",       "WAVES",          "WIND"
+);
+
+# 2. IDENTIFY the input schema format, defaulting to full OGD schema.
+if (isset($_REQUEST["game_id"])) {
+  $game_id = strtoupper($_REQUEST["game_id"]);
+}
+else if (isset($_REQUEST["app_id"])) {
+  $game_id = strtoupper($_REQUEST["app_id"]);
+}
+else {
+   die("FAIL: Request is missing game_id element!");
+}
+
+$schema_version = $_REQUEST["schema_version"] ?? "N/A";
+switch ($schema_version) {
+   case "1.0-alpha":
+      $request_schema = Schemas::OGD_SCHEMA_10;
+      break;
+   default:
+      $request_schema = Schemas::OGD_SCHEMA_01;
+      if (in_array($game_id, LOGGER_GAMES)) {
+         $request_schema = Schemas::LOGGER_SCHEMA;
+      }
+      break;
+}
+
+# 3. DECODE the query data from raw input data.
+/**
+ * An array of event data bodies, containing event_name, event_data, and similar columns.
+* @var data
+*/
+$data = json_decode(base64_decode($_POST["data"]));
+if (!is_array($data)) {
+   $d = $data;
+   $data = array();
+   array_push($data, $d);
+}
+
+# 4. PARSE and SEND data through a DB query.
+if (count($data) > 0) {
+   $query = new EventQuery($request_schema, $game_id, $data);
+   die("SUCCESS: " . $query);
+} else {
+   http_response_code(400);
+   die("FAIL: Could not log event(s), no valid data received!");
+}

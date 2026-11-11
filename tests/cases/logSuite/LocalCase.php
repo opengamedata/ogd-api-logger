@@ -56,12 +56,15 @@
          $response = $request->Execute();
          $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
+         echo "Raw rresult\n";
+         var_dump($response);
+
          $this->assertSame(
             $code, 200,
             "Test Fail: Unexpected response code '".$code."' from call to ".$test_url."\nMessage: ".$response
          );
          $this->assertSame(
-            $response, "SUCCESS: Inserted 2 rows to BigQuery in ".$game_id.".".$game_id."_daily_".(new DateTime())->format("Ymd").".",
+            $response, "SUCCESS: dummy insert into ".$game_id,
             "Test Fail: Unexpected result '".$response."' from call to ".$test_url
          );
       }

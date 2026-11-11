@@ -19,8 +19,8 @@
          ];
          $payload = [
             [
-               "timestamp" => "2020-01-01 13:42:56.789Z", // date('Y-m-d\TH:i:s.uT'),
-               "authoritative_timestamp" => date('Y-m-d\TH:i:s.uT'),
+               "timestamp" => "2020-01-01 01:23:45.678Z", // date('Y-m-d\TH:i:s.uT'),
+               "authoritative_timestamp" => date('Y-m-d H:i:s.uT'),
                "game_time" => "00:15:49.345",
                "session_sequence_index" => 1,
                "game_segment" => json_encode(["level" => 1]),
@@ -30,8 +30,8 @@
                "event_data" => json_encode(["some_element" => "some_value", "some_int" => 0])
             ],
             [
-               "timestamp" => "2020-01-01 13:42:57.123+01:00", // date('Y-m-d\TH:i:s.uT'),
-               "authoritative_timestamp" => date('Y-m-d\TH:i:s.uT'),
+               "timestamp" => "2020-01-01 12:34:56.789+01:00", // date('Y-m-d\TH:i:s.uT'),
+               "authoritative_timestamp" => date('Y-m-d H:i:s.uT'),
                "game_time" => "00:15:49.345",
                "session_sequence_index" => 2,
                "game_segment" => json_encode(["level" => 1]),

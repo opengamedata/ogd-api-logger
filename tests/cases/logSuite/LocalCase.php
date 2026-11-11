@@ -62,12 +62,61 @@
          echo "Raw rresult\n";
          var_dump($response);
 
+         $expected = <<<END
+         0:
+            instance_id: fakeinstance
+            player_id: TestUser
+            session_id: {$post_fields['session_id']}
+            timestamp: 2020-01-01 01:23:45.678000
+            timezone_offset: +00:00
+            authoritative_timestamp: {$payload[0]['authoritative_timestamp']}
+            game_time: 1549.345
+            session_sequence_index: 1
+            game_segment: {"level":1}
+            event_source: GAME
+            source_version: 1.0.0-testbed
+            game_version: 1.0.0-testbed
+            schema_version: 1.0-alpha
+            log_version: 1
+            condition: {$_ENV['branch']}-testbed
+            game_configuration: {}
+            platform: {}
+            game_state: {"state_var":"active"}
+            player_history: {}
+            event_id: 9999
+            event_name: ogd_standard_event
+            event_data: {"some_element":"some_value","some_int":0}
+         1:
+            instance_id: fakeinstance
+            player_id: TestUser
+            session_id: {$post_fields['session_id']}
+            timestamp: 2020-01-01 12:34:56.789000
+            timezone_offset: +01:00
+            authoritative_timestamp: {$payload[1]['authoritative_timestamp']}
+            game_time: 1549.345
+            session_sequence_index: 2
+            game_segment: {"level":1}
+            event_source: GAME
+            source_version: 1.0.0-testbed
+            game_version: 1.0.0-testbed
+            schema_version: 1.0-alpha
+            log_version: 1
+            condition: {$_ENV['branch']}-testbed
+            game_configuration: {}
+            platform: {}
+            game_state: {"state_var":"inactive"}
+            player_history: {}
+            event_id: 9999
+            event_name: another_ogd_standard_event
+            event_data: {"some_element":"new_value","some_int":42}
+         END;
+
          $this->assertSame(
             $code, 200,
             "Test Fail: Unexpected response code '".$code."' from call to ".$test_url."\nMessage: ".$response
          );
          $this->assertSame(
-            $response, "SUCCESS: dummy insert into ".$game_id,
+            $response, $expected,
             "Test Fail: Unexpected result '".$response."' from call to ".$test_url
          );
       }

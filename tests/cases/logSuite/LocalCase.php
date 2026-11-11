@@ -55,7 +55,7 @@
          ];
          $test_url = $_ENV['base_url'];
 
-         $request = new TestRequest($test_url, $url_params, $post_fields);
+         $request = new TestRequest($test_url, "echo.php", $url_params, $post_fields);
          $response = $request->Execute();
          $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
@@ -63,6 +63,7 @@
          var_dump($response);
 
          $expected = <<<END
+         SUCCESS:
          0:
             instance_id: fakeinstance
             player_id: TestUser

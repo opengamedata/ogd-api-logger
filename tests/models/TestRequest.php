@@ -16,11 +16,12 @@ class TestRequest {
 
    private $request;
 
-   function __construct(string $base_url, array $url_params, array $post_params) {
+   function __construct(?string $base_url, ?string $endpoint, array $url_params, array $post_params) {
       $this->request = curl_init();
 
       $base_url = $base_url ?: $_ENV['base_url'];
-      $url = $base_url."/log.php?".http_build_query($url_params);
+      $endpoint = $endpoint ?: "log.php";
+      $url = $base_url."/".$endpoint."?".http_build_query($url_params);
 
       $opts = [
          CURLOPT_URL => $url,

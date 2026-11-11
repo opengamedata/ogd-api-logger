@@ -49,7 +49,7 @@
          $post_fields = ["data" => base64_encode(json_encode($body_params))];
          $test_url = $_ENV['base_url'];
 
-         $request = new TestRequest($test_url, $url_params, $post_fields);
+         $request = new TestRequest($test_url, "log.php", $url_params, $post_fields);
          $response = $request->Execute();
          $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
@@ -96,7 +96,7 @@
          $post_fields = ["data" => base64_encode(json_encode($body_params))];
          $test_url = $_ENV['base_url'];
 
-         $request = new TestRequest($test_url, $url_params, $post_fields);
+         $request = new TestRequest($test_url, "log.php", $url_params, $post_fields);
          $response = $request->Execute();
          $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
@@ -155,7 +155,7 @@
          ];
          $test_url = $_ENV['base_url'];
 
-         $request = new TestRequest($test_url, $url_params, $post_fields);
+         $request = new TestRequest($test_url, "log.php", $url_params, $post_fields);
          $response = $request->Execute();
          $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 

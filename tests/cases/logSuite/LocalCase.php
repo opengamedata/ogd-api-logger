@@ -6,6 +6,9 @@
 
    final class LogLocalCase extends TestCase
    {
+      public function setUp(): void {
+         error_reporting(E_ALL);
+      }
 
       public function testOGDStandardCall(): void
       {

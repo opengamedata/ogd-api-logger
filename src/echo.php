@@ -63,7 +63,7 @@ if (!is_array($data)) {
 # 4. PARSE and SEND data through a DB query.
 if (count($data) > 0) {
    $query = new EventQuery($request_schema, $game_id, $data);
-   die("SUCCESS: " . $query);
+   die("SUCCESS:\n" . $query);
 } else {
    http_response_code(400);
    die("FAIL: Could not log event(s), no valid data received!");

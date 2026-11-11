@@ -92,8 +92,7 @@ if (count($data) > 0) {
          error_log("Sending mysql response: ".$result);
          break;
       case "echo":
-         $arr = $query->AsArray();
-         $result = EchoOutput::Insert($game_id, $arr);
+         $result = EchoOutput::Insert($game_id, $query);
       default:
          http_response_code(500);
          die("FAIL: API software was misconfigured, invalid db_type setting!");

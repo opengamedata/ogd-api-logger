@@ -1,19 +1,11 @@
 <?php declare(strict_types=1);
+   require_once 'tests/models/TestRequest.php';
+
    use PHPUnit\Framework\TestCase;
+   use Testing\TestRequest;
 
    final class LogRemoteCase extends TestCase
    {
-      static array $headers = [
-         "Accept" => "*/*",
-         "Accept-Language" => "en-US,en;q=0.5",
-         "Accept-Encoding" => "gzip, deflate, br, zstd",
-         "Content-Type" => "application/x-www-form-urlencoded",
-         "DNT" => "1",
-         "Connection" => "keep-alive",
-         "Sec-Fetch-Dest" => "empty",
-         "Sec-Fetch-Mode" => "cors",
-         "Sec-Fetch-Site" => "cross-site"
-      ];
 
       /* TODO : check into whether we should be inserting escape characters,
                 as in what we had in old Python-based tests:
@@ -54,23 +46,12 @@
                "event_sequence_index" => 2
             ]
          ];
+         $post_fields = ["data" => base64_encode(json_encode($body_params))];
+         $test_url = $_ENV['base_url'];
 
-         $request = curl_init();
-         $test_url = $_ENV['base_url']."/log.php?".http_build_query($url_params);
-         $opts = [
-            CURLOPT_URL => $test_url,
-            CURLOPT_USERAGENT => "fake agent/1.0",
-            CURLOPT_HTTPHEADER => LogRemoteCase::$headers,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
-            CURLOPT_POSTREDIR => CURL_REDIR_POST_302,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_RETURNTRANSFER => true
-         ];
-         curl_setopt_array($request, $opts);
-
-         $response = curl_exec($request);
-         $code = curl_getinfo($request, CURLINFO_HTTP_CODE);
+         $request = new TestRequest($test_url, $url_params, $post_fields);
+         $response = $request->Execute();
+         $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
          $this->assertSame(
             $code, 200,
@@ -112,23 +93,12 @@
                "event_sequence_index" => 2
             ]
          ];
+         $post_fields = ["data" => base64_encode(json_encode($body_params))];
+         $test_url = $_ENV['base_url'];
 
-         $request = curl_init();
-         $test_url = $_ENV['base_url']."/log.php?".http_build_query($url_params);
-         $opts = [
-            CURLOPT_URL => $test_url,
-            CURLOPT_USERAGENT => "fake agent/1.0",
-            CURLOPT_HTTPHEADER => LogRemoteCase::$headers,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
-            CURLOPT_POSTREDIR => CURL_REDIR_POST_302,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_RETURNTRANSFER => true
-         ];
-         curl_setopt_array($request, $opts);
-
-         $response = curl_exec($request);
-         $code = curl_getinfo($request, CURLINFO_HTTP_CODE);
+         $request = new TestRequest($test_url, $url_params, $post_fields);
+         $response = $request->Execute();
+         $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
          $this->assertSame(
             $code, 200,
@@ -183,23 +153,11 @@
             "player_history" => "{}",
             "data" => base64_encode(json_encode($payload))
          ];
+         $test_url = $_ENV['base_url'];
 
-         $request = curl_init();
-         $test_url = $_ENV['base_url']."/log.php?".http_build_query($url_params);
-         $opts = [
-            CURLOPT_URL => $test_url,
-            CURLOPT_USERAGENT => "fake agent/1.0",
-            CURLOPT_HTTPHEADER => LogRemoteCase::$headers,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $post_fields,
-            CURLOPT_POSTREDIR => CURL_REDIR_POST_302,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_RETURNTRANSFER => true
-         ];
-         curl_setopt_array($request, $opts);
-
-         $response = curl_exec($request);
-         $code = curl_getinfo($request, CURLINFO_HTTP_CODE);
+         $request = new TestRequest($test_url, $url_params, $post_fields);
+         $response = $request->Execute();
+         $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
          $this->assertSame(
             $code, 200,

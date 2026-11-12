@@ -1,12 +1,14 @@
 <?php declare(strict_types=1);
-
-   namespace Logger;
+namespace Logger;
 
    use \Exception;
    use \DateTimeImmutable;
    use \DateTimeZone;
 
    class Event {
+      const PRESERVE_ALPHANUM = "/[^a-zA-Z0-9]+/";
+      const PRESERVE_VARNAME  = "/[^a-zA-Z0-9-_]+/";
+      const PRESERVE_VERSION  = "/[^a-zA-Z0-9-.]+/";
 
       # Category 0 Data: Non-logged data
       private static int $synced = 0;
@@ -83,6 +85,34 @@
          $this->event_data = $event_data;
       }
 
+      public function __toString(): string
+      {
+         return join("\n   ", [
+            "instance_id: ".$this->instance_id,
+            "player_id: ".$this->player_id,
+            "session_id: ".$this->session_id,
+            "timestamp: ".$this->timestamp->format("Y-m-d H:i:s.u"),
+            "timezone_offset: ".$this->timestamp->format("P"),
+            "authoritative_timestamp: ".($this->authoritative_timestamp ? $this->authoritative_timestamp->format("Y-m-d H:i:s.uT") : null),
+            "game_time: ".$this->game_time,
+            "session_sequence_index: ".$this->session_sequence_index,
+            "game_segment: ".$this->game_segment,
+            "event_source: ".Event::$event_source,
+            "source_version: ".$this->source_version,
+            "game_version: ".$this->game_version,
+            "schema_version: ".$this->schema_version,
+            "log_version: ".$this->log_version,
+            "condition: ".$this->condition,
+            "game_configuration: ".$this->game_configuration,
+            "platform: ".$this->platform,
+            "game_state: ".$this->game_state,
+            "player_history: ".$this->player_history,
+            "event_id: ".$this->event_id,
+            "event_name: ".$this->event_name,
+            "event_data: ".$this->event_data,
+         ]);
+      }
+
       static function IDtoName(int $event_id) : string {
          $ret_val = null;
 
@@ -125,19 +155,19 @@
 
          # Category 1 Data: Identification
 
-         $raw = $_REQUEST["instance_id"];
+         $raw = $_POST["instance_id"];
          $instance_id = isset($raw)
-                      ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
+                      ? preg_replace(Event::PRESERVE_ALPHANUM, "", $raw)
                       : null;
 
-         $raw = $_REQUEST["player_id"];
+         $raw = $_POST["player_id"];
          $player_id   = isset($raw)
-                      ? preg_replace("/[^a-zA-Z0-9]+/", "", $raw)
+                      ? preg_replace(Event::PRESERVE_ALPHANUM, "", $raw)
                       : null;
 
-         $raw = $_REQUEST["session_id"];
+         $raw = $_POST["session_id"];
          $session_id = isset($raw)
-                     ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                     ? preg_replace(Event::PRESERVE_ALPHANUM, "", $raw)
                      : die("No session_id found in the logger request.");
 
          # Category 2 Data: Sequencing
@@ -151,7 +181,7 @@
 
          $raw = $datum->authoritative_timestamp;
          $auth_timestamp = isset($raw)
-                         ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $raw) ?? null
+                         ? (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uT', $raw) ?: null)
                          : null;
 
          $raw = $datum->game_time;
@@ -180,34 +210,34 @@
 
          # Category 5 Data: Versioning
 
-         // source_version is given the game_version
+         // source_version is given as the game_version
 
-         $raw = $_REQUEST["source_version"];
+         $raw = $_POST["source_version"];
          $source_version = isset($raw)
-                       ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                       ? preg_replace(Event::PRESERVE_VERSION, "", $raw)
                        : ( isset($_REQUEST["game_version"])
-                         ? filter_var($_REQUEST["game_version"], FILTER_SANITIZE_NUMBER_INT)
+                         ? preg_replace(Event::PRESERVE_VERSION, "", $_REQUEST["game_version"])
                          : die("No source_version found in the logger request.")
                        );
                        
          $raw = $_REQUEST["schema_version"];
          $schema_version = isset($raw)
-                         ? $raw
+                         ? preg_replace(Event::PRESERVE_VERSION, "", $raw)
                          : die("No schema_version found in the logger request.");
 
-         $raw = $_REQUEST["log_version"];
+         $raw = $_POST["log_version"];
          $log_version = isset($raw)
-                      ? filter_var($raw, FILTER_SANITIZE_NUMBER_INT)
+                      ? preg_replace(Event::PRESERVE_VERSION, "", $raw)
                       : die("No log_version found in the logger request.");
 
          # Category 6 Data: Configuration
 
-         $raw = $_REQUEST["condition"];
+         $raw = $_POST["condition"];
          $condition = isset($raw)
-                    ? preg_replace("/[^a-zA-Z0-9-_]+/", "", $raw)
+                    ? preg_replace(Event::PRESERVE_VARNAME, "", $raw)
                     : null;
 
-         $raw = $_REQUEST["game_configuration"];
+         $raw = $_POST["game_configuration"];
          $game_config = isset($raw)
                       ? ( json_validate($raw)
                         ? $raw
@@ -215,7 +245,7 @@
                       )
                       : null;
 
-         $raw = $_REQUEST["platform"];
+         $raw = $_POST["platform"];
          $platform = isset($raw)
                    ? ( json_validate($raw)
                      ? $raw
@@ -233,7 +263,7 @@
                      )
                      : null;
 
-         $raw = $_REQUEST["player_history"];
+         $raw = $_POST["player_history"];
          $player_history = isset($raw)
                          ? ( json_validate($raw)
                            ? $raw
@@ -249,7 +279,7 @@
 
          $raw = $datum->event_name;
          $event_name = isset($raw)
-                      ? preg_replace("/[^a-zA-Z0-9-_]+/", "", $raw)
+                      ? preg_replace(Event::PRESERVE_VARNAME, "", $raw)
                       : null;
 
          $raw = $datum->event_data;
@@ -296,29 +326,34 @@
          } else { die("No session_id"); }
 
          if(isset($_REQUEST["user_id"])) {
-            $player_id = preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["user_id"]);
+            $player_id = preg_replace(Event::PRESERVE_ALPHANUM, "", $_REQUEST["user_id"]);
          }
          $player_id = $session_id;
 
          # Category 2 Data: Sequencing
 
-         // $client_time = $datum->client_time ?? new DateTimeImmutable("Y-m-d H:i:s");
+         // $client_time = $datum->client_time ?: new DateTimeImmutable("Y-m-d H:i:s");
          $client_time = isset($datum->client_time)
-                      ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?? new DateTimeImmutable()
+                      ? (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.uZ', $datum->client_time) ?: new DateTimeImmutable())
                       : new DateTimeImmutable();
 
-         $offset_components = explode(":", $datum->client_offset ?? "+00:00");
+         $offset_components = explode(":", $datum->client_offset ?: "+00:00");
          $prefix = (str_starts_with($offset_components[0], "+") || str_starts_with($offset_components[0], "-"))
                  ? ""
                  : "+";
          $offset_str = $prefix.$offset_components[0].":".$offset_components[1];
          $client_offset =  new DateTimeZone($offset_str);
-         $client_time = $client_time->setTimezone($client_offset);
+         if (!$client_offset) {
+            error_log("Could not create timezone from offset string of ".$offset_str);
+         }
+         else {
+            $client_time = $client_time->setTimezone($client_offset) ?: $client_time;
+         }
 
          $game_time = 0.0; // Don't have a great default here
 
          if(isset($datum->event_sequence_index)) {
-            $session_sequence_index  = filter_var($datum->event_sequence_index, FILTER_SANITIZE_NUMBER_INT);
+            $session_sequence_index = (int) filter_var($datum->event_sequence_index, FILTER_SANITIZE_NUMBER_INT);
             // error_log("From datum ".json_encode($datum).", event sequence index is ".$datum->session_sequence_index);
          } else { die("No event_sequence_index"); }
 
@@ -345,7 +380,7 @@
          # Category 6 Data: Configuration
 
          if(isset($_REQUEST["app_branch"])) {
-            $condition = preg_replace("/[^a-zA-Z0-9-_]+/", "", $_REQUEST["app_branch"]);
+            $condition = preg_replace(Event::PRESERVE_VARNAME, "", $_REQUEST["app_branch"]);
          }
 
          # Category 7 Data: Context
@@ -406,13 +441,13 @@
             die("No session_id");
          }
          $player_id = isset($_REQUEST["player_id"])
-                    ? preg_replace("/[^a-zA-Z0-9]+/", "", $_REQUEST["player_id"])
+                    ? preg_replace(Event::PRESERVE_ALPHANUM, "", $_REQUEST["player_id"])
                     : $session_id;
 
          # Category 2 Data: Sequencing
 
          $client_time = isset($datum->client_time)
-                      ? DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?? new DateTimeImmutable()
+                      ? (DateTimeImmutable::createFromFormat('Y-m-d*H:i:s.u', $datum->client_time) ?: new DateTimeImmutable())
                       : new DateTimeImmutable();
 
          $game_time = 0.0; // Don't have a great default here

@@ -1,19 +1,11 @@
 <?php declare(strict_types=1);
+   require_once 'tests/models/TestRequest.php';
+
    use PHPUnit\Framework\TestCase;
+   use Testing\TestRequest;
 
    final class LogRemoteCase extends TestCase
    {
-      static array $headers = [
-         "Accept" => "*/*",
-         "Accept-Language" => "en-US,en;q=0.5",
-         "Accept-Encoding" => "gzip, deflate, br, zstd",
-         "Content-Type" => "application/x-www-form-urlencoded",
-         "DNT" => "1",
-         "Connection" => "keep-alive",
-         "Sec-Fetch-Dest" => "empty",
-         "Sec-Fetch-Mode" => "cors",
-         "Sec-Fetch-Site" => "cross-site"
-      ];
 
       /* TODO : check into whether we should be inserting escape characters,
                 as in what we had in old Python-based tests:
@@ -33,44 +25,33 @@
             "user_id" => "TestUser",
             "user_data" => "{}",
             "app_version" => "1",
-            "app_branch" => "testing-branch",
+            "app_branch" => $_ENV['branch']."-testbed",
             "log_version" => "1"
          ];
          $body_params = [
             [
-               "client_time" => "2020-01-01 13:42:56.789", //date('Y-m-d H:i:s'),
+               "client_time" => "2020-01-01 01:23:45.678Z", //date('Y-m-d H:i:s'),
                "client_offset" => "00:00",
-               "event_name" => "fake_event",
+               "event_name" => "legacy_ogd_call_event",
                "event_data" => json_encode(["some_element" => "some_value", "some_int" => 0]),
                "game_state" => json_encode(["state_var" => "active"]),
                "event_sequence_index" => 1
             ],
             [
-               "client_time" => "2020-01-01 13:42:57.123", //date('Y-m-d H:i:s'),
+               "client_time" => "2020-01-01 12:34:56.789Z", //date('Y-m-d H:i:s'),
                "client_offset" => "01:00",
-               "event_name" => "another_event",
+               "event_name" => "another_ogd_legacy_event",
                "event_data" => json_encode(["some_element" => "new_value", "some_int" => 42]),
                "game_state" => json_encode(["state_var" => "inactive"]),
                "event_sequence_index" => 2
             ]
          ];
+         $post_fields = ["data" => base64_encode(json_encode($body_params))];
+         $test_url = $_ENV['base_url'];
 
-         $request = curl_init();
-         $test_url = $_ENV['base_url']."/log.php?".http_build_query($url_params);
-         $opts = [
-            CURLOPT_URL => $test_url,
-            CURLOPT_USERAGENT => "fake agent/1.0",
-            CURLOPT_HTTPHEADER => LogRemoteCase::$headers,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
-            CURLOPT_POSTREDIR => CURL_REDIR_POST_302,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_RETURNTRANSFER => true
-         ];
-         curl_setopt_array($request, $opts);
-
-         $response = curl_exec($request);
-         $code = curl_getinfo($request, CURLINFO_HTTP_CODE);
+         $request = new TestRequest($test_url, "log.php", $url_params, $post_fields);
+         $response = $request->Execute();
+         $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
          $this->assertSame(
             $code, 200,
@@ -91,44 +72,33 @@
             "user_id" => "TestUser",
             "user_data" => "{}",
             "app_version" => "1",
-            "app_branch" => "testing-branch",
+            "app_branch" => $_ENV['branch']."-testbed",
             "log_version" => "1"
          ];
          $body_params = [
             [
-               "client_time" => "2020-01-01 13:42:56.789", //date('Y-m-d H:i:s'),
+               "client_time" => "2020-01-01 01:23:45.678Z", //date('Y-m-d H:i:s'),
                "client_offset" => "03:00:00",
-               "event_name" => "fake_event",
+               "event_name" => "ogd_legacy_odd_offset_event",
                "event_data" => json_encode(["some_element" => "some_value", "some_int" => 0]),
                "game_state" => json_encode(["state_var" => "active"]),
                "event_sequence_index" => 1
             ],
             [
-               "client_time" => "2020-01-01 13:42:57.123", //date('Y-m-d H:i:s'),
+               "client_time" => "2020-01-01 12:34:56.789Z", //date('Y-m-d H:i:s'),
                "client_offset" => "-04:00:00",
-               "event_name" => "another_event",
+               "event_name" => "another_ogd_legacy_odd_offset_event",
                "event_data" => json_encode(["some_element" => "new_value", "some_int" => 42]),
                "game_state" => json_encode(["state_var" => "inactive"]),
                "event_sequence_index" => 2
             ]
          ];
+         $post_fields = ["data" => base64_encode(json_encode($body_params))];
+         $test_url = $_ENV['base_url'];
 
-         $request = curl_init();
-         $test_url = $_ENV['base_url']."/log.php?".http_build_query($url_params);
-         $opts = [
-            CURLOPT_URL => $test_url,
-            CURLOPT_USERAGENT => "fake agent/1.0",
-            CURLOPT_HTTPHEADER => LogRemoteCase::$headers,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
-            CURLOPT_POSTREDIR => CURL_REDIR_POST_302,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_RETURNTRANSFER => true
-         ];
-         curl_setopt_array($request, $opts);
-
-         $response = curl_exec($request);
-         $code = curl_getinfo($request, CURLINFO_HTTP_CODE);
+         $request = new TestRequest($test_url, "log.php", $url_params, $post_fields);
+         $response = $request->Execute();
+         $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
          $this->assertSame(
             $code, 200,
@@ -145,58 +115,49 @@
          $game_id = "TEST_GAME";
          $url_params = [
             "game_id" => $game_id,
-            "instance_id" => "fake_instance",
-            "player_id" => "TestUser",
-            "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
-            "game_version" => "1.0.0-testbed",
             "schema_version" => "1.0-alpha",
-            "log_version" => "1",
-            "condition" => "testing-branch",
-            "game_configuration" => "{}",
-            "platform" => "{}",
-            "player_history" => "{}"
          ];
-         $body_params = [
+         $payload = [
             [
-               "timestamp" => "2020-01-01 13:42:56.789Z", // date('Y-m-d\TH:i:s.uT'),
+               "timestamp" => "2020-01-01 01:23:45.678Z", // date('Y-m-d\TH:i:s.uT'),
                "authoritative_timestamp" => date('Y-m-d\TH:i:s.uT'),
                "game_time" => "00:15:49.345",
                "session_sequence_index" => 1,
                "game_segment" => json_encode(["level" => 1]),
                "game_state" => json_encode(["state_var" => "active"]),
                "event_id" => 9999,
-               "event_name" => "fake_event",
+               "event_name" => "ogd_standard_event",
                "event_data" => json_encode(["some_element" => "some_value", "some_int" => 0])
             ],
             [
-               "timestamp" => "2020-01-01 13:42:57.123+01:00", // date('Y-m-d\TH:i:s.uT'),
+               "timestamp" => "2020-01-01 12:34:56.789+01:00", // date('Y-m-d\TH:i:s.uT'),
                "authoritative_timestamp" => date('Y-m-d\TH:i:s.uT'),
                "game_time" => "00:15:49.345",
                "session_sequence_index" => 2,
                "game_segment" => json_encode(["level" => 1]),
                "game_state" => json_encode(["state_var" => "inactive"]),
                "event_id" => 9999,
-               "event_name" => "another_event",
+               "event_name" => "another_ogd_standard_event",
                "event_data" => json_encode(["some_element" => "new_value", "some_int" => 42])
             ]
          ];
-
-         $request = curl_init();
-         $test_url = $_ENV['base_url']."/log.php?".http_build_query($url_params);
-         $opts = [
-            CURLOPT_URL => $test_url,
-            CURLOPT_USERAGENT => "fake agent/1.0",
-            CURLOPT_HTTPHEADER => LogRemoteCase::$headers,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => ["data" => base64_encode(json_encode($body_params))],
-            CURLOPT_POSTREDIR => CURL_REDIR_POST_302,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_RETURNTRANSFER => true
+         $post_fields = [
+            "instance_id" => "fake_instance",
+            "player_id" => "TestUser",
+            "session_id" => time(), // use a fake number that is always different so we don't get errors for duplicate event_sequence_index
+            "game_version" => "1.0.0-testbed",
+            "log_version" => "1",
+            "condition" => $_ENV['branch']."-testbed",
+            "game_configuration" => "{}",
+            "platform" => "{}",
+            "player_history" => "{}",
+            "data" => base64_encode(json_encode($payload))
          ];
-         curl_setopt_array($request, $opts);
+         $test_url = $_ENV['base_url'];
 
-         $response = curl_exec($request);
-         $code = curl_getinfo($request, CURLINFO_HTTP_CODE);
+         $request = new TestRequest($test_url, "log.php", $url_params, $post_fields);
+         $response = $request->Execute();
+         $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
          $this->assertSame(
             $code, 200,

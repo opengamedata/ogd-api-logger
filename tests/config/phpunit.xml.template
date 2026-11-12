@@ -4,18 +4,19 @@
          bootstrap="vendor/autoload.php"
          colors="true">
   <testsuites>
+    <!-- <testsuite name="query">
+      <directory suffix="Case.php">tests/cases/querySuite</directory>
+    </testsuite> -->
     <testsuite name="hello">
       <directory suffix="Case.php">tests/cases/helloSuite</directory>
     </testsuite>
     <testsuite name="log">
-      <directory suffix="Case.php">tests/cases/logSuite</directory>
-    </testsuite>
-    <testsuite name="event">
-      <directory suffix="Case.php">tests/cases/eventSuite</directory>
+      <directory suffix="RemoteCase.php">tests/cases/logSuite</directory>
     </testsuite>
 
   </testsuites>
   <php>
     <env name="base_url" value="PLACEHOLDER_URL"/>
+    <env name="branch" value="PLACEHOLDER_BRANCH"/>
   </php>
 </phpunit>

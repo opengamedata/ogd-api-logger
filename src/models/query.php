@@ -1,8 +1,7 @@
 <?php
+namespace Logger;
 
-   namespace Logger;
-
-   require_once 'event.php';
+   require_once 'models/Event.php';
    require_once 'models/Schemas.php';
 
    use Logger\Event;
@@ -60,6 +59,12 @@
                break;
          }
          $this->events = array_map($lambda, $data);
+      }
+
+      public function __toString(): string
+      {
+         $lambda = fn($key, Event $next_event) => ((string) $key).":\n   ".$next_event;
+         return join("\n", array_map($lambda, array_keys($this->events), $this->events));
       }
 
       function AsBigQuery($conn) {

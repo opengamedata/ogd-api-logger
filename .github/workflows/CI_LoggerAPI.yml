@@ -7,9 +7,9 @@ on:
     - '.github/workflows/CI_LoggerAPI.yml'
     - '.github/workflows/BUILD_LoggerAPI.yml'
     - '.github/workflows/DEPLOY_LoggerAPI.yml'
+    - '.github/workflows/TEST_*.yml'
     - '.github/actions/LoggerAPI_config**'
-    - 'src/*.php'
-    - 'src/config.php.template'
+    - 'src/**'
     - '.dockerignore'
     - 'Dockerfile'
   workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
@@ -27,7 +27,7 @@ jobs:
         with:
           n: 17
           remove: '\.'
-          with_hash: 'true'
+          with_hash: ${{ case(github.ref_name == 'main', 'false', 'true') }}
           hash_n: 2
 
   build:

@@ -30,7 +30,7 @@
          ];
          $body_params = [
             [
-               "client_time" => "2020-01-01 13:42:56.789Z", //date('Y-m-d H:i:s'),
+               "client_time" => "2020-01-01 01:23:45.678Z", //date('Y-m-d H:i:s'),
                "client_offset" => "00:00",
                "event_name" => "legacy_ogd_call_event",
                "event_data" => json_encode(["some_element" => "some_value", "some_int" => 0]),
@@ -38,7 +38,7 @@
                "event_sequence_index" => 1
             ],
             [
-               "client_time" => "2020-01-01 13:42:57.123Z", //date('Y-m-d H:i:s'),
+               "client_time" => "2020-01-01 12:34:56.789Z", //date('Y-m-d H:i:s'),
                "client_offset" => "01:00",
                "event_name" => "another_ogd_legacy_event",
                "event_data" => json_encode(["some_element" => "new_value", "some_int" => 42]),
@@ -49,7 +49,7 @@
          $post_fields = ["data" => base64_encode(json_encode($body_params))];
          $test_url = $_ENV['base_url'];
 
-         $request = new TestRequest($test_url, $url_params, $post_fields);
+         $request = new TestRequest($test_url, "log.php", $url_params, $post_fields);
          $response = $request->Execute();
          $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
@@ -77,7 +77,7 @@
          ];
          $body_params = [
             [
-               "client_time" => "2020-01-01 13:42:56.789Z", //date('Y-m-d H:i:s'),
+               "client_time" => "2020-01-01 01:23:45.678Z", //date('Y-m-d H:i:s'),
                "client_offset" => "03:00:00",
                "event_name" => "ogd_legacy_odd_offset_event",
                "event_data" => json_encode(["some_element" => "some_value", "some_int" => 0]),
@@ -85,7 +85,7 @@
                "event_sequence_index" => 1
             ],
             [
-               "client_time" => "2020-01-01 13:42:57.123Z", //date('Y-m-d H:i:s'),
+               "client_time" => "2020-01-01 12:34:56.789Z", //date('Y-m-d H:i:s'),
                "client_offset" => "-04:00:00",
                "event_name" => "another_ogd_legacy_odd_offset_event",
                "event_data" => json_encode(["some_element" => "new_value", "some_int" => 42]),
@@ -96,7 +96,7 @@
          $post_fields = ["data" => base64_encode(json_encode($body_params))];
          $test_url = $_ENV['base_url'];
 
-         $request = new TestRequest($test_url, $url_params, $post_fields);
+         $request = new TestRequest($test_url, "log.php", $url_params, $post_fields);
          $response = $request->Execute();
          $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
@@ -119,7 +119,7 @@
          ];
          $payload = [
             [
-               "timestamp" => "2020-01-01 13:42:56.789Z", // date('Y-m-d\TH:i:s.uT'),
+               "timestamp" => "2020-01-01 01:23:45.678Z", // date('Y-m-d\TH:i:s.uT'),
                "authoritative_timestamp" => date('Y-m-d\TH:i:s.uT'),
                "game_time" => "00:15:49.345",
                "session_sequence_index" => 1,
@@ -130,7 +130,7 @@
                "event_data" => json_encode(["some_element" => "some_value", "some_int" => 0])
             ],
             [
-               "timestamp" => "2020-01-01 13:42:57.123+01:00", // date('Y-m-d\TH:i:s.uT'),
+               "timestamp" => "2020-01-01 12:34:56.789+01:00", // date('Y-m-d\TH:i:s.uT'),
                "authoritative_timestamp" => date('Y-m-d\TH:i:s.uT'),
                "game_time" => "00:15:49.345",
                "session_sequence_index" => 2,
@@ -155,7 +155,7 @@
          ];
          $test_url = $_ENV['base_url'];
 
-         $request = new TestRequest($test_url, $url_params, $post_fields);
+         $request = new TestRequest($test_url, "log.php", $url_params, $post_fields);
          $response = $request->Execute();
          $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 

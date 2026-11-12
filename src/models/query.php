@@ -61,6 +61,12 @@ namespace Logger;
          $this->events = array_map($lambda, $data);
       }
 
+      public function __toString(): string
+      {
+         $lambda = fn($key, Event $next_event) => ((string) $key).":\n   ".$next_event;
+         return join("\n", array_map($lambda, array_keys($this->events), $this->events));
+      }
+
       function AsBigQuery($conn) {
          $lambda = fn(Event $next_event) => [ 'data' => $next_event->AsBigQuery($conn) ];
          return array_map($lambda, $this->events);

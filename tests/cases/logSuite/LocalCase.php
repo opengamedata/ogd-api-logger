@@ -59,9 +59,6 @@
          $response = $request->Execute();
          $code = $request->GetInfo(CURLINFO_HTTP_CODE);
 
-         echo "Raw rresult\n";
-         var_dump($response);
-
          $expected = <<<END
          SUCCESS:
          0:

@@ -30,9 +30,6 @@ switch ($db_type) {
    case "mysql":
       $conn = MySQLUtils::Connect($servername, null, null, $db);
       break;
-   case "echo":
-      $conn = null;
-      break;
    default:
       die("FAIL: API software was misconfigured, invalid db_type setting!");
       break;
@@ -89,8 +86,6 @@ if (count($data) > 0) {
          $result = "Dummy run of \n".$query_string."\n in MySQL.";
          error_log("Sending mysql response: ".$result);
          break;
-      case "echo":
-         $result = EchoOutput::Insert($game_id, $query);
       default:
          http_response_code(500);
          die("FAIL: API software was misconfigured, invalid db_type setting!");

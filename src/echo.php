@@ -6,18 +6,11 @@ header("Access-Control-Allow-Origin: *");
 require_once 'vendor/autoload.php';
 # Local imports
 require_once 'config.php';
-require_once 'monitor.php';
-require_once 'outerfaces/BigQuery.php';
-require_once 'outerfaces/MySQL.php';
-require_once 'outerfaces/Echo.php';
 require_once 'models/query.php';
 require_once 'models/Schemas.php';
 
 use Logger\EventQuery;
 use Logger\Schemas;
-use Logger\EchoOutput;
-use Logger\BigQueryUtils;
-use Logger\MySQLUtils;
 
 const LOGGER_GAMES = array(
    "BACTERIA",   "BALLOON",  "CRYSTAL",    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER",

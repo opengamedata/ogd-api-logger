@@ -456,7 +456,7 @@ namespace Logger;
          if(isset($datum->session_n)) {
             $session_n = filter_var($datum->session_n, FILTER_SANITIZE_NUMBER_INT);
          }
-         $session_sequence_index = $session_n;
+         $session_sequence_index = (int) $session_n;
 
          # Category 3 Data: Segmenting
 

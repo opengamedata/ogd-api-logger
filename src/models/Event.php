@@ -460,9 +460,10 @@ namespace Logger;
 
          # Category 3 Data: Segmenting
 
-         $segment = 0;
+         $segment = null;
          if(isset($datum->level)) {
-            $segment = filter_var($datum->level, FILTER_SANITIZE_NUMBER_INT);
+            $level_num = filter_var($datum->level, FILTER_SANITIZE_NUMBER_INT);
+            $segment = json_encode(["level" => (int) $level_num]);
          }
 
          # Category 4 Data: Provenance

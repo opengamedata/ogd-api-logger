@@ -494,17 +494,18 @@ namespace Logger;
 
          # Category 8 Data: Event
 
+         $event_type = "UNDEFINED";
+         if(isset($datum->event)) {
+            $event_type = $datum->event;
+         }
+
          $event_id = 9999;
-         if(isset($datum->event_custom)) {
+         if($event_type == "CUSTOM" && isset($datum->event_custom)) {
             $event_custom = filter_var($datum->event_custom, FILTER_SANITIZE_NUMBER_INT);
             $event_id = 9000 + (int) $event_custom;
          }
 
-         $event_name = "UNDEFINED";
-         if(isset($datum->event)) {
-            $event_name = $datum->event;
-         }
-         $event_name = $event_name.".".$event_custom;
+         $event_name = $event_type.".".$event_custom;
 
          $event_data = $datum->event_data_complex ?? "{}";
 

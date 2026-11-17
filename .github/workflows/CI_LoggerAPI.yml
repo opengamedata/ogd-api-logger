@@ -50,6 +50,15 @@ jobs:
       remove: false
     secrets: inherit
 
+  made_it:
+    name: Made it past Deploy
+    needs: [deploy]
+    runs-on: ubuntu-24.04
+    steps:
+    - name: announce
+      run: echo "Made it"
+
+
   testbed_helloapi_remote:
     name: HelloAPI Remote Testbeds
     needs: [deploy]

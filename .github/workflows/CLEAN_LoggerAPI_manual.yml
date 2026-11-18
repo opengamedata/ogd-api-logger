@@ -8,36 +8,38 @@ on:
       tag:
         description: "The tag to be removed from the repo"
         required: true
+        default: "['some-tag']"
     
 jobs:
   branch_delete:
     name: Cleanup LoggerAPI Images
-    if: github.event.ref_type == 'branch'
     runs-on: ubuntu-24.04
     permissions:
       packages: write # scope permissions within GH to managing packages
-    concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
-      cancel-in-progress: false
+    strategy:
+      matrix:
+        tag: ${{ FromJson(github.event.inputs.tag) }}
+      fail-fast: false # we don't want to cancel just because one game fails.
+      max-parallel: 3
     
     steps:
     - name: Announce cleanup
-      run: echo "Removing images from tag ${{inputs.tag}}"
+      run: echo "Removing images from tag ${{matrix.tag}}"
     
     # 1. Remove Image from GitHub
 
     - name: Remove Image from Repo
       uses: dataaxiom/ghcr-cleanup-action@v1.2.2
       with:
-        delete-tags: ${{ inputs.tag }}
+        delete-tags: ${{ matrix.tag }}
 
+  clean_untagged:
+    name: Cleanup Untagged LoggerAPI Images
+    runs-on: ubuntu-24.04
+    needs: [branch_delete]
+    permissions:
+      packages: write # scope permissions within GH to managing packages
+
+    steps:
     - name: Clean any other Untagged Images from Repo
       uses: dataaxiom/ghcr-cleanup-action@v1.2.2
-
-    # 2. Remove from GCP
-    # TODO
-
-    - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v7.0.1
-      with:
-        path: ./*.log

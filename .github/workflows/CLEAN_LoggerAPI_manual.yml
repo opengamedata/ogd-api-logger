@@ -8,7 +8,7 @@ on:
       tag:
         description: "The tag to be removed from the repo"
         required: true
-        default: ['some-tag']
+        default: "['some-tag']"
     
 jobs:
   branch_delete:

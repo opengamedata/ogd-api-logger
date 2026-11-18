@@ -36,6 +36,7 @@ jobs:
   clean_untagged:
     name: Cleanup Untagged LoggerAPI Images
     runs-on: ubuntu-24.04
+    needs: [branch_delete]
     permissions:
       packages: write # scope permissions within GH to managing packages
 

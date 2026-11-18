@@ -12,7 +12,6 @@ on:
 jobs:
   branch_delete:
     name: Cleanup LoggerAPI Images
-    if: github.event.ref_type == 'branch'
     runs-on: ubuntu-24.04
     permissions:
       packages: write # scope permissions within GH to managing packages

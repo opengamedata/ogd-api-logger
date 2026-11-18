@@ -33,13 +33,12 @@ jobs:
       with:
         delete-tags: ${{ matrix.tag }}
 
+  clean_untagged:
+    name: Cleanup Untagged LoggerAPI Images
+    runs-on: ubuntu-24.04
+    permissions:
+      packages: write # scope permissions within GH to managing packages
+
+    steps:
     - name: Clean any other Untagged Images from Repo
       uses: dataaxiom/ghcr-cleanup-action@v1.2.2
-
-    # 2. Remove from GCP
-    # TODO
-
-    - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v7.0.1
-      with:
-        path: ./*.log

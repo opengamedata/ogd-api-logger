@@ -16,9 +16,6 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       packages: write # scope permissions within GH to managing packages
-    concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
-      cancel-in-progress: false
     strategy:
       matrix:
         tag: ${{ FromJson(github.event.inputs.tag) }}

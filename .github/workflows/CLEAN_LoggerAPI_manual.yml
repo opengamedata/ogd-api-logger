@@ -1,0 +1,43 @@
+# Workflow to clean out the directory where a deleted branch's files were deployed by CI
+name: Manually Cleanup Dead Branch Tag - LoggerAPI
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'delete' && github.event.ref || 'Manual Run') }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The tag to be removed from the repo"
+        required: true
+    
+jobs:
+  branch_delete:
+    name: Cleanup LoggerAPI Images
+    if: github.event.ref_type == 'branch'
+    runs-on: ubuntu-24.04
+    permissions:
+      packages: write # scope permissions within GH to managing packages
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      cancel-in-progress: false
+    
+    steps:
+    - name: Announce cleanup
+      run: echo "Removing images from tag ${{inputs.tag}}"
+    
+    # 1. Remove Image from GitHub
+
+    - name: Remove Image from Repo
+      uses: dataaxiom/ghcr-cleanup-action@v1.2.2
+      with:
+        delete-tags: ${{ inputs.tag }}
+
+    - name: Clean any other Untagged Images from Repo
+      uses: dataaxiom/ghcr-cleanup-action@v1.2.2
+
+    # 2. Remove from GCP
+    # TODO
+
+    - name: Upload logs as artifacts
+      uses: actions/upload-artifact@v7.0.1
+      with:
+        path: ./*.log
